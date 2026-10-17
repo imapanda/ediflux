@@ -1,5 +1,10 @@
 # Ediflux
 
+[![CI](https://github.com/imapanda/ediflux/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/imapanda/ediflux/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/imapanda/ediflux/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/imapanda/ediflux/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/imapanda/ediflux/badge)](https://scorecard.dev/viewer/?uri=github.com/imapanda/ediflux)
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
+
 **Open-source EDI gateway: receive, translate and send business messages, reliably.**
 
 Ediflux receives EDI messages from your trading partners, translates them into the
@@ -28,6 +33,11 @@ configure. Ediflux aims to be the simple, reliable one.
   specification sheet (message implementation guide) and draft the matching mapping.
 - **Self-hosted or hosted**: run it on your own server with Docker Compose, or use a
   managed instance.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how changes are proposed, checked and released, and
+[SECURITY.md](SECURITY.md) to report a vulnerability privately.
 
 ## License
 
