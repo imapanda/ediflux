@@ -70,6 +70,9 @@ The split follows technical responsibilities, so each service can be developed, 
 scaled and replaced on its own, and written in the language that suits it best. Business
 rules live in the workers and in the mappings, not spread across services.
 
+Custom services are written in TypeScript and share packages in one monorepo; SFTP and
+AS2 use proven third-party containers ([ADR 4](adr/0004-language-per-service.md)).
+
 ```mermaid
 flowchart LR
     subgraph Partners
@@ -118,7 +121,7 @@ flowchart LR
 | `worker` | Message state machine: routing, calls to the translator, delivery, numbering, retries, acknowledgements, alerts, scheduled jobs. | Competing consumers on the job queue (`SELECT … FOR UPDATE SKIP LOCKED` or a broker); add replicas to drain the queue faster. Per-partner ordering, when a flow needs it, uses a partition key or an advisory lock. |
 | `translator` | Parse, validate, serialize EDIFACT/X12; run mappings; render outputs. Input bytes + configuration in, result out. | Pure and stateless, CPU-bound; scale with the message volume. |
 | `sftp-gateway` | SFTP/FTPS server for partners and the ERP to drop and pick up files. | Several replicas behind a TCP load balancer, sharing their user store (database) and file storage (S3 or a shared volume). See [ADR 0003](adr/0003-reuse-before-build.md). |
-| `as2-gateway` | AS2 send/receive, signatures, encryption, MDN, certificates. | Stateless HTTP receivers behind the load balancer; keys and certificates come from the database or a secret store. Later milestone. |
+| `as2-gateway` | AS2 send/receive, signatures, encryption, MDN, certificates. | **Exception**: OpenAS2 runs active/passive (one replica with a persistent volume). A custom service with database-held keys would scale like the others if needed ([ADR 4](adr/0004-language-per-service.md)). Later milestone. |
 | `connectors` | Outbound and polling transports: push to a partner's SFTP, poll a remote server or a mailbox, call webhooks. | Each endpoint is polled under a lease (a row lock with an expiry), so N replicas share the endpoints without polling the same one twice. |
 | `web` | Admin console: messages, errors, replay, partners, flows, mapping tests, promotion. | Static or server-rendered front end; any number of replicas. |
 | `mcp` | MCP server for AI assistants. Talks only to the `api` with the caller's rights; writes only drafts in the test environment. | Stateless Streamable HTTP; any number of replicas. |
