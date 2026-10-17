@@ -42,16 +42,24 @@ gantt
 
 ## M0 — Foundations (v0.0)
 
-- **Project governance**: community files (code of conduct, contributing with DCO,
-  security, support, governance), issue and discussion forms, labels, project board,
-  Discussions categories.
-- **Architecture decisions** recorded as ADRs: services and scaling, language per service,
-  reliability backbone, mapping format, standards licensing, MCP scope.
-- **Repository skeleton**: monorepo layout (`services/*`, `packages/*`, `docs/`), shared
-  tooling, Docker Compose with PostgreSQL, devcontainer.
-- **CI/CD**: one always-on `ci-gate` check, path-filtered jobs per service, PR-title lint,
-  Dependabot, CodeQL, OpenSSF Scorecard, release-please, multi-arch images (amd64 + arm64)
-  on GHCR with provenance attestations, docs site (Starlight) on GitHub Pages.
+Already done in #2: CI with one required `CI result` check (Markdown, spelling,
+EditorConfig, links, actionlint, zizmor, dependency review), Conventional Commit PR titles,
+CodeQL, OpenSSF Scorecard, release-please, Dependabot with SHA-pinned actions,
+`CONTRIBUTING.md`, `SECURITY.md`, issue forms, PR template, `CODEOWNERS`, rulesets on `main`
+and release tags ([CI/CD](ci-cd.md)).
+
+Remaining:
+
+- **Project governance**: code of conduct, support and governance files, DCO sign-off,
+  labels, milestones, project board, Discussions categories and forms.
+- **Architecture decisions** recorded as ADRs (this pull request).
+- **Repository skeleton**: pnpm monorepo (`services/*`, `packages/*`, `docs/`), shared
+  TypeScript tooling (strict mode, Vitest, fast-check), Docker Compose with PostgreSQL and
+  a reverse proxy, devcontainer.
+- **Container pipeline**: one multi-role image built on native amd64 and arm64 runners,
+  pushed to GHCR with SBOM and provenance attestations; CI job per package with path
+  filters, all aggregated in `CI result`.
+- **Documentation site** (Astro Starlight) on GitHub Pages.
 - **Synthetic sample corpus**: fictitious ORDERS, ORDRSP, DESADV, CONTRL interchanges in
   D96A and D01B, syntax 3 and 4, UNOA/UNOC/UNOW. Never real partner data.
 

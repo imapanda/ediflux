@@ -15,7 +15,7 @@
 | **Labels** | `type:*`, `area:*` (one per service), `needs-triage`, `breaking-change`, `dependencies`, `security`, `partner-format`, `good first issue`, `help wanted` | `good first issue` feeds GitHub's discovery |
 | **Issue forms** | Bug, feature, partner-format request, docs; blank issues disabled; questions redirected to Discussions | `.github/ISSUE_TEMPLATE/*.yml` |
 | **Discussions** | Announcements, General, Ideas, Polls, Q&A, Show and tell, plus "Partner formats & mappings" and "RFCs"; forms per category | Categories are created in the UI only |
-| **Actions** | CI with one always-on `ci-gate` check, path filters per service, reusable workflows | Standard runners, including `ubuntu-24.04-arm`, are free and unlimited for public repos |
+| **Actions** | CI with one always-on required check (`CI result`), path filters per service, reusable workflows | Standard runners, including `ubuntu-24.04-arm`, are free and unlimited for public repos |
 | **GHCR** | Multi-arch images per service, built on native amd64 and arm64 runners, merged by digest | First publish of a package is private: switch to public in the UI; packages do **not** follow a repository transfer |
 | **Attestations** | Build provenance and SBOM for every image (`actions/attest`) | Free for public repos |
 | **Releases** | release-please (manifest mode, one version for all images), draft then publish; immutable releases | Release PRs need a PAT or GitHub App token to trigger CI |
@@ -45,7 +45,7 @@ CLA. The choice must be made before the first external contribution. Not legal a
 ## Pitfalls to remember
 
 - A workflow skipped by path filters leaves a required check pending: require only the
-  always-on `ci-gate` job.
+  always-on aggregate job (`CI result`).
 - `sub_issue_id` and `issue_id` in the REST API are database ids, not issue numbers.
 - Squash merges drop per-commit `Signed-off-by` lines unless they are in the PR body.
 - Pin actions by SHA, let Dependabot update them, then enforce SHA pinning.
