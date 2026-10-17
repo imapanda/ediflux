@@ -1,0 +1,45 @@
+# Release automation with release-please.
+#
+# Each push to main updates a "chore(main): release x.y.z" pull request that
+# bumps the version and the changelog from the Conventional Commit messages.
+# Merging that pull request tags the commit and publishes the GitHub Release.
+#
+# The job uses a GitHub App token, not GITHUB_TOKEN: pull requests opened with
+# GITHUB_TOKEN do not trigger workflows, so the release pull request could
+# never pass the required checks. Until the App is configured (repository
+# variable RELEASE_APP_CLIENT_ID and secret RELEASE_APP_PRIVATE_KEY, see
+# docs/ci-cd.md), the job is skipped.
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Release PR
+    if: vars.RELEASE_APP_CLIENT_ID != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions: {}
+    steps:
+      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        id: app-token
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-issues: write # release-please labels its pull requests
+          permission-pull-requests: write
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

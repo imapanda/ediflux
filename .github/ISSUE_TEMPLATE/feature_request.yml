@@ -1,0 +1,46 @@
+name: Feature request
+description: Suggest a new capability, message type, format or transport.
+labels: [enhancement, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideas still taking shape are welcome in
+        [Discussions](https://github.com/imapanda/ediflux/discussions) first.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and what gets in the way today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How would you like Ediflux to handle it?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - EDI formats (EDIFACT, EANCOM, X12...)
+        - ERP formats (CSV, JSON, XML, fixed-width)
+        - Transports (SFTP, AS2, HTTP, email...)
+        - Mappings and partner onboarding
+        - MCP server and AI assistance
+        - Monitoring, replay and alerts
+        - Installation and operations
+        - Other
+  - type: textarea
+    id: standards
+    attributes:
+      label: Standards and message types involved
+      description: For example "EANCOM D96A ORDERS over AS2" or "X12 850 4010 over SFTP".
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

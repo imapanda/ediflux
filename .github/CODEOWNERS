@@ -1,0 +1,3 @@
+# Reviewers requested automatically on each pull request.
+# Add owners per directory as the team grows; the last matching rule wins.
+* @imapanda

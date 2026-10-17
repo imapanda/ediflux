@@ -1,0 +1,24 @@
+# https://editorconfig.org, checked in CI by editorconfig-checker.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Markdown list continuations and the license text use free-form indentation.
+[{*.md,LICENSE}]
+indent_size = unset
+
+# Sample EDI messages must stay byte-for-byte identical to what partners send:
+# CRLF or no line breaks at all, no final newline, other character sets.
+[*.{edi,edifact,x12}]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset

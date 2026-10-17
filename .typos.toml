@@ -1,0 +1,14 @@
+# Spell checker configuration, checked in CI: https://github.com/crate-ci/typos
+[files]
+extend-exclude = [
+  "CHANGELOG.md", # generated from commit messages
+  "LICENSE",
+  "*.edi",
+  "*.edifact",
+  "*.x12",
+]
+
+[default.extend-words]
+# EDI vocabulary
+advices = "advices" # "despatch advices" (DESADV)
+contrl = "contrl" # CONTRL syntax and service report message
