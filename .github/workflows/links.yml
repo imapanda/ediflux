@@ -1,0 +1,29 @@
+# Weekly check of external links in the documentation. Pull requests only
+# check relative links (ci.yml), so that a slow website never blocks a merge.
+name: Links
+
+on:
+  schedule:
+    - cron: "12 6 * * 1" # Mondays 06:12 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  external:
+    name: External links
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --include-fragments --no-progress "./**/*.md"

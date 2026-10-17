@@ -1,0 +1,153 @@
+# Continuous integration for every pull request and every push to main.
+#
+# Branch protection requires one check from this workflow: "CI result". It
+# passes only when every job listed in its `needs` succeeded or was skipped,
+# so adding a job here never requires changing the ruleset. See docs/ci-cd.md.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  markdown:
+    name: Markdown lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff # v24.2.0
+        with:
+          globs: "**/*.md"
+
+  spelling:
+    name: Spelling
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: crate-ci/typos@7f9d0819ca1c008ade73f4b41fa9d258d48f605b # v1.51.1
+
+  editorconfig:
+    name: EditorConfig
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: editorconfig-checker/action-editorconfig-checker@51f63319f592f97930c73d9c46184d20bd206393 # v3.0.0
+        with:
+          version: v4.0.2
+      - run: editorconfig-checker
+
+  links:
+    name: Local links
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Offline: only relative links and anchors. External links are checked
+      # weekly by links.yml so that a slow website never blocks a merge.
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --offline --include-fragments --no-progress "./**/*.md"
+          failIfEmpty: false
+          jobSummary: false
+
+  actionlint:
+    name: actionlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2.2.0
+        with:
+          version: 1.7.12
+          cache: false
+          pyflakes: false
+
+  zizmor:
+    name: zizmor
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
+        with:
+          version: 1.31.1
+          advanced-security: false
+          annotations: true
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: moderate
+          comment-summary-in-pr: never
+
+  ci-result:
+    name: CI result
+    if: always()
+    needs:
+      - markdown
+      - spelling
+      - editorconfig
+      - links
+      - actionlint
+      - zizmor
+      - dependency-review
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Check that every job succeeded or was skipped
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          failed=$(jq -r 'to_entries[]
+            | select(.value.result != "success" and .value.result != "skipped")
+            | "\(.key): \(.value.result)"' <<< "$NEEDS")
+          if [ -n "$failed" ]; then
+            echo "::error::Some jobs did not succeed:"
+            echo "$failed"
+            exit 1
+          fi
+          echo "All jobs succeeded or were skipped."

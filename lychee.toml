@@ -1,0 +1,6 @@
+# Link checker configuration (ci.yml for relative links, links.yml weekly).
+# https://lychee.cli.rs/guides/config/
+exclude_path = ["CHANGELOG.md"]
+max_retries = 3
+timeout = 20
+accept = ["200..=299", "429"]

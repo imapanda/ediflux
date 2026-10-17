@@ -1,0 +1,7 @@
+# Normalize text files to LF in the repository.
+* text=auto eol=lf
+
+# Sample EDI messages are kept exactly as received (line endings, encoding).
+*.edi -text diff
+*.edifact -text diff
+*.x12 -text diff
