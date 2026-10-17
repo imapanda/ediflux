@@ -5,7 +5,7 @@
 ## Core concepts
 
 | Concept | What it is |
-|---|---|
+| --- | --- |
 | **Instance** | One Ediflux installation (self-hosted) or one customer space (hosted). |
 | **Environment** | `test` or `production` inside an instance. Each has its own partners' endpoints, mapping versions, numbering counters, archive and messages. Configuration is promoted from test to production, never edited live in production. |
 | **Partner** | A trading partner and its identifiers (GLN, SIRET, EDIFACT/X12 interchange IDs and qualifiers). |
@@ -116,7 +116,7 @@ flowchart LR
 ```
 
 | Service | Responsibility | How it scales |
-|---|---|---|
+| --- | --- | --- |
 | `api` | REST API: configuration, message intake from gateways, queries for the console and the MCP server, promotion test → production. | Stateless HTTP behind the load balancer; any number of replicas. |
 | `worker` | Message state machine: routing, calls to the translator, delivery, numbering, retries, acknowledgements, alerts, scheduled jobs. | Competing consumers on the job queue (`SELECT … FOR UPDATE SKIP LOCKED` or a broker); add replicas to drain the queue faster. Per-partner ordering, when a flow needs it, uses a partition key or an advisory lock. |
 | `translator` | Parse, validate, serialize EDIFACT/X12; run mappings; render outputs. Input bytes + configuration in, result out. | Pure and stateless, CPU-bound; scale with the message volume. |

@@ -6,7 +6,7 @@
 ## What we use and how
 
 | Feature | Use in Ediflux | Notes |
-|---|---|---|
+| --- | --- | --- |
 | **Projects** (public) | Roadmap, board, backlog and "good first issues" views; fields Status, Priority (P0–P3), Size (XS–XL), Iteration (2 weeks), Start and Target dates | Fields and views can be created through the API; roadmap date settings and built-in workflows (auto-add, auto-archive) are UI only |
 | **Milestones** | One per release (v0.1, v0.2…), with due dates | Shown as markers on the roadmap |
 | **Sub-issues** | Epic → tasks (max 100 per parent, 8 levels) | GA 2025-04; availability on personal-account repos is unclear *(smoke-test first)* |

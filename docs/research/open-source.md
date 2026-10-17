@@ -29,7 +29,7 @@
 ## 2. Complete open-source EDI products
 
 | Name | Language | Licence | Status | Verdict |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Bots NG | Python/Django | GPL-3.0 | active (rc) | learn from (UX is the cautionary tale) |
 | mescedia-core | Java (Camel, Daffodil, Smooks) | Apache-2.0 / LGPL | archived, last code 2023 | learn from |
 | Smooks + EDI cartridge | Java | Apache-2.0 / LGPL | v2.2.1 (2025-02), low activity | avoid: DFDL schemas to author |
@@ -44,7 +44,7 @@ No credible open-core EDI gateway launched in 2023–2026: new entrants have few
 ## 3. Parsing and validation libraries
 
 | Name | Language | Licence | Notes | Verdict |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | StAEDI | Java | Apache-2.0 | Streaming X12/EDIFACT/TRADACOMS with schema validation; ships envelope schemas only | **test oracle in CI** |
 | EDIReader | Java | GPL-3.0 | SAX parser, no directory validation *(unverified)* | oracle / learn from |
 | pydifact | Python | MIT | tokenizer/serializer, API unstable | avoid as core |
@@ -64,7 +64,7 @@ its own parser/validator, checked against StAEDI in CI.
 ## 4. Transport building blocks
 
 | Name | Language | Licence | Notes | Verdict |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | **SFTPGo** | Go | AGPL-3.0 + additional terms | SFTP/FTPS/WebDAV/HTTP, S3/GCS/Azure backends, REST API, event manager with upload hooks; very active (12.6k stars) | **wrap as `sftp-gateway`** |
 | OpenAS2 | Java | GPL-3.0 | RFC 4130, sync/async MDN, sign/encrypt/compress, Docker, active (v4.14, 2026-10) | wrap as container |
 | phase2 | Java | FreeBSD / Apache-2.0 | library-first AS2, active | wrap (custom service) |
@@ -80,7 +80,7 @@ offered over a network, even unmodified: relevant for the hosted offer.
 ## 5. Reliability backbone
 
 | Option | Verdict | Reason |
-|---|---|---|
+| --- | --- | --- |
 | **PostgreSQL + pg-boss** (Node, MIT) | **recommended** | No extra container; `SKIP LOCKED`; retries with backoff, dead-letter with redrive, cron, archive for replay |
 | graphile-worker (Node) | alternative | pre-1.0 |
 | River (Go, MPL-2.0) | alternative if Go | some features in paid Pro |
@@ -93,7 +93,7 @@ offered over a network, even unmodified: relevant for the hosted offer.
 ## 6. Mapping engines
 
 | Option | Verdict | Reason |
-|---|---|---|
+| --- | --- | --- |
 | **JSONata** (JS reference; Java, Go, Rust, Python ports) | **recommended** | Pure expression language with no I/O; easy for an LLM to write and for a human to review field by field; Stedi uses it for its mappings |
 | jq | alternative | terse, harder to review |
 | XSLT 3 | avoid | XML-centric and verbose |

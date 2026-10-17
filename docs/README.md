@@ -1,7 +1,7 @@
 # Documentation
 
 | Document | Content |
-|---|---|
+| --- | --- |
 | [Vision](vision.md) | Problem, principles, non-goals, first target user |
 | [Architecture](architecture.md) | Concepts, message lifecycle, reliability model, services and scaling |
 | [Roadmap](roadmap.md) | Milestones in order, with their epics |

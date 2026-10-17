@@ -24,7 +24,7 @@ Services may use different languages (ADR 2). The comparison is in
 ## Decision
 
 | Service | Language / product | Rewrite trigger |
-|---|---|---|
+| --- | --- | --- |
 | `api` | TypeScript, Node.js LTS, Fastify + Zod (OpenAPI generated from schemas) | — |
 | `worker` | TypeScript + pg-boss | — |
 | `translator` | TypeScript, mappings run in a worker-thread pool with hard timeouts | p95 CPU > ~20 ms per typical message, > ~8–10 cores needed, or unbounded memory on large interchanges → Rust or Go core (possibly as WebAssembly) |

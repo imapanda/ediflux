@@ -54,7 +54,7 @@
 ## 2. Licensing constraints (critical for an AGPL project)
 
 | Material | Terms | Consequence for Ediflux |
-|---|---|---|
+| --- | --- | --- |
 | **UN/EDIFACT directories** (D.01B, D.16B, D.21B zips contain `LICENAGR.TXT`) | Use limited to the licensee's country; redistribution of the **unmodified** zip with its licence is allowed; **modifying and distributing** is not, without written UN permission. D.96A: "all rights reserved". | **Do not commit or ship derived directory data** (JSON, XSD, SQL) in the repo, releases or images. Ship a generator that downloads the official zips on first run into the operator's volume, so the operator is the licensee. Optionally ask UNECE for written permission. |
 | **EANCOM (GS1)** manuals, GS1 France profiles | Copyright GS1; reproduction only unaltered, personal or internal; no redistribution without written approval. EANCOM® is a registered trademark. | Do not bundle GS1 documents, profiles or machine-readable EANCOM subsets. Partner mappings are user content. Use "EANCOM" only descriptively. |
 | **ANSI X12** dictionaries, code sets, schemas | Copyrighted; distribution of derived works or use in a commercial product needs an X12 licence (Developer $1,200/yr, Internal $3,600/yr, Commercial partner by agreement). | Defer X12. When added: envelope parser plus **user-supplied** schemas only, as StAEDI does. |
@@ -73,7 +73,7 @@ The order, despatch advice and invoice represent more than 90 % of retail EDI tr
 in France (GS1 France / Generix, 2018); France counts about 15,500 EANCOM users.
 
 | # | Message | Purpose | Supplier direction |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1 | ORDERS | Purchase order | inbound |
 | 2 | DESADV | Despatch advice (SSCC) | outbound |
 | 3 | INVOIC | Invoice / credit note | outbound (see §5) |
@@ -92,7 +92,7 @@ PA, RECADV, ORDCHG. **Wave 3**: PRICAT, INVRPT/SLSRPT, PARTIN, REMADV, IFTMIN.
 ## 4. Other syntaxes and transports
 
 | Syntax | Relevance in France |
-|---|---|
+| --- | --- |
 | UBL 2.1, UN/CEFACT CII D22B, Factur-X | **High**: the three base formats of the French e-invoicing reform |
 | Peppol BIS Billing 3.0 | Medium: interoperability layer between platforms |
 | ANSI X12 | Low (multinationals); licensing constraints above |
@@ -101,7 +101,7 @@ PA, RECADV, ORDCHG. **Wave 3**: PRICAT, INVRPT/SLSRPT, PARTIN, REMADV, IFTMIN.
 | GS1 XML, cXML | Low (cXML for Ariba buyers) |
 
 | Transport | Who uses it | Priority |
-|---|---|---|
+| --- | --- | --- |
 | SFTP | Very common; also one of the PA↔PPF protocols | **High** |
 | AS2 (RFC 4130, signed MDN) | Most popular EDI channel worldwide; used in France next to VANs | **High** |
 | HTTPS / REST | PA APIs (AFNOR XP Z12-013), ERP webhooks | **High** |

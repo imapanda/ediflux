@@ -6,7 +6,7 @@
 ## Summary
 
 | Service | Recommended | Runner-up | Key reason |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | api | TypeScript (Node LTS, Fastify, Zod) | Go (huma, pgx, sqlc) | Schemas shared with web, mcp and worker; OpenAPI generated from them |
 | worker | TypeScript + pg-boss | Go + River | I/O-bound state machine sharing the api's domain types |
 | translator | TypeScript with a worker-thread pool | Go (gnata) or a Rust core as WebAssembly, on triggers | JSONata reference engine is JavaScript and runs in the browser too |
@@ -22,7 +22,7 @@ Synthetic 10 MB ORDERS-like interchange (1,083 messages, 443k segments), throwaw
 tokenizer building an object tree:
 
 | Test | Node 24 | Go 1.25 |
-|---|---|---|
+| --- | --- | --- |
 | Whole interchange | 41–42 MB/s | 76–96 MB/s |
 | Per 9 KB message | ~5.4k msg/s | 12.4–13.2k msg/s |
 | Per 0.6 KB message | ~88k msg/s | ~158k msg/s |
@@ -38,7 +38,7 @@ tokenizer building an object tree:
 Runtime cost per replica (indicative):
 
 | | Idle RSS | Cold start | Image |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Go static binary | ~6 MiB | ~4 ms | ~12 MB with distroless |
 | Node 24 + Fastify + Zod + pg | ~84 MiB | ~130 ms | ~215–245 MB |
 | Python FastAPI stack | ~70 MiB | ~490 ms | ~180 MB + dependencies |
