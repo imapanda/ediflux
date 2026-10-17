@@ -1,0 +1,50 @@
+name: Bug report
+description: Ediflux does not behave as documented.
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a problem.
+
+        **Never paste real partner data.** Anonymize company names, addresses, GLNs,
+        prices and references in any message or log you share.
+
+        Found a security issue? Do not open a public issue: follow the
+        [security policy](https://github.com/imapanda/ediflux/security/policy).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include an anonymized sample message and the configuration involved if you can.
+      placeholder: |
+        1. Configure a partner with ...
+        2. Drop this message in ...
+        3. See error ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Ediflux version
+      placeholder: "0.1.0, or a commit SHA"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, Docker version, how you deployed Ediflux.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Anonymized, please. This is rendered as code, no need for backticks.
+      render: text
