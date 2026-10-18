@@ -11,7 +11,7 @@
 | worker | TypeScript + pg-boss | Go + River | I/O-bound state machine sharing the api's domain types |
 | translator | TypeScript with a worker-thread pool | Go (gnata) or a Rust core as WebAssembly, on triggers | JSONata reference engine is JavaScript and runs in the browser too |
 | sftp-gateway | SFTPGo (Go), off the shelf | custom Go service on `pkg/sftp` | Mature and active; nothing to write |
-| as2-gateway | OpenAS2 (Java), off the shelf | custom Java service on phase2 | Only mature, maintained AS2 option; nothing production-grade in TS or Python |
+| as2-gateway | OpenAS2 (Java), off the shelf | custom Java service on phase2 | Only mature, maintained AS2 option; nothing production-grade in TS or Python (see the decision below) |
 | connectors | TypeScript (ssh2, ImapFlow, undici) | Go (`x/crypto/ssh`, `pkg/sftp`, go-imap) | I/O-bound, shares worker code; Go's SFTP stack is stronger, first candidate to switch |
 | web | React + Vite SPA | SvelteKit | Runs the mapping engine in the browser; largest ecosystem |
 | mcp | TypeScript, official SDK (Tier 1) | Go SDK (Tier 1) | Zod schemas become tool schemas; MCP spec 2026-07-28 is stateless, good for replicas |
@@ -54,6 +54,11 @@ Runtime cost per replica (indicative):
 - **Rust/Go core compiled to WebAssembly** is mature for plain modules but adds a second
   toolchain and a boundary cost, and JSONata would still need a port. Keep the `edifact`
   package interface narrow so this stays possible.
+
+**Decision on AS2 (ADR 4)**: build our own TypeScript `as2-gateway` on PKI.js and Node.js
+crypto (Node 24 with OpenSSL 3.5 supports RSA-SHA256, RSA PKCS#1 v1.5 key transport,
+AES-CBC/GCM and 3DES, checked locally) if it passes an interop matrix against OpenAS2,
+phase2 and mendelson; otherwise use OpenAS2.
 
 **Result**: one language to maintain (TypeScript); Go (SFTPGo) and Java (OpenAS2) only as
 pinned third-party images.

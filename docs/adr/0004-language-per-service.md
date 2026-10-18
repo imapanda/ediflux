@@ -1,6 +1,6 @@
 # 4. Language per service
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-17
 
 ## Context
@@ -32,7 +32,7 @@ Services may use different languages (ADR 2). The comparison is in
 | `web` | TypeScript, React + Vite single-page app | — |
 | `mcp` | TypeScript, official MCP SDK (Tier 1) | — |
 | `sftp-gateway` | **SFTPGo** (Go), unmodified container | — |
-| `as2-gateway` | **OpenAS2** (Java), unmodified container, active/passive | Need for HA, multi-tenant isolation or tighter integration → custom Java service on phase2 |
+| `as2-gateway` | TypeScript, our own service (PKI.js for CMS/S-MIME, Node.js crypto), stateless with keys in the database — **only if it passes the interoperability gate below** | Gate failed → **OpenAS2** (Java) container, active/passive |
 
 - One **pnpm monorepo** with shared packages (`canonical`, `registry`, `edifact`, `mapping`,
   `api-client`) used by the services and by the browser.
@@ -50,5 +50,13 @@ Services may use different languages (ADR 2). The comparison is in
 - Mitigations required from the first milestone: worker-thread isolation and timeouts for
   mappings, message-at-a-time parsing with a memory budget, benchmarks in CI re-run on the
   target ARM64 hardware.
-- OpenAS2 does not follow the "N replicas" rule; this exception is documented and revisited
-  at milestone 8.
+- **AS2 interoperability gate** (milestone 8): our `as2-gateway` replaces OpenAS2 only if a
+  spike passes an automated interop matrix against OpenAS2, phase2 and mendelson AS2
+  containers: signing (SHA-1/SHA-256), encryption (3DES, AES-128/256-CBC, RSA PKCS#1 v1.5
+  key transport), compression (RFC 5402), sync and async signed MDN with correct MIC, in
+  both directions. Node.js 24 (OpenSSL 3.5) provides every primitive; PKI.js (active,
+  v3.4) provides the CMS structures. Why build it: OpenAS2 keeps file-based state and runs as
+  a single replica, is configured with XML files, is not multi-tenant and adds a Java
+  runtime; our service would scale like the others, keep keys and partner settings in the
+  database, and track MDNs in the same message lifecycle. If the gate fails, OpenAS2 runs
+  as an active/passive exception to the scaling rules.

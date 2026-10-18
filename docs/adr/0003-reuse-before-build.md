@@ -1,6 +1,6 @@
 # 3. Reuse proven components before building
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-17
 
 ## Context
@@ -11,8 +11,9 @@ message-level EDIFACT definitions or a usable configuration model.
 
 ## Decision
 
-- **Reuse as containers**: SFTPGo (AGPL-3.0) for `sftp-gateway`; OpenAS2 (GPL-3.0) or a
-  service built on phase2 for `as2-gateway` (decided at milestone 8); phase4 for AS4 later.
+- **Reuse as containers**: SFTPGo (AGPL-3.0) for `sftp-gateway`; OpenAS2 (GPL-3.0) for
+  `as2-gateway` unless our own TypeScript service passes the interoperability gate of ADR 4
+  (milestone 8); phase4 for AS4 later.
 - **Reuse as libraries**: a PostgreSQL-backed job queue, JSONata for mappings, the official
   MCP SDK, StAEDI as a test oracle in CI.
 - **Build**: the definition registry generator, the EDIFACT parser/validator/serializer,

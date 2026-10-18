@@ -1,6 +1,6 @@
 # 7. Standards licensing: generate, never ship, derived data
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-17
 
 ## Context
@@ -26,4 +26,4 @@ redistributing EANCOM material; X12 dictionaries require a paid licence for dist
 
 - First start needs internet access (or an offline bundle of the official zips supplied by
   the operator).
-- Copyright of Ediflux code stays clean, keeping licensing options open.
+- Copyright of Libredi code stays clean, keeping licensing options open.

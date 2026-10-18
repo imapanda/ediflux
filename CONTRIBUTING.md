@@ -1,8 +1,8 @@
-# Contributing to Ediflux
+# Contributing to Libredi
 
-Thanks for your interest! Ediflux is in early design, so the most useful contributions right
+Thanks for your interest! Libredi is in early design, so the most useful contributions right
 now are ideas, feedback and real-world EDI requirements in
-[Discussions](https://github.com/imapanda/ediflux/discussions).
+[Discussions](https://github.com/imapanda/libredi/discussions).
 
 ## Ground rules
 
@@ -10,10 +10,14 @@ now are ideas, feedback and real-world EDI requirements in
   names, addresses, GLNs, prices and references. The repository is public.
 - Security issues go through the [security policy](SECURITY.md), not public issues.
 - Repository content is written in English.
+- **Sign off every commit** with `git commit -s`. The `Signed-off-by:` line certifies the
+  [Developer Certificate of Origin](https://developercertificate.org/): you wrote the change
+  or have the right to submit it under the project licence (AGPL-3.0). There is no CLA
+  ([ADR 9](docs/adr/0009-developer-certificate-of-origin.md)).
 
 ## How a change reaches `main`
 
-1. **Discuss first.** Open or pick an [issue](https://github.com/imapanda/ediflux/issues)
+1. **Discuss first.** Open or pick an [issue](https://github.com/imapanda/libredi/issues)
    so that the approach is agreed before you spend time on code.
 2. **Branch.** Fork the repository (or create a branch if you have write access) and work
    on a topic branch. To bring in changes from `main`, merge it into your branch.

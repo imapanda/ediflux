@@ -15,7 +15,7 @@
 - **UNB** carries the syntax identifier (`UNOC:3`), sender and recipient (GLN with
   qualifier `14`), date/time, interchange control reference (0020), acknowledgement
   request (0031 = `1`), agreement identifier (0032; EANCOM requires it to start with
-  `EANCOM`) and the **test indicator (0035)**, which maps naturally to Ediflux's test
+  `EANCOM`) and the **test indicator (0035)**, which maps naturally to Libredi's test
   environment.
 - **UNG/UNE** functional groups are optional and rare in retail.
 - **UNH/UNT** frame each message. UNH holds the message reference and identifier, e.g.
@@ -33,7 +33,7 @@
 - In France, EANCOM 1994/1997/2002 are used **with syntax 3**; syntax 4 is rare.
 - Character sets: UNOA (EANCOM default, uppercase), UNOB (adds lowercase), UNOC
   (ISO 8859-1, covers French), UNOD–UNOK (ISO 8859-2…9), UNOW (UTF-8), UNOY (ISO 10646).
-  Ediflux must support at least **UNOA, UNOB, UNOC and UNOW**, reading UNB up to S001 as
+  Libredi must support at least **UNOA, UNOB, UNOC and UNOW**, reading UNB up to S001 as
   ISO 646 before switching.
 
 ### Directories
@@ -53,7 +53,7 @@
 
 ## 2. Licensing constraints (critical for an AGPL project)
 
-| Material | Terms | Consequence for Ediflux |
+| Material | Terms | Consequence for Libredi |
 | --- | --- | --- |
 | **UN/EDIFACT directories** (D.01B, D.16B, D.21B zips contain `LICENAGR.TXT`) | Use limited to the licensee's country; redistribution of the **unmodified** zip with its licence is allowed; **modifying and distributing** is not, without written UN permission. D.96A: "all rights reserved". | **Do not commit or ship derived directory data** (JSON, XSD, SQL) in the repo, releases or images. Ship a generator that downloads the official zips on first run into the operator's volume, so the operator is the licensee. Optionally ask UNECE for written permission. |
 | **EANCOM (GS1)** manuals, GS1 France profiles | Copyright GS1; reproduction only unaltered, personal or internal; no redistribution without written approval. EANCOM® is a registered trademark. | Do not bundle GS1 documents, profiles or machine-readable EANCOM subsets. Partner mappings are user content. Use "EANCOM" only descriptively. |
@@ -131,11 +131,11 @@ PA, RECADV, ORDCHG. **Wave 3**: PRICAT, INVRPT/SLSRPT, PARTIN, REMADV, IFTMIN.
 - **Orders, despatch advices and other non-invoice documents are not affected**: they keep
   being exchanged as the partners choose.
 - **Becoming a PA** requires DGFiP registration, ISO 27001, EU hosting, SecNumCloud-grade
-  infrastructure, annual audits and a link to the PPF. Ediflux will not be a PA.
+  infrastructure, annual audits and a link to the PPF. Libredi will not be a PA.
 - **EU ViDA** (Directive 2025/516): cross-border B2B e-invoicing and digital reporting from
   1 July 2030.
 
-## Implications for Ediflux
+## Implications for Libredi
 
 1. **No derived UN directory data in the repository or images.** A directory generator
    downloads the official UNECE zips on first run. MVP message definitions are written by
@@ -147,7 +147,7 @@ PA, RECADV, ORDCHG. **Wave 3**: PRICAT, INVRPT/SLSRPT, PARTIN, REMADV, IFTMIN.
 5. **Transports MVP**: SFTP and HTTPS first, AS2 with MDN next, AS4 later, OFTP2/X.400 via
    a VAN bridge or never.
 6. **Never claim to be a PA**, never use "plateforme agréée" wording or the DGFiP mark.
-   Ediflux can generate Factur-X/UBL/CII, hand invoices to the customer's PA through its API
+   Libredi can generate Factur-X/UBL/CII, hand invoices to the customer's PA through its API
    (AFNOR XP Z12-013) and receive invoices from it. It must not send in-scope domestic
    invoices directly to buyers, nor transmit to the PPF.
 7. **Invoices need enrichment** (SIREN, operation type, delivery address) that a standard

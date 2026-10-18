@@ -5,7 +5,7 @@
 
 ## Context
 
-Ediflux is built in the open, largely with AI assistance, by a small team. Decisions and
+Libredi is built in the open, largely with AI assistance, by a small team. Decisions and
 their reasons must survive turnover of people, sessions and tools.
 
 ## Decision

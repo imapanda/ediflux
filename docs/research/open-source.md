@@ -57,7 +57,7 @@ No credible open-core EDI gateway launched in 2023–2026: new entrants have few
 | Ballerina EDI | Ballerina | Apache-2.0 | JSON-schema driven, generated from UNECE zips | learn from |
 | EdiFabric | .NET (+ bindings) | commercial | $179–799/yr, OEM +$4,500/yr | avoid (lock-in) |
 
-**Conclusion**: no ecosystem ships validated message-level EDIFACT definitions. Ediflux
+**Conclusion**: no ecosystem ships validated message-level EDIFACT definitions. Libredi
 will generate its definition registry from the UN directories at install time and write
 its own parser/validator, checked against StAEDI in CI.
 
@@ -114,7 +114,7 @@ inbound and outbound flows each have their own.
   human acceptance of low-confidence rules.
 - **MCP servers for EDI**: a handful of small projects (Stedi healthcare only, StateSet
   `edi-mcp`, several 0-star repos). **None reads a partner's implementation guide to draft
-  a mapping**: that is Ediflux's opening.
+  a mapping**: that is Libredi's opening.
 - **Caution**: standards and partner specifications are licensed or confidential. Treat
   them as private tenant data and let users bring their own model key.
 

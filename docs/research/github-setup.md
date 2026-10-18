@@ -5,7 +5,7 @@
 
 ## What we use and how
 
-| Feature | Use in Ediflux | Notes |
+| Feature | Use in Libredi | Notes |
 | --- | --- | --- |
 | **Projects** (public) | Roadmap, board, backlog and "good first issues" views; fields Status, Priority (P0–P3), Size (XS–XL), Iteration (2 weeks), Start and Target dates | Fields and views can be created through the API; roadmap date settings and built-in workflows (auto-add, auto-archive) are UI only |
 | **Milestones** | One per release (v0.1, v0.2…), with due dates | Shown as markers on the roadmap |
@@ -32,8 +32,10 @@ properties, teams, organization projects and templates. Moving later is costly: 
 packages stay with the old owner, Pages URLs are not redirected, and user-owned projects
 cannot be linked to an organization repository.
 
-**Recommendation**: create a free `ediflux` organization and transfer the repository before
-publishing images, enabling Pages or creating the project board.
+**Decision (2026-10-18)**: the repository stays on the founder's personal account
+(`imapanda/libredi`). Issue types are replaced by `type:` labels and project fields. If an
+organization becomes necessary, transfer the repository before publishing images or
+enabling Pages.
 
 ## DCO or CLA
 

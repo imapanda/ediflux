@@ -1,6 +1,6 @@
 # 5. PostgreSQL as the only stateful backbone
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-17
 
 ## Context

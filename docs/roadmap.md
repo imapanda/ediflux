@@ -74,7 +74,7 @@ Remaining:
   (segment groups, cardinalities), data elements (type, length), code lists; plain-language
   errors with segment, position, expected and found.
 - **CONTRL** generation and parsing.
-- **CLI** `ediflux inspect <file>`: tree, JSON and validation report.
+- **CLI** `libredi inspect <file>`: tree, JSON and validation report.
 - **Quality**: golden files, property-based tests (round-trip, fuzzing), StAEDI as a test
   oracle in CI, performance benchmark.
 - **Checkpoint** after two weeks: confirm the translator language on real-world-shaped
@@ -90,7 +90,7 @@ Remaining:
   fixed-width.
 - **Outbound builder**: canonical document → EDIFACT with envelopes, control references and
   UNT/UNZ counts.
-- **CLI** `ediflux convert` and `ediflux test <mapping>`.
+- **CLI** `libredi convert` and `libredi test <mapping>`.
 - **Reference flows**: ORDERS → CSV, CSV → ORDRSP, CSV → DESADV.
 - **Local MCP server (stdio)** wrapping the CLI: inspect, validate, run a mapping on
   fixtures, explain an error. Used by the team to build mappings with an AI assistant.
@@ -153,11 +153,12 @@ Remaining:
 
 ## After 1.0
 
-- **M8 — AS2** (v1.1): `as2-gateway`, certificate management and expiry alerts, MDN
-  sync/async, interoperability tests.
+- **M8 — AS2** (v1.1): spike of our own TypeScript `as2-gateway` against an interop matrix
+  (OpenAS2, phase2, mendelson); then the gateway (or OpenAS2 if the gate fails),
+  certificate management and expiry alerts, MDN sync/async.
 - **M9 — French e-invoicing** (v1.2): Factur-X, UBL and CII generation; connector to the
   customer's *plateforme agréée* (AFNOR XP Z12-013 API); invoice enrichment; reception of
-  invoices from the platform. Ediflux never acts as a platform itself.
+  invoices from the platform. Libredi never acts as a platform itself.
 - **M10 — Hosted offer** (v2.0): multi-tenancy with row-level security, Helm chart,
   autoscaling on queue depth, metering, EU hosting, status page.
 - **Later**: more messages (RECADV, ORDCHG, PRICAT, INVRPT, SLSRPT, REMADV, PARTIN),

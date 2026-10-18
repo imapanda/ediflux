@@ -1,12 +1,12 @@
 # 6. Declarative mappings with JSONata
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-17
 
 ## Context
 
 Bots' mappings are arbitrary Python scripts: hard to review, impossible to sandbox, and
-debugged with print statements. Ediflux mappings must be readable by a human, writable by
+debugged with print statements. Libredi mappings must be readable by a human, writable by
 an AI assistant, testable, and safe to run in a hosted environment.
 
 ## Decision

@@ -1,25 +1,25 @@
-# Ediflux
+# Libredi
 
-[![CI](https://github.com/imapanda/ediflux/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/imapanda/ediflux/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/imapanda/ediflux/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/imapanda/ediflux/actions/workflows/codeql.yml)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/imapanda/ediflux/badge)](https://scorecard.dev/viewer/?uri=github.com/imapanda/ediflux)
+[![CI](https://github.com/imapanda/libredi/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/imapanda/libredi/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/imapanda/libredi/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/imapanda/libredi/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/imapanda/libredi/badge)](https://scorecard.dev/viewer/?uri=github.com/imapanda/libredi)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 
 **Open-source EDI gateway: receive, translate and send business messages, reliably.**
 
-Ediflux receives EDI messages from your trading partners, translates them into the
+Libredi receives EDI messages from your trading partners, translates them into the
 formats your ERP understands (CSV, JSON, XML…), and sends your own documents back the
 other way. It is built as a set of Docker services that you can run yourself, for free.
 
 > **Status: early design.** Nothing is usable yet. Follow the
-> [roadmap](https://github.com/imapanda/ediflux/milestones) and the
-> [discussions](https://github.com/imapanda/ediflux/discussions) to see where we are going.
+> [roadmap](https://github.com/imapanda/libredi/milestones) and the
+> [discussions](https://github.com/imapanda/libredi/discussions) to see where we are going.
 
 ## Why
 
 Small and mid-sized companies often pay an EDI provider for every message they exchange
 (orders, despatch advices, invoices…). The open-source alternatives exist but are hard to
-configure. Ediflux aims to be the simple, reliable one.
+configure. Libredi aims to be the simple, reliable one.
 
 ## Planned features
 
@@ -41,4 +41,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how changes are proposed, checked and
 
 ## License
 
-Ediflux is free software, licensed under the [GNU Affero General Public License v3.0](LICENSE).
+Libredi is free software, licensed under the [GNU Affero General Public License v3.0](LICENSE).

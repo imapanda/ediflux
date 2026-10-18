@@ -1,11 +1,11 @@
 # 2. Technical services and horizontal scaling
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-17
 
 ## Context
 
-Ediflux must run on a single small server for a self-hosting company and on a cluster for
+Libredi must run on a single small server for a self-hosting company and on a cluster for
 the hosted offer. Load is uneven: translation is CPU-bound, transports are I/O-bound, the
 API is request-driven. The founder wants to be able to run, for example, five workers and
 two translators.

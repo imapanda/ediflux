@@ -17,7 +17,7 @@ Open-source alternatives exist (Bots EDI, Smooks, mescedia…), but they are too
 integration specialists: hard to install, hard to configure, and with little help when a
 message fails at 3 a.m.
 
-## What Ediflux is
+## What Libredi is
 
 A **self-hostable EDI gateway** that a small IT team (or a single ERP admin) can install
 with Docker Compose and operate with confidence:
@@ -49,14 +49,14 @@ with Docker Compose and operate with confidence:
    land in the test environment; a human promotes them to production.
 6. **Formats and transports are separate.** How a file travels (SFTP, AS2…) and what it
    contains (EDIFACT, X12…) are independent plug-ins.
-7. **Open source, hosted option.** Everything needed to run Ediflux is AGPL-3.0. A managed
+7. **Open source, hosted option.** Everything needed to run Libredi is AGPL-3.0. A managed
    hosting offer may exist for those who do not want to operate it.
 
 ## Non-goals (for now)
 
-- Being a French e-invoicing "plateforme agréée" (PA). Ediflux can prepare and route
+- Being a French e-invoicing "plateforme agréée" (PA). Libredi can prepare and route
   invoices but does not replace a registered platform.
-- Replacing an ERP, a WMS or a TMS: Ediflux moves and translates documents, it does not
+- Replacing an ERP, a WMS or a TMS: Libredi moves and translates documents, it does not
   manage orders or stock.
 - Business-logic microservices: services are split along technical lines (transport,
   translation, orchestration, UI, MCP), not by business domain.

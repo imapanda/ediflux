@@ -8,5 +8,6 @@ What does this change, and why? Link the issue it resolves, for example `Closes 
 
 - [ ] The title follows [Conventional Commits](https://www.conventionalcommits.org/)
   (`feat: ...`, `fix(parser): ...`, `feat!: ...` for a breaking change).
+- [ ] Every commit is signed off (`git commit -s`, Developer Certificate of Origin).
 - [ ] Tests or sample messages cover the change, with anonymized data only.
 - [ ] Documentation is updated when behavior changes.

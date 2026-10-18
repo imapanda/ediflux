@@ -6,14 +6,14 @@
 
 | Concept | What it is |
 | --- | --- |
-| **Instance** | One Ediflux installation (self-hosted) or one customer space (hosted). |
+| **Instance** | One Libredi installation (self-hosted) or one customer space (hosted). |
 | **Environment** | `test` or `production` inside an instance. Each has its own partners' endpoints, mapping versions, numbering counters, archive and messages. Configuration is promoted from test to production, never edited live in production. |
 | **Partner** | A trading partner and its identifiers (GLN, SIRET, EDIFACT/X12 interchange IDs and qualifiers). |
 | **Endpoint** | How bytes travel to or from a partner or the ERP: an SFTP folder, a remote SFTP server, an AS2 station, an HTTP webhook, a mailbox, a local drop folder. |
 | **Flow** | Partner + direction + message type + version, e.g. *"Distributor X, inbound ORDERS EANCOM D96A → ERP CSV"*. A flow holds the envelope rules, validation level, acknowledgement policy, mapping version and destination. |
 | **Mapping** | A versioned, declarative file that turns a parsed message into a canonical document (and back), with sample files and expected outputs as tests. |
-| **Canonical document** | Ediflux's neutral model of an order, order response, despatch advice, invoice… Partner mappings target it; ERP exports read it. This avoids writing one mapping per partner *and* per ERP format. |
-| **Message** | One document travelling through Ediflux, with its raw bytes, its state history, its errors and its links to related messages (order → despatch advice → invoice). |
+| **Canonical document** | Libredi's neutral model of an order, order response, despatch advice, invoice… Partner mappings target it; ERP exports read it. This avoids writing one mapping per partner *and* per ERP format. |
+| **Message** | One document travelling through Libredi, with its raw bytes, its state history, its errors and its links to related messages (order → despatch advice → invoice). |
 
 ## Message lifecycle
 
@@ -70,8 +70,8 @@ The split follows technical responsibilities, so each service can be developed, 
 scaled and replaced on its own, and written in the language that suits it best. Business
 rules live in the workers and in the mappings, not spread across services.
 
-Custom services are written in TypeScript and share packages in one monorepo; SFTP and
-AS2 use proven third-party containers ([ADR 4](adr/0004-language-per-service.md)).
+Custom services are written in TypeScript and share packages in one monorepo; SFTP uses a
+proven third-party container, and AS2 too unless our own service passes its interop tests ([ADR 4](adr/0004-language-per-service.md)).
 
 ```mermaid
 flowchart LR
@@ -80,7 +80,7 @@ flowchart LR
       P2[Partner AS2]
       P3[Partner API / email]
     end
-    subgraph Ediflux
+    subgraph Libredi
       LB[reverse proxy / load balancer]
       SFTP[sftp-gateway ×N]
       AS2[as2-gateway ×N]
@@ -121,7 +121,7 @@ flowchart LR
 | `worker` | Message state machine: routing, calls to the translator, delivery, numbering, retries, acknowledgements, alerts, scheduled jobs. | Competing consumers on the job queue (`SELECT … FOR UPDATE SKIP LOCKED` or a broker); add replicas to drain the queue faster. Per-partner ordering, when a flow needs it, uses a partition key or an advisory lock. |
 | `translator` | Parse, validate, serialize EDIFACT/X12; run mappings; render outputs. Input bytes + configuration in, result out. | Pure and stateless, CPU-bound; scale with the message volume. |
 | `sftp-gateway` | SFTP/FTPS server for partners and the ERP to drop and pick up files. | Several replicas behind a TCP load balancer, sharing their user store (database) and file storage (S3 or a shared volume). See [ADR 0003](adr/0003-reuse-before-build.md). |
-| `as2-gateway` | AS2 send/receive, signatures, encryption, MDN, certificates. | **Exception**: OpenAS2 runs active/passive (one replica with a persistent volume). A custom service with database-held keys would scale like the others if needed ([ADR 4](adr/0004-language-per-service.md)). Later milestone. |
+| `as2-gateway` | AS2 send/receive, signatures, encryption, MDN, certificates. | Our own service: stateless HTTP receivers behind the load balancer, keys and certificates in the database. If it fails the interoperability gate, OpenAS2 runs instead as an active/passive exception ([ADR 4](adr/0004-language-per-service.md)). Milestone 8. |
 | `connectors` | Outbound and polling transports: push to a partner's SFTP, poll a remote server or a mailbox, call webhooks. | Each endpoint is polled under a lease (a row lock with an expiry), so N replicas share the endpoints without polling the same one twice. |
 | `web` | Admin console: messages, errors, replay, partners, flows, mapping tests, promotion. | Static or server-rendered front end; any number of replicas. |
 | `mcp` | MCP server for AI assistants. Talks only to the `api` with the caller's rights; writes only drafts in the test environment. | Stateless Streamable HTTP; any number of replicas. |

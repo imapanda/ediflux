@@ -1,11 +1,11 @@
 # 8. MCP server scope and safety
 
-- Status: proposed
+- Status: accepted
 - Date: 2026-10-17
 
 ## Context
 
-Everything in Ediflux should be usable by an AI assistant, and the main differentiator is
+Everything in Libredi should be usable by an AI assistant, and the main differentiator is
 drafting a partner flow from its specification. EDI traffic is business-critical and partner
 specifications are confidential.
 
