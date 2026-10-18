@@ -1,5 +1,5 @@
 name: Bug report
-description: Ediflux does not behave as documented.
+description: Libredi does not behave as documented.
 labels: [bug, triage]
 body:
   - type: markdown
@@ -11,7 +11,7 @@ body:
         prices and references in any message or log you share.
 
         Found a security issue? Do not open a public issue: follow the
-        [security policy](https://github.com/imapanda/ediflux/security/policy).
+        [security policy](https://github.com/imapanda/libredi/security/policy).
   - type: textarea
     id: what-happened
     attributes:
@@ -33,7 +33,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: Ediflux version
+      label: Libredi version
       placeholder: "0.1.0, or a commit SHA"
     validations:
       required: true
@@ -41,7 +41,7 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: Operating system, Docker version, how you deployed Ediflux.
+      description: Operating system, Docker version, how you deployed Libredi.
   - type: textarea
     id: logs
     attributes:

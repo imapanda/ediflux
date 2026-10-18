@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Question or idea
-    url: https://github.com/imapanda/ediflux/discussions
+    url: https://github.com/imapanda/libredi/discussions
     about: Ask how to do something, or discuss an idea before opening an issue.
   - name: Security vulnerability
-    url: https://github.com/imapanda/ediflux/security/advisories/new
+    url: https://github.com/imapanda/libredi/security/advisories/new
     about: Report it privately. Please do not open a public issue.

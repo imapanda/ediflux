@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Ideas still taking shape are welcome in
-        [Discussions](https://github.com/imapanda/ediflux/discussions) first.
+        [Discussions](https://github.com/imapanda/libredi/discussions) first.
   - type: textarea
     id: problem
     attributes:
@@ -18,7 +18,7 @@ body:
     id: proposal
     attributes:
       label: Proposed solution
-      description: How would you like Ediflux to handle it?
+      description: How would you like Libredi to handle it?
     validations:
       required: true
   - type: dropdown
