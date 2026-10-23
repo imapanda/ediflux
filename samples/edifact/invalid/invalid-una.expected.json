@@ -1,0 +1,10 @@
+{
+  "sample": "invalid-una.edi",
+  "kind": "invalid",
+  "description": "UNA reuses the colon as both component and element separator.",
+  "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
+  "layer": "tokenizer",
+  "expectedErrors": [
+    {"code": "INVALID_UNA", "severity": "error", "position": {"segment": 0, "tag": "UNA", "element": null, "component": null}, "expected": "six distinct service characters", "found": "component and element separators are both ':'"}
+  ]
+}

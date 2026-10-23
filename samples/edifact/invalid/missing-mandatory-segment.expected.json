@@ -1,0 +1,10 @@
+{
+  "sample": "missing-mandatory-segment.edi",
+  "kind": "invalid",
+  "description": "BGM, mandatory in ORDERS, is absent.",
+  "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
+  "layer": "structure",
+  "expectedErrors": [
+    {"code": "MISSING_MANDATORY_SEGMENT", "severity": "error", "position": {"segment": 3, "tag": "DTM", "element": null, "component": null}, "expected": "BGM", "found": "DTM"}
+  ]
+}

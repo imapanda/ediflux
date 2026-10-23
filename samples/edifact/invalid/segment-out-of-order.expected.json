@@ -1,0 +1,10 @@
+{
+  "sample": "segment-out-of-order.edi",
+  "kind": "invalid",
+  "description": "The optional FTX comes between the two NAD segments instead of before them.",
+  "basedOn": "valid/orders-d96a-s3-unoa-free-text.edi",
+  "layer": "structure",
+  "expectedErrors": [
+    {"code": "SEGMENT_OUT_OF_ORDER", "severity": "error", "position": {"segment": 6, "tag": "FTX", "element": null, "component": null}, "expected": "a segment allowed after NAD (second NAD, LIN, UNS)", "found": "FTX"}
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "sample": "invalid-character-unoa.edi",
+  "kind": "invalid",
+  "description": "An UNOA interchange contains the byte 0xC9 (capital E acute in ISO 8859-1), carried by a party name added to NAD.",
+  "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
+  "layer": "tokenizer",
+  "expectedErrors": [
+    {"code": "INVALID_CHARACTER", "severity": "error", "position": {"segment": 5, "tag": "NAD", "element": 4, "component": 1}, "expected": "a character of UNOA", "found": "byte 0xC9"}
+  ]
+}
