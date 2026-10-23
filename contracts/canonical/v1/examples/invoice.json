@@ -1,0 +1,89 @@
+{
+  "documentType": "invoice",
+  "schemaVersion": 1,
+  "invoiceKind": "invoice",
+  "documentNumber": "INV-2030-0001",
+  "issueDate": "2030-10-25",
+  "deliveryDate": "2030-10-22",
+  "currency": "EUR",
+  "parties": {
+    "supplier": {
+      "gln": "9520000000035",
+      "name": "SAMPLE SUPPLIER SARL",
+      "address": {
+        "street": "1 RUE FICTIVE",
+        "city": "EXEMPLEVILLE",
+        "postalCode": "00000",
+        "country": "FR"
+      },
+      "identifiers": [
+        { "scheme": "vat", "value": "FR00000000000" },
+        { "scheme": "siret", "value": "00000000000000" }
+      ]
+    },
+    "buyer": {
+      "gln": "9520000000011",
+      "name": "SAMPLE RETAIL SA",
+      "address": {
+        "street": "1 RUE FICTIVE",
+        "city": "EXEMPLEVILLE",
+        "postalCode": "00000",
+        "country": "FR"
+      }
+    },
+    "shipTo": { "gln": "9520000000028", "name": "SAMPLE DEPOT NORD" }
+  },
+  "references": [
+    { "type": "order", "value": "PO-0100" },
+    { "type": "despatchAdvice", "value": "DES-0100" }
+  ],
+  "payment": {
+    "dueDate": "2030-11-24",
+    "terms": "30 days net",
+    "iban": "FR0000000000000000000000000"
+  },
+  "lines": [
+    {
+      "lineNumber": 1,
+      "product": { "gtin": "9520000010010", "supplierItemId": "SUP-001" },
+      "quantity": { "value": "12", "unit": "PCE" },
+      "unitPrice": { "amount": "1.00" },
+      "lineAmount": "12.00",
+      "tax": { "category": "standard", "rate": "5.5" }
+    },
+    {
+      "lineNumber": 2,
+      "product": { "gtin": "9520000010027", "supplierItemId": "SUP-002" },
+      "quantity": { "value": "24", "unit": "PCE" },
+      "unitPrice": { "amount": "2.50" },
+      "lineAmount": "60.00",
+      "tax": { "category": "standard", "rate": "5.5" }
+    },
+    {
+      "lineNumber": 3,
+      "product": { "gtin": "9520000010034", "supplierItemId": "SUP-003" },
+      "quantity": { "value": "6", "unit": "PCE" },
+      "unitPrice": { "amount": "12.00" },
+      "lineAmount": "72.00",
+      "tax": { "category": "standard", "rate": "20" }
+    }
+  ],
+  "adjustments": [
+    {
+      "kind": "charge",
+      "amount": "10.00",
+      "reason": "Transport",
+      "tax": { "category": "standard", "rate": "20" }
+    }
+  ],
+  "taxSubtotals": [
+    { "category": "standard", "rate": "5.5", "taxableAmount": "72.00", "taxAmount": "3.96" },
+    { "category": "standard", "rate": "20", "taxableAmount": "82.00", "taxAmount": "16.40" }
+  ],
+  "totals": {
+    "netTotal": "154.00",
+    "taxTotal": "20.36",
+    "grossTotal": "174.36",
+    "payableAmount": "174.36"
+  }
+}

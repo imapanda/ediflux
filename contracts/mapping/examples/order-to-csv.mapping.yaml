@@ -1,0 +1,91 @@
+# yaml-language-server: $schema=../mapping.schema.json
+formatVersion: 1
+name: Order to ERP order lines (CSV)
+description: >-
+  Turns a canonical order into the rows of the CSV file that the ERP imports: one row per order
+  line, the header values repeated on each row. Reviewed by a person.
+version: 3
+flow:
+  direction: outbound
+  message:
+    syntax: csv
+    type: order-lines
+    version: "1"
+  canonical:
+    documentType: order
+    schemaVersion: 1
+lookups:
+  erpUnits:
+    PCE: ST
+    KGM: KG
+fields:
+  rows:
+    forEach: lines
+    fields:
+      order_number:
+        expression: $root.documentNumber
+        confidence: high
+      order_date:
+        expression: $substring($root.issueDate, 0, 10)
+        note: The issue date may carry a time; the ERP wants the date only.
+      buyer_gln:
+        expression: $root.parties.buyer.gln
+      ship_to_gln:
+        expression: $root.parties.shipTo.gln
+      line:
+        expression: $string(lineNumber)
+      gtin:
+        expression: product.gtin
+      supplier_item:
+        expression: product.supplierItemId
+      quantity:
+        expression: quantity.value
+      unit:
+        expression: $lookup($lookups.erpUnits, quantity.unit)
+        confidence: high
+        specRef:
+          source: Sample ERP import guide, version 4
+          location: Column UNIT, table of unit codes
+      unit_price:
+        expression: unitPrice.amount
+fixtures:
+  - name: two lines delivered to a depot
+    input:
+      documentType: order
+      schemaVersion: 1
+      documentNumber: PO-0100
+      issueDate: "2030-10-15T09:00:00+02:00"
+      parties:
+        buyer: { gln: "9520000000011" }
+        supplier: { gln: "9520000000035" }
+        shipTo: { gln: "9520000000028" }
+      lines:
+        - lineNumber: 1
+          product: { gtin: "9520000010010", supplierItemId: SUP-001 }
+          quantity: { value: "12", unit: PCE }
+          unitPrice: { amount: "1.00" }
+        - lineNumber: 2
+          product: { gtin: "9520000010027" }
+          quantity: { value: "24", unit: PCE }
+          unitPrice: { amount: "2.50" }
+    expected:
+      rows:
+        - order_number: PO-0100
+          order_date: "2030-10-15"
+          buyer_gln: "9520000000011"
+          ship_to_gln: "9520000000028"
+          line: "1"
+          gtin: "9520000010010"
+          supplier_item: SUP-001
+          quantity: "12"
+          unit: ST
+          unit_price: "1.00"
+        - order_number: PO-0100
+          order_date: "2030-10-15"
+          buyer_gln: "9520000000011"
+          ship_to_gln: "9520000000028"
+          line: "2"
+          gtin: "9520000010027"
+          quantity: "24"
+          unit: ST
+          unit_price: "2.50"

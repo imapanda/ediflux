@@ -49,9 +49,9 @@ access; only `connectors` can reach partners. `scripts/smoke-compose.sh` checks 
 | `services/api`, `worker`, `translator`, `mcp` | TypeScript services. Each has its `Dockerfile`, a `src/main.ts` entry point and tests. |
 | `services/connectors` | Go service, with its own `go.mod` and `Dockerfile`. |
 | `packages/service-kit` | Shared runtime of the TypeScript services: `/healthz`, port handling, graceful shutdown. |
-| `packages/contracts` | Tests that check that the files in `contracts/` are valid. Each service tests its own responses against them. |
+| `packages/contracts` | Tests that check that the files in `contracts/` are valid, and the TypeScript types generated from the canonical schemas (`@libredi/contracts/canonical/v1`). Each service tests its own responses against the contracts. |
 | `packages/registry` | The registry generator ([docs](registry-generator.md)): downloads the UN/ECE directories, parses them into the EDIFACT definition registry of `contracts/registry/`, and checks the result. Tests use fictitious files only. |
-| `contracts/` | OpenAPI (`openapi/`), job JSON Schemas (`jobs/`) and the EDIFACT registry schema (`registry/`), written before the code. See its [README](../contracts/README.md). |
+| `contracts/` | OpenAPI (`openapi/`), job JSON Schemas (`jobs/`), canonical documents (`canonical/`), the mapping format (`mapping/`) and the EDIFACT registry schema (`registry/`), written before the code. See its [README](../contracts/README.md). |
 | `infra/postgres`, `infra/caddy` | Image of PostgreSQL with pgmq; configuration of the reverse proxy. |
 | `compose.yaml`, `.env.example` | The stack on one machine. |
 | `scripts/` | `init-env.sh`, `check-pins.sh`, `check-derived-data.sh`, `smoke-image.sh`, `smoke-compose.sh`. |
@@ -68,6 +68,7 @@ with the milestones of the [roadmap](roadmap.md).
 | `pnpm test` | Vitest (with fast-check for property tests) in every package. |
 | `pnpm build` | Bundle every service into `dist/main.js` with esbuild. |
 | `pnpm verify` | `check`, `typecheck` and `test`. Run it before every push. |
+| `pnpm --filter @libredi/contracts generate` | Regenerate the TypeScript types of the canonical documents after changing a schema in `contracts/canonical/`. The tests fail when they are out of date. |
 | `pnpm --filter @libredi/api dev` | Run a service from source with `node --watch`. |
 | `scripts/check-pins.sh` | Check that the Node.js, pnpm, Go and Biome versions agree across files. |
 | `scripts/check-derived-data.sh` | Check that Git tracks no UN/EDIFACT directory file and no registry built from one ([ADR 7](adr/0007-standards-licensing.md)). |

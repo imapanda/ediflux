@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/imapanda/libredi/main/contracts/canonical/v1/common.schema.json",
+  "title": "Canonical documents, shared definitions (version 1)",
+  "description": "Building blocks shared by the order, order response, despatch advice and invoice schemas. Not a document by itself.",
+  "$defs": {
+    "decimal": {
+      "title": "Decimal",
+      "description": "A decimal number written as text, so that no digit is lost: no exponent, no thousands separator, a point as decimal mark. Compare values as numbers: 5.5 and 5.50 are the same rate.",
+      "type": "string",
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+      "examples": ["12", "2.50"]
+    },
+    "unsignedDecimal": {
+      "title": "UnsignedDecimal",
+      "description": "A decimal that cannot be negative: a price, a rate, the amount of a discount or a charge.",
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+    },
+    "documentFunction": {
+      "title": "DocumentFunction",
+      "description": "Whether a document is the first one, replaces an earlier one with the same number or cancels it. Absent means original.",
+      "enum": ["original", "replacement", "cancellation"]
+    },
+    "gln": {
+      "title": "Gln",
+      "description": "Global Location Number, 13 digits. The check digit is verified by the validator, not by this schema.",
+      "type": "string",
+      "pattern": "^[0-9]{13}$"
+    },
+    "gtin": {
+      "title": "Gtin",
+      "description": "Global Trade Item Number: 8, 12, 13 or 14 digits.",
+      "type": "string",
+      "pattern": "^([0-9]{8}|[0-9]{12,14})$"
+    },
+    "sscc": {
+      "title": "Sscc",
+      "description": "Serial Shipping Container Code, 18 digits.",
+      "type": "string",
+      "pattern": "^[0-9]{18}$"
+    },
+    "currency": {
+      "title": "CurrencyCode",
+      "description": "Three upper-case letters (ISO 4217).",
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "country": {
+      "title": "CountryCode",
+      "description": "Two upper-case letters (ISO 3166-1 alpha-2).",
+      "type": "string",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "unit": {
+      "title": "UnitCode",
+      "description": "Unit of measure as a short upper-case code (UN/ECE Recommendation 20, for example PCE). The code list is not part of this schema.",
+      "type": "string",
+      "pattern": "^[A-Z0-9]{2,3}$"
+    },
+    "date": {
+      "title": "CalendarDate",
+      "description": "A calendar date, YYYY-MM-DD.",
+      "type": "string",
+      "format": "date"
+    },
+    "moment": {
+      "title": "Moment",
+      "description": "A date, or a date and time with a UTC offset (RFC 3339). A mapping adds the offset of the partner when the message has none.",
+      "anyOf": [{ "type": "string", "format": "date" }, { "type": "string", "format": "date-time" }]
+    },
+    "identifier": {
+      "title": "Identifier",
+      "description": "A document number, item number or other reference chosen by a partner.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 70
+    },
+    "text": {
+      "title": "Text",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "notes": {
+      "title": "Notes",
+      "description": "Free text, one entry per note.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/text" }
+    },
+    "lineNumber": {
+      "title": "LineNumber",
+      "description": "Position of a line in its document, starting at 1.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "address": {
+      "title": "Address",
+      "type": "object",
+      "properties": {
+        "street": { "$ref": "#/$defs/text" },
+        "city": { "$ref": "#/$defs/text" },
+        "postalCode": { "$ref": "#/$defs/identifier" },
+        "country": { "$ref": "#/$defs/country" }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "party": {
+      "title": "Party",
+      "description": "A company or a location. The GLN is the usual key; other identifiers (VAT number, SIRET) go in `identifiers`.",
+      "type": "object",
+      "properties": {
+        "gln": { "$ref": "#/$defs/gln" },
+        "name": { "$ref": "#/$defs/text" },
+        "address": { "$ref": "#/$defs/address" },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "title": "PartyIdentifier",
+            "type": "object",
+            "properties": {
+              "scheme": {
+                "description": "Lower case name of the numbering scheme, for example vat or siret.",
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]*$"
+              },
+              "value": { "$ref": "#/$defs/identifier" }
+            },
+            "required": ["scheme", "value"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "reference": {
+      "title": "Reference",
+      "description": "A pointer to another document, a contract or any other reference carried by the message. `label` says what an `other` reference is.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": ["order", "orderResponse", "despatchAdvice", "invoice", "contract", "other"]
+        },
+        "value": { "$ref": "#/$defs/identifier" },
+        "label": { "$ref": "#/$defs/text" },
+        "date": { "$ref": "#/$defs/date" }
+      },
+      "required": ["type", "value"],
+      "additionalProperties": false
+    },
+    "product": {
+      "title": "Product",
+      "description": "Identifies an item by at least one of its GTIN, the supplier's number, the buyer's number or its description.",
+      "type": "object",
+      "properties": {
+        "gtin": { "$ref": "#/$defs/gtin" },
+        "supplierItemId": { "$ref": "#/$defs/identifier" },
+        "buyerItemId": { "$ref": "#/$defs/identifier" },
+        "description": { "$ref": "#/$defs/text" }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "quantity": {
+      "title": "Quantity",
+      "type": "object",
+      "properties": {
+        "value": { "$ref": "#/$defs/decimal" },
+        "unit": { "$ref": "#/$defs/unit" }
+      },
+      "required": ["value"],
+      "additionalProperties": false
+    },
+    "unitPrice": {
+      "title": "UnitPrice",
+      "description": "Net price of `basisQuantity` units (one unit when absent), in the currency of the document.",
+      "type": "object",
+      "properties": {
+        "amount": { "$ref": "#/$defs/unsignedDecimal" },
+        "basisQuantity": { "$ref": "#/$defs/unsignedDecimal" }
+      },
+      "required": ["amount"],
+      "additionalProperties": false
+    },
+    "taxCategory": {
+      "title": "TaxCategory",
+      "description": "How a line is taxed. The rate tells apart the standard, reduced and other non-zero rates.",
+      "enum": [
+        "standard",
+        "zero",
+        "exempt",
+        "reverseCharge",
+        "intraCommunity",
+        "export",
+        "notSubject"
+      ]
+    },
+    "tax": {
+      "title": "Tax",
+      "description": "The tax category and its rate in percent, for example 20 or 5.5.",
+      "type": "object",
+      "properties": {
+        "category": { "$ref": "#/$defs/taxCategory" },
+        "rate": { "$ref": "#/$defs/unsignedDecimal" }
+      },
+      "required": ["category"],
+      "additionalProperties": false
+    },
+    "adjustment": {
+      "title": "Adjustment",
+      "description": "A discount (allowance) or an extra cost (charge) on a line or on the whole document. The amount is positive.",
+      "type": "object",
+      "properties": {
+        "kind": { "enum": ["allowance", "charge"] },
+        "amount": { "$ref": "#/$defs/unsignedDecimal" },
+        "reason": { "$ref": "#/$defs/text" },
+        "tax": { "$ref": "#/$defs/tax" }
+      },
+      "required": ["kind", "amount"],
+      "additionalProperties": false
+    },
+    "package": {
+      "title": "Package",
+      "description": "A logistic unit, with the lines it holds and the packages inside it (a pallet holding cartons).",
+      "type": "object",
+      "properties": {
+        "sscc": { "$ref": "#/$defs/sscc" },
+        "type": { "enum": ["pallet", "carton", "container", "other"] },
+        "contents": {
+          "type": "array",
+          "items": {
+            "title": "PackageContent",
+            "description": "A quantity of the despatch line `lineNumber` held by the package.",
+            "type": "object",
+            "properties": {
+              "lineNumber": { "$ref": "#/$defs/lineNumber" },
+              "quantity": { "$ref": "#/$defs/quantity" },
+              "batchNumber": { "$ref": "#/$defs/identifier" },
+              "expiryDate": { "$ref": "#/$defs/date" }
+            },
+            "required": ["lineNumber", "quantity"],
+            "additionalProperties": false
+          }
+        },
+        "packages": { "type": "array", "items": { "$ref": "#/$defs/package" } }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    }
+  }
+}
