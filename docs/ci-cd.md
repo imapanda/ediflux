@@ -25,9 +25,9 @@ flowchart LR
 
 | Workflow                                              | Runs on                       | Purpose                                  |
 | ----------------------------------------------------- | ----------------------------- | ---------------------------------------- |
-| [`ci.yml`](../.github/workflows/ci.yml)               | pull requests, `main`         | Linting, workflow security, dependencies |
+| [`ci.yml`](../.github/workflows/ci.yml)               | pull requests, `main`         | Linting, services, images, Compose       |
 | [`pr-title.yml`](../.github/workflows/pr-title.yml)   | pull requests                 | Conventional Commit title                |
-| [`codeql.yml`](../.github/workflows/codeql.yml)       | pull requests, `main`, weekly | CodeQL static analysis                   |
+| [`codeql.yml`](../.github/workflows/codeql.yml)       | pull requests, `main`, weekly | CodeQL: workflows, TypeScript and Go     |
 | [`scorecard.yml`](../.github/workflows/scorecard.yml) | `main`, weekly                | OpenSSF Scorecard and README badge       |
 | [`release.yml`](../.github/workflows/release.yml)     | `main`                        | Release pull request, tags and releases  |
 | [`links.yml`](../.github/workflows/links.yml)         | weekly                        | External links in the documentation      |
@@ -47,18 +47,36 @@ flowchart LR
 - **Dependency review**: [dependency-review-action](https://github.com/actions/dependency-review-action)
   blocks a pull request that adds a dependency with a known vulnerability of moderate
   severity or higher.
-- **CI result** waits for all of them and fails if any failed or was cancelled.
+- **Changes** decides which of the jobs below have something to check, from the files of the
+  pull request ([paths-filter](https://github.com/dorny/paths-filter)). The filtering is done
+  in the jobs, not in the workflow's `paths`: a workflow that does not run never reports
+  `CI result`, and the required check would block the merge. A manual run checks everything.
+- **Workspace**: [Biome](https://biomejs.dev/) over the whole repository, `scripts/check-pins.sh`
+  (the Node.js, pnpm, Go and Biome versions agree across the files that pin them), then
+  typecheck and tests of the shared packages, including the checks of the files in
+  `contracts/`.
+- **Service (api, worker, translator, mcp)**: one job per TypeScript service, run when the
+  service or a shared package changed. Typecheck, tests, build, then
+  `scripts/smoke-image.sh`: build the image, run it read-only without capabilities, wait for
+  its health check, check that it is not root and that `SIGTERM` stops it with exit code 0.
+- **Service (connectors)**: the same for the Go service: `gofmt`, `go vet`, `go test -race`,
+  then the image smoke test.
+- **Compose (3 workers)**: `scripts/smoke-compose.sh` starts PostgreSQL with pgmq, the five
+  services and the proxy with `--scale worker=3`, and checks that everything is healthy, that
+  no service publishes a host port, that the proxy routes work, that the translator cannot
+  reach PostgreSQL and that a message goes through a pgmq queue.
+- **CI result** waits for all of them and fails if any failed or was cancelled. A job that
+  was skipped because nothing it checks changed counts as a success.
 
 ### Adding a job
 
 Add the job to `ci.yml` and list it in the `needs` of `ci-result`. Branch protection only
-requires `CI result`, so the ruleset does not change. When the first service lands, expect:
+requires `CI result`, so the ruleset does not change. For a new service, see "One image per
+service" in the [development guide](development.md). Still to come:
 
-- a build and test job per language, with a `paths` filter if it gets slow;
-- the language in the CodeQL matrix;
-- an ecosystem entry in `.github/dependabot.yml` (application packages, `docker`);
-- a container job: build multi-architecture images, scan them, and on release push them to
-  GitHub Container Registry with an SBOM and a signed build provenance attestation.
+- a container job that builds multi-architecture images, scans them, and on release pushes
+  them to GitHub Container Registry with an SBOM and a signed build provenance attestation;
+- per-service benchmarks.
 
 ## Conventions enforced by the workflows
 
