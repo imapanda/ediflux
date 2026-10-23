@@ -1,0 +1,55 @@
+{
+  "sample": "orders-d01b-s4-unoc-repetition-separator.edi",
+  "kind": "valid",
+  "description": "Syntax 4: UNA declares the asterisk as repetition separator and one data element is repeated three times; an escaped asterisk stays literal.",
+  "notes": "Exercises the tokenizer only. D.01B does not necessarily allow a repeated FTX text element, so a structure validator may report this sample.",
+  "interchange": {
+    "syntaxIdentifier": "UNOC",
+    "syntaxVersion": 4,
+    "encoding": "iso-8859-1",
+    "una": ":+.?*'",
+    "interchangeReference": "IC000113",
+    "messages": [
+      { "reference": "1", "type": "ORDERS", "version": "D", "release": "01B", "agency": "UN" }
+    ]
+  },
+  "segments": [
+    {
+      "tag": "UNB",
+      "elements": [
+        ["UNOC", "4"],
+        ["9520000000011", "14"],
+        ["9520000000035", "14"],
+        ["20301015", "0830"],
+        ["IC000113"]
+      ]
+    },
+    { "tag": "UNH", "elements": [["1"], ["ORDERS", "D", "01B", "UN", "LBR001"]] },
+    { "tag": "BGM", "elements": [["220"], ["PO-0001"], ["9"]] },
+    { "tag": "DTM", "elements": [["137", "20301015", "102"]] },
+    {
+      "tag": "FTX",
+      "elements": [
+        ["AAI"],
+        [],
+        [],
+        {
+          "repetitions": [
+            ["FIRST NOTE"],
+            ["SECOND NOTE", "WITH TWO COMPONENTS"],
+            ["LITERAL * STAR"]
+          ]
+        },
+        ["EN"]
+      ]
+    },
+    { "tag": "NAD", "elements": [["BY"], ["9520000000011", "", "9"]] },
+    { "tag": "NAD", "elements": [["SU"], ["9520000000035", "", "9"]] },
+    { "tag": "LIN", "elements": [["1"], [], ["9520000010010", "EN"]] },
+    { "tag": "QTY", "elements": [["21", "10", "PCE"]] },
+    { "tag": "UNS", "elements": [["S"]] },
+    { "tag": "CNT", "elements": [["2", "1"]] },
+    { "tag": "UNT", "elements": [["11"], ["1"]] },
+    { "tag": "UNZ", "elements": [["1"], ["IC000113"]] }
+  ]
+}

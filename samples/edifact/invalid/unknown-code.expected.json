@@ -1,0 +1,16 @@
+{
+  "sample": "unknown-code.edi",
+  "kind": "invalid",
+  "description": "The party qualifier QQQ is not in the code list.",
+  "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
+  "layer": "code",
+  "expectedErrors": [
+    {
+      "code": "UNKNOWN_CODE",
+      "severity": "error",
+      "position": { "segment": 5, "tag": "NAD", "element": 1, "component": null },
+      "expected": "a party qualifier from the D.96A code list (for example BY, SU, DP)",
+      "found": "QQQ"
+    }
+  ]
+}

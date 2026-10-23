@@ -1,0 +1,16 @@
+{
+  "sample": "value-too-long.edi",
+  "kind": "invalid",
+  "description": "The BGM document number has 36 characters where 35 are allowed.",
+  "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
+  "layer": "element",
+  "expectedErrors": [
+    {
+      "code": "VALUE_TOO_LONG",
+      "severity": "error",
+      "position": { "segment": 3, "tag": "BGM", "element": 2, "component": 1 },
+      "expected": "at most 35 characters",
+      "found": "36 characters"
+    }
+  ]
+}

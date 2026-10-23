@@ -1,0 +1,94 @@
+{
+  "sample": "orders-d96a-s3-unoa-multi-line.edi",
+  "kind": "valid",
+  "description": "Three order lines with product identification, description, quantity and price; buyer, supplier and delivery parties with addresses.",
+  "interchange": {
+    "syntaxIdentifier": "UNOA",
+    "syntaxVersion": 3,
+    "encoding": "ascii",
+    "una": ":+.? '",
+    "interchangeReference": "IC000101",
+    "messages": [
+      { "reference": "1", "type": "ORDERS", "version": "D", "release": "96A", "agency": "UN" }
+    ]
+  },
+  "segments": [
+    {
+      "tag": "UNB",
+      "elements": [
+        ["UNOA", "3"],
+        ["9520000000011", "14"],
+        ["9520000000035", "14"],
+        ["301015", "0830"],
+        ["IC000101"]
+      ]
+    },
+    { "tag": "UNH", "elements": [["1"], ["ORDERS", "D", "96A", "UN", "LBR001"]] },
+    { "tag": "BGM", "elements": [["220"], ["PO-0100"], ["9"]] },
+    { "tag": "DTM", "elements": [["137", "20301015", "102"]] },
+    { "tag": "DTM", "elements": [["2", "20301022", "102"]] },
+    { "tag": "RFF", "elements": [["CT", "CONTRACT-X1"]] },
+    {
+      "tag": "NAD",
+      "elements": [
+        ["BY"],
+        ["9520000000011", "", "9"],
+        [],
+        ["SAMPLE RETAIL SA"],
+        ["1 RUE FICTIVE"],
+        ["EXEMPLEVILLE"],
+        [],
+        ["00000"],
+        ["FR"]
+      ]
+    },
+    {
+      "tag": "NAD",
+      "elements": [
+        ["SU"],
+        ["9520000000035", "", "9"],
+        [],
+        ["SAMPLE SUPPLIER SARL"],
+        ["1 RUE FICTIVE"],
+        ["EXEMPLEVILLE"],
+        [],
+        ["00000"],
+        ["FR"]
+      ]
+    },
+    {
+      "tag": "NAD",
+      "elements": [
+        ["DP"],
+        ["9520000000028", "", "9"],
+        [],
+        ["SAMPLE DEPOT NORD"],
+        ["1 RUE FICTIVE"],
+        ["EXEMPLEVILLE"],
+        [],
+        ["00000"],
+        ["FR"]
+      ]
+    },
+    { "tag": "CUX", "elements": [["2", "EUR", "9"]] },
+    { "tag": "LIN", "elements": [["1"], [], ["9520000010010", "EN"]] },
+    { "tag": "PIA", "elements": [["1"], ["SUP-001", "SA"]] },
+    { "tag": "IMD", "elements": [["F"], [], ["", "", "", "SAMPLE BISCUITS 200G"]] },
+    { "tag": "QTY", "elements": [["21", "12", "PCE"]] },
+    { "tag": "PRI", "elements": [["AAA", "1.00"]] },
+    { "tag": "LIN", "elements": [["2"], [], ["9520000010027", "EN"]] },
+    { "tag": "PIA", "elements": [["1"], ["SUP-002", "SA"]] },
+    { "tag": "IMD", "elements": [["F"], [], ["", "", "", "SAMPLE JUICE 1L"]] },
+    { "tag": "QTY", "elements": [["21", "24", "PCE"]] },
+    { "tag": "PRI", "elements": [["AAA", "2.50"]] },
+    { "tag": "LIN", "elements": [["3"], [], ["9520000010034", "EN"]] },
+    { "tag": "PIA", "elements": [["1"], ["SUP-003", "SA"]] },
+    { "tag": "IMD", "elements": [["F"], [], ["", "", "", "SAMPLE COFFEE 250G"]] },
+    { "tag": "QTY", "elements": [["21", "6", "PCE"]] },
+    { "tag": "PRI", "elements": [["AAA", "12.00"]] },
+    { "tag": "UNS", "elements": [["S"]] },
+    { "tag": "CNT", "elements": [["2", "3"]] },
+    { "tag": "UNT", "elements": [["27"], ["1"]] },
+    { "tag": "UNZ", "elements": [["1"], ["IC000101"]] }
+  ]
+}

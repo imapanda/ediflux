@@ -1,0 +1,65 @@
+{
+  "sample": "orders-d96a-s3-unob-lowercase.edi",
+  "kind": "valid",
+  "description": "UNOB (ISO 646 with lower case): mixed-case text, still plain ASCII bytes.",
+  "interchange": {
+    "syntaxIdentifier": "UNOB",
+    "syntaxVersion": 3,
+    "encoding": "ascii",
+    "una": ":+.? '",
+    "interchangeReference": "IC000107",
+    "messages": [
+      { "reference": "1", "type": "ORDERS", "version": "D", "release": "96A", "agency": "UN" }
+    ]
+  },
+  "segments": [
+    {
+      "tag": "UNB",
+      "elements": [
+        ["UNOB", "3"],
+        ["9520000000011", "14"],
+        ["9520000000035", "14"],
+        ["301015", "0830"],
+        ["IC000107"]
+      ]
+    },
+    { "tag": "UNH", "elements": [["1"], ["ORDERS", "D", "96A", "UN", "LBR001"]] },
+    { "tag": "BGM", "elements": [["220"], ["PO-0700"], ["9"]] },
+    { "tag": "DTM", "elements": [["137", "20301015", "102"]] },
+    { "tag": "FTX", "elements": [["AAI"], [], [], ["Deliver to the back door, please."], ["EN"]] },
+    {
+      "tag": "NAD",
+      "elements": [
+        ["BY"],
+        ["9520000000011", "", "9"],
+        [],
+        ["Sample Retail SA"],
+        ["1 rue fictive"],
+        ["Exempleville"],
+        [],
+        ["00000"],
+        ["FR"]
+      ]
+    },
+    {
+      "tag": "NAD",
+      "elements": [
+        ["SU"],
+        ["9520000000035", "", "9"],
+        [],
+        ["Sample Supplier SARL"],
+        ["2 rue fictive"],
+        ["Exempleville"],
+        [],
+        ["00000"],
+        ["FR"]
+      ]
+    },
+    { "tag": "LIN", "elements": [["1"], [], ["9520000010010", "EN"]] },
+    { "tag": "QTY", "elements": [["21", "10", "PCE"]] },
+    { "tag": "UNS", "elements": [["S"]] },
+    { "tag": "CNT", "elements": [["2", "1"]] },
+    { "tag": "UNT", "elements": [["11"], ["1"]] },
+    { "tag": "UNZ", "elements": [["1"], ["IC000107"]] }
+  ]
+}

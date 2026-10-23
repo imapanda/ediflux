@@ -1,0 +1,47 @@
+{
+  "sample": "desadv-d01b-s3-unoc-sscc.edi",
+  "kind": "valid",
+  "description": "Despatch advice with one pallet identified by an SSCC carrying two lines.",
+  "interchange": {
+    "syntaxIdentifier": "UNOC",
+    "syntaxVersion": 3,
+    "encoding": "iso-8859-1",
+    "una": ":+.? '",
+    "interchangeReference": "IC000117",
+    "messages": [
+      { "reference": "1", "type": "DESADV", "version": "D", "release": "01B", "agency": "UN" }
+    ]
+  },
+  "segments": [
+    {
+      "tag": "UNB",
+      "elements": [
+        ["UNOC", "3"],
+        ["9520000000035", "14"],
+        ["9520000000011", "14"],
+        ["301020", "0830"],
+        ["IC000117"]
+      ]
+    },
+    { "tag": "UNH", "elements": [["1"], ["DESADV", "D", "01B", "UN", "LBR001"]] },
+    { "tag": "BGM", "elements": [["351"], ["DES-0001"], ["9"]] },
+    { "tag": "DTM", "elements": [["137", "203010200900", "203"]] },
+    { "tag": "DTM", "elements": [["11", "20301020", "102"]] },
+    { "tag": "DTM", "elements": [["132", "20301021", "102"]] },
+    { "tag": "RFF", "elements": [["ON", "PO-0001"]] },
+    { "tag": "NAD", "elements": [["SU"], ["9520000000035", "", "9"]] },
+    { "tag": "NAD", "elements": [["BY"], ["9520000000011", "", "9"]] },
+    { "tag": "NAD", "elements": [["DP"], ["9520000000028", "", "9"]] },
+    { "tag": "CPS", "elements": [["1"]] },
+    { "tag": "PAC", "elements": [["1"], [], ["PX"]] },
+    { "tag": "PCI", "elements": [["33E"]] },
+    { "tag": "GIN", "elements": [["BJ"], ["395200000000000012"]] },
+    { "tag": "LIN", "elements": [["1"], [], ["9520000010010", "EN"]] },
+    { "tag": "QTY", "elements": [["12", "48", "PCE"]] },
+    { "tag": "LIN", "elements": [["2"], [], ["9520000010027", "EN"]] },
+    { "tag": "QTY", "elements": [["12", "24", "PCE"]] },
+    { "tag": "CNT", "elements": [["2", "2"]] },
+    { "tag": "UNT", "elements": [["19"], ["1"]] },
+    { "tag": "UNZ", "elements": [["1"], ["IC000117"]] }
+  ]
+}

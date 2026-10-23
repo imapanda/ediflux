@@ -1,0 +1,16 @@
+{
+  "sample": "unexpected-end-of-file.edi",
+  "kind": "invalid",
+  "description": "The interchange is truncated in the middle of a NAD segment; UNT and UNZ are missing.",
+  "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
+  "layer": "tokenizer",
+  "expectedErrors": [
+    {
+      "code": "UNEXPECTED_END_OF_FILE",
+      "severity": "error",
+      "position": { "segment": 6, "tag": "NAD", "element": null, "component": null },
+      "expected": "segment terminator, then UNT and UNZ",
+      "found": "end of file inside NAD"
+    }
+  ]
+}

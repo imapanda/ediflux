@@ -1,0 +1,16 @@
+{
+  "sample": "unsupported-charset.edi",
+  "kind": "invalid",
+  "description": "UNB announces the character set identifier UNOZ, which Libredi does not support.",
+  "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
+  "layer": "tokenizer",
+  "expectedErrors": [
+    {
+      "code": "UNSUPPORTED_CHARSET",
+      "severity": "error",
+      "position": { "segment": 1, "tag": "UNB", "element": 1, "component": 1 },
+      "expected": "UNOA, UNOB, UNOC or UNOW",
+      "found": "UNOZ"
+    }
+  ]
+}

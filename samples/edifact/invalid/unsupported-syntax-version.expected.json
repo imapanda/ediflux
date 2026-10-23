@@ -1,0 +1,16 @@
+{
+  "sample": "unsupported-syntax-version.edi",
+  "kind": "invalid",
+  "description": "UNB announces syntax version 9.",
+  "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
+  "layer": "envelope",
+  "expectedErrors": [
+    {
+      "code": "UNSUPPORTED_SYNTAX_VERSION",
+      "severity": "error",
+      "position": { "segment": 1, "tag": "UNB", "element": 1, "component": 2 },
+      "expected": "3 or 4",
+      "found": "9"
+    }
+  ]
+}
