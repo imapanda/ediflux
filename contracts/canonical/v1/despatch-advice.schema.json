@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/imapanda/libredi/main/contracts/canonical/v1/despatch-advice.schema.json",
+  "title": "DespatchAdvice",
+  "description": "A supplier's notice that goods are on their way: what is shipped, and optionally how it is packed, down to the SSCC of each logistic unit (canonical document, version 1).",
+  "type": "object",
+  "properties": {
+    "documentType": { "const": "despatchAdvice" },
+    "schemaVersion": { "const": 1 },
+    "documentFunction": { "$ref": "common.schema.json#/$defs/documentFunction" },
+    "documentNumber": { "$ref": "common.schema.json#/$defs/identifier" },
+    "issueDate": { "$ref": "common.schema.json#/$defs/moment" },
+    "despatchDate": { "$ref": "common.schema.json#/$defs/moment" },
+    "estimatedDeliveryDate": { "$ref": "common.schema.json#/$defs/moment" },
+    "parties": {
+      "type": "object",
+      "properties": {
+        "supplier": { "$ref": "common.schema.json#/$defs/party" },
+        "buyer": { "$ref": "common.schema.json#/$defs/party" },
+        "shipFrom": { "$ref": "common.schema.json#/$defs/party" },
+        "shipTo": { "$ref": "common.schema.json#/$defs/party" }
+      },
+      "required": ["buyer", "supplier"],
+      "additionalProperties": false
+    },
+    "references": {
+      "description": "Includes the orders that are delivered.",
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/reference" }
+    },
+    "notes": { "$ref": "common.schema.json#/$defs/notes" },
+    "lines": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/line" } },
+    "packages": {
+      "description": "The logistic units, outermost first. Their contents point at the lines above.",
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/package" }
+    }
+  },
+  "required": ["documentType", "schemaVersion", "documentNumber", "issueDate", "parties", "lines"],
+  "additionalProperties": false,
+  "$defs": {
+    "line": {
+      "title": "DespatchLine",
+      "description": "`quantity` is the despatched quantity.",
+      "type": "object",
+      "properties": {
+        "lineNumber": { "$ref": "common.schema.json#/$defs/lineNumber" },
+        "product": { "$ref": "common.schema.json#/$defs/product" },
+        "quantity": { "$ref": "common.schema.json#/$defs/quantity" },
+        "notes": { "$ref": "common.schema.json#/$defs/notes" }
+      },
+      "required": ["lineNumber", "product", "quantity"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "documentType": "orderResponse",
+  "schemaVersion": 1,
+  "documentNumber": "ORS-1000",
+  "issueDate": "2030-10-16",
+  "responseStatus": "changed",
+  "confirmedDeliveryDate": "2030-10-24",
+  "parties": {
+    "buyer": {
+      "gln": "9520000000011",
+      "name": "SAMPLE RETAIL SA",
+      "address": {
+        "street": "1 RUE FICTIVE",
+        "city": "EXEMPLEVILLE",
+        "postalCode": "00000",
+        "country": "FR"
+      }
+    },
+    "supplier": {
+      "gln": "9520000000035",
+      "name": "SAMPLE SUPPLIER SARL",
+      "address": {
+        "street": "2 RUE FICTIVE",
+        "city": "EXEMPLEVILLE",
+        "postalCode": "00000",
+        "country": "FR"
+      }
+    }
+  },
+  "references": [{ "type": "order", "value": "PO-1000" }],
+  "lines": [
+    {
+      "lineNumber": 1,
+      "product": { "gtin": "9520000010010" },
+      "status": "accepted",
+      "orderedQuantity": { "value": "12", "unit": "PCE" },
+      "confirmedQuantity": { "value": "12", "unit": "PCE" },
+      "unitPrice": { "amount": "1.00" }
+    },
+    {
+      "lineNumber": 2,
+      "product": { "gtin": "9520000010027" },
+      "status": "changed",
+      "orderedQuantity": { "value": "24", "unit": "PCE" },
+      "confirmedQuantity": { "value": "18", "unit": "PCE" },
+      "unitPrice": { "amount": "2.60" },
+      "notes": ["Quantity reduced to the stock available."]
+    },
+    {
+      "lineNumber": 3,
+      "product": { "gtin": "9520000010034" },
+      "status": "rejected",
+      "orderedQuantity": { "value": "6", "unit": "PCE" },
+      "confirmedQuantity": { "value": "0", "unit": "PCE" },
+      "unitPrice": { "amount": "12.00" }
+    }
+  ]
+}
