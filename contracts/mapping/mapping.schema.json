@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/imapanda/libredi/main/contracts/mapping/mapping.schema.json",
+  "title": "Mapping",
+  "description": "A declarative mapping, written in YAML: one JSONata expression per target field, lookup tables as data, and fixtures that prove it works. A mapping is one-way; its flow says between which message and which canonical document.",
+  "type": "object",
+  "properties": {
+    "formatVersion": {
+      "description": "Version of this format.",
+      "const": 1
+    },
+    "name": { "$ref": "#/$defs/text" },
+    "description": { "$ref": "#/$defs/text" },
+    "version": {
+      "description": "Revision of this mapping. Every change that is saved gets the next number; a revision is promoted to production, never edited there.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "flow": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "description": "inbound: the message is the source and the canonical document the target. outbound: the other way round.",
+          "enum": ["inbound", "outbound"]
+        },
+        "message": {
+          "description": "The message or file on the non-canonical side: a partner message or an ERP file.",
+          "type": "object",
+          "properties": {
+            "syntax": { "enum": ["edifact", "x12", "csv", "fixed-width", "json", "xml"] },
+            "type": {
+              "description": "Message type, for example ORDERS, or the name of an ERP file.",
+              "$ref": "#/$defs/text"
+            },
+            "version": {
+              "description": "Directory or release of the message type, for example D.96A.",
+              "$ref": "#/$defs/text"
+            }
+          },
+          "required": ["syntax", "type"],
+          "additionalProperties": false
+        },
+        "canonical": {
+          "type": "object",
+          "properties": {
+            "documentType": { "enum": ["order", "orderResponse", "despatchAdvice", "invoice"] },
+            "schemaVersion": { "description": "Only version 1 exists.", "const": 1 }
+          },
+          "required": ["documentType", "schemaVersion"],
+          "additionalProperties": false
+        }
+      },
+      "required": ["direction", "message", "canonical"],
+      "additionalProperties": false
+    },
+    "lookups": {
+      "description": "Lookup tables, by name, read in expressions as $lookups.<name>. Keys and values are strings; quote them in YAML, which reads 01 as the number 1.",
+      "type": "object",
+      "propertyNames": { "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": { "type": "string" }
+      }
+    },
+    "fields": { "$ref": "#/$defs/fields" },
+    "fixtures": {
+      "description": "Sample inputs with the output they must give. A revision whose fixtures do not all pass cannot be promoted.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "$ref": "#/$defs/text" },
+          "description": { "$ref": "#/$defs/text" },
+          "input": { "description": "What the mapping reads, as JSON." },
+          "expected": { "description": "What the mapping must produce.", "type": "object" }
+        },
+        "required": ["name", "input", "expected"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["formatVersion", "name", "version", "flow", "fields", "fixtures"],
+  "additionalProperties": false,
+  "$defs": {
+    "text": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "fields": {
+      "description": "The properties of an output object, by name.",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "minLength": 1 },
+      "additionalProperties": { "$ref": "#/$defs/field" }
+    },
+    "field": {
+      "description": "A leaf has an `expression` and gives the value of the property. A group has `fields` and gives an object. A group with `forEach` gives an array: one object per item that the expression selects, in which `$` is that item.",
+      "type": "object",
+      "properties": {
+        "expression": {
+          "description": "A JSONata expression. An undefined result leaves the property out.",
+          "$ref": "#/$defs/text"
+        },
+        "forEach": {
+          "description": "A JSONata expression that selects the items to repeat the group for.",
+          "$ref": "#/$defs/text"
+        },
+        "fields": { "$ref": "#/$defs/fields" },
+        "confidence": {
+          "description": "How sure the author is, often an AI assistant: high, medium or low. A mapping with a low-confidence field cannot be promoted until a person reviews it and raises or removes the value.",
+          "enum": ["high", "medium", "low"]
+        },
+        "specRef": {
+          "description": "Where the specification describes this field, for review.",
+          "type": "object",
+          "properties": {
+            "source": {
+              "description": "The document: a standard and its version, or a partner's implementation guide.",
+              "$ref": "#/$defs/text"
+            },
+            "location": {
+              "description": "Where in the document: a section, a table or a segment.",
+              "$ref": "#/$defs/text"
+            },
+            "url": { "type": "string", "format": "uri", "pattern": "^https?://" }
+          },
+          "required": ["source"],
+          "additionalProperties": false
+        },
+        "note": {
+          "description": "Why the expression is written this way, for the next reader.",
+          "$ref": "#/$defs/text"
+        }
+      },
+      "oneOf": [
+        { "required": ["expression"], "properties": { "expression": true } },
+        { "required": ["fields"], "properties": { "fields": true } }
+      ],
+      "dependentRequired": { "forEach": ["fields"] },
+      "additionalProperties": false
+    }
+  }
+}

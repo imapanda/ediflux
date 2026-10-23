@@ -63,7 +63,7 @@ schemas of a version live in `contracts/canonical/v<N>/` and their `$id` contain
   release, so it rejects a property added by a later release: a mapping that uses a new optional
   property needs that release or a newer one. Code that only reads documents ignores the
   properties it does not know.
-- **A mapping targets one version** (the mapping format is defined separately). Moving a
+- **A mapping targets one version** (see the [mapping format](../mapping/README.md)). Moving a
   partner to version 2 means a new mapping version that passes its fixtures; nothing converts
   documents behind its back.
 

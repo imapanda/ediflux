@@ -17,6 +17,7 @@
     "ajv-formats": "catalog:",
     "fast-check": "catalog:",
     "json-schema-to-typescript": "catalog:",
+    "jsonata": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "yaml": "catalog:"
