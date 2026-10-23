@@ -3,6 +3,8 @@
 extend-exclude = [
   "CHANGELOG.md", # generated from commit messages
   "LICENSE",
+  "go.mod", # module versions and hashes
+  "go.sum",
   "*.edi",
   "*.edifact",
   "*.x12",

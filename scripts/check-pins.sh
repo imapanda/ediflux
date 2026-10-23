@@ -30,6 +30,8 @@ expect "Biome version in biome.json \$schema" "$biome" \
   "$(sed -n 's#.*biomejs.dev/schemas/\([0-9.]*\)/schema.json.*#\1#p' biome.json)"
 expect "Node.js in the devcontainer" "$node" \
   "$(sed -n '/features\/node/,/}/s/.*"version": "\([^"]*\)".*/\1/p' .devcontainer/devcontainer.json)"
+expect "Go in tools/codegen/go.mod" "$go" \
+  "$(sed -n 's/^go \([0-9.]*\)$/\1/p' tools/codegen/go.mod)"
 expect "Go in the devcontainer" "$go" \
   "$(sed -n '/features\/go/,/}/s/.*"version": "\([^"]*\)".*/\1/p' .devcontainer/devcontainer.json)"
 expect "pnpm in the devcontainer" "$pnpm" \
