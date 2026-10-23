@@ -8,6 +8,7 @@ them. A service in any language reads these files; none of them is generated fro
 | [`openapi/api.yaml`](openapi/api.yaml) | The REST API of the `api` service (OpenAPI 3.1) | Synchronous calls between services, the web console and the MCP server |
 | [`jobs/job-envelope.schema.json`](jobs/job-envelope.schema.json) | The envelope of every job in the PostgreSQL queue (JSON Schema 2020-12) | Asynchronous steps, through pgmq |
 | [`canonical/`](canonical/README.md) | The neutral order, order response, despatch advice and invoice (JSON Schema 2020-12, versioned) | The documents partner mappings produce and ERP exports read |
+| [`registry/registry.schema.json`](registry/registry.schema.json) | The EDIFACT definition registry: segments, composites, data elements, code lists, message structures (JSON Schema 2020-12) | The registry generator writes it; the parser and the validator read it. See its [README](registry/README.md) |
 
 ## Rules
 
@@ -23,7 +24,8 @@ them. A service in any language reads these files; none of them is generated fro
   [`packages/contracts`](../packages/contracts) checks that the files are valid, that the
   examples pass and that broken variants fail; each service tests its own responses against
   the contract (see `services/api/src/contract.test.ts`). A service never imports another
-  service's code.
+  service's code. The registry schema is checked the same way by
+  [`packages/registry`](../packages/registry), which will also hold the code that reads registries.
 
 Each job type will get its own payload schema next to the envelope, in `jobs/`, when the
 worker implements it. The TypeScript types of the canonical documents are generated into
