@@ -166,8 +166,8 @@ warnings; there are none for D.96A and D.01B.
 It runs in the `Derived data` job of the CI, on every pull request: unlike most jobs, it does not wait
 for the path filter, since such a file can be committed anywhere. The `.gitignore` also lists the
 usual places (`/registry/`, `/.libredi/`, `*.registry.json`, `d96a.zip` and the like). Run the script
-by hand before pushing if you work with real archives. The guard looks for files, not for facts: it does
-not notice a fragment pasted into another file, so review what you paste.
+by hand before pushing if you work with real archives. The guard looks for files, not for facts:
+it does not notice a fragment pasted into another file, so review what you paste.
 
 ## Tests
 
