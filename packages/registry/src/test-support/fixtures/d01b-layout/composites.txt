@@ -1,0 +1,30 @@
+FICTITIOUS COMPOSITE DATA ELEMENT DIRECTORY
+A test fixture that imitates the layout of a composite directory (D.01B style).
+
+────────────────────────────────────────────────────────────────────
+
+       C901 EXAMPLE DOCUMENT IDENTIFICATION
+
+       Desc: Identifies an invented document.
+
+010    9002  Example document number                   M      an..35
+020    9001  Example function code                     C      an..3
+
+────────────────────────────────────────────────────────────────────
+
+    X  C902 EXAMPLE DATE
+
+       Desc: An invented date and what it means.
+
+010    9003  Example date qualifier                    M      an..3
+020    9004  Example date value                        M      n8
+
+────────────────────────────────────────────────────────────────────
+
+       C904 EXAMPLE QUANTITY
+
+       Desc: An invented quantity with its meaning.
+
+010    9010  Example quantity qualifier                M      an..3
+020    9009  Example quantity value with a name that
+             is too long for one line                  C      n..15

@@ -2,7 +2,8 @@
 
 The format of the registry: what the Libredi parser, validator and tools need to know about a
 UN/EDIFACT directory such as D.96A or D.01B. It is the first contract of milestone M1 (issue
-[#30](https://github.com/imapanda/libredi/issues/30), epic #29).
+[#30](https://github.com/imapanda/libredi/issues/30), epic #29). The generator that writes it is
+described in [Registry generator](../../docs/registry-generator.md).
 
 A registry is **generated, never committed**. A generator downloads the official UNECE
 directory files into the operator's volume and writes a registry document that follows this
@@ -87,6 +88,10 @@ A composite lists its `components`, a segment its `elements`, in order:
   "codes": { "Q1": { "name": "Ordered quantity" }, "Q2": { "name": "Delivered quantity" } }
 }
 ```
+
+Code values are arbitrary text, so a code may be called `constructor` or `toString`: a reader
+looks codes up as own properties of `codes` (`Object.hasOwn` in JavaScript), not with a plain
+`codes[value]`.
 
 `closed` tells the validator how much to trust the list. `true`: `codes` holds every valid value,
 so another value is an error. `false`: the list is maintained elsewhere (a standards body, a
@@ -179,15 +184,20 @@ Decided later, when the generator (#32) reads the real files, without breaking t
   CONTRL (`D` and `3` for syntax 3, `4` and `2` for syntax 4; unverified), which is why `nodes`
   leaves UNH and UNT out. Still to settle: how such a registry is marked (a `role` property), how
   it is merged with a directory registry when both define the same element, and whether the
-  interchange itself (UNB to UNZ) is described as a structure.
+  interchange itself (UNB to UNZ) is described as a structure. The generator defines `UNS`
+  itself, because every message table lists it and no directory file defines it. The segments
+  `UGH` and `UGT` of syntax version 4 are in the same case, and two messages of D.01B (`JUPREQ`
+  and `PAYDUC`) use them: the generator leaves those two out until a service registry defines them.
 - **Names of positions.** A composite can use the same data element several times, so a message
   such as "expected 4440" is ambiguous. An optional `name` on a position would fix it.
 - **Addresses of nodes.** `sequence` is informative and not required to be unique. Partner
   overrides (#47) need a stable way to point at a node: a uniqueness rule on `sequence` would do.
 - **Closed lists.** `closed` is required, but the UNTDID files do not say which lists are
-  exhaustive. The generator (#32) needs a rule for it.
+  exhaustive. The generator marks every list that has codes as closed and leaves the strictness to
+  the validator (#45), which can turn the check down per list or per partner (#47).
 - **`syntaxVersions` of a directory.** A directory such as D.01B works with syntax 3 and 4. The
-  generator sets the field; how it decides is for #32.
+  generator takes the values from its table of directories (`directories.ts`), not from the files,
+  which do not say.
 - **Size.** A registry with every message of a directory may be large. A generator can emit
   only the messages an installation uses, since `messages` may be partial.
 - **Types.** `packages/registry` has hand-written TypeScript types. They will be generated from
