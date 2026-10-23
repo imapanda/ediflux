@@ -1,0 +1,70 @@
+openapi: 3.1.1
+info:
+  title: Libredi API
+  version: 0.0.0
+  summary: REST API of the Libredi EDI gateway.
+  description: |
+    Skeleton: only the health endpoint exists. Routes are added here first, then
+    implemented in services/api (contract first).
+  license:
+    name: AGPL-3.0-only
+    identifier: AGPL-3.0-only
+servers:
+  - url: /api
+    description: Through the reverse proxy, which strips the /api prefix.
+tags:
+  - name: health
+    description: Liveness and readiness of the service.
+paths:
+  /healthz:
+    get:
+      operationId: getHealth
+      tags: [health]
+      summary: Liveness of the process
+      description: Answers 200 as long as the process is running. It never touches the database.
+      responses:
+        "200":
+          description: The process is alive.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+        default:
+          description: Unexpected error.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+components:
+  schemas:
+    Health:
+      type: object
+      required: [status, service]
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          const: ok
+        service:
+          type: string
+          description: Name of the service that answered.
+          examples: [api]
+    Problem:
+      description: Problem details for HTTP APIs (RFC 9457).
+      type: object
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          description: URI reference that identifies the problem type.
+          default: about:blank
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+        instance:
+          type: string

@@ -1,0 +1,24 @@
+{
+  "name": "@libredi/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Checks that the OpenAPI and JSON Schema files in contracts/ are valid and that services honour them",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@libredi/api": "workspace:*",
+    "@libredi/service-kit": "workspace:*",
+    "@seriousme/openapi-schema-validator": "catalog:",
+    "@types/node": "catalog:",
+    "ajv": "catalog:",
+    "ajv-formats": "catalog:",
+    "fast-check": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "yaml": "catalog:"
+  }
+}
