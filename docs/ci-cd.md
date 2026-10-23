@@ -6,7 +6,7 @@ How changes are checked, merged and released, and how the repository is protecte
 
 ```mermaid
 flowchart LR
-    pr["Pull request"] --> checks["Required checks<br/>CI result, PR title, CodeQL"]
+    pr["Pull request"] --> checks["Required checks<br/>CI result, PR title, DCO, CodeQL"]
     checks --> merge["Squash merge<br/>into main"]
     merge --> post["On main: CI, CodeQL,<br/>Scorecard"]
     merge --> rp["Release PR updated<br/>(release-please)"]
@@ -27,6 +27,7 @@ flowchart LR
 | ----------------------------------------------------- | ----------------------------- | ---------------------------------------- |
 | [`ci.yml`](../.github/workflows/ci.yml)               | pull requests, `main`         | Linting, workflow security, dependencies |
 | [`pr-title.yml`](../.github/workflows/pr-title.yml)   | pull requests                 | Conventional Commit title                |
+| [`dco.yml`](../.github/workflows/dco.yml)             | pull requests                 | DCO sign-off of every commit             |
 | [`codeql.yml`](../.github/workflows/codeql.yml)       | pull requests, `main`, weekly | CodeQL static analysis                   |
 | [`scorecard.yml`](../.github/workflows/scorecard.yml) | `main`, weekly                | OpenSSF Scorecard and README badge       |
 | [`release.yml`](../.github/workflows/release.yml)     | `main`                        | Release pull request, tags and releases  |
@@ -48,6 +49,18 @@ flowchart LR
   blocks a pull request that adds a dependency with a known vulnerability of moderate
   severity or higher.
 - **CI result** waits for all of them and fails if any failed or was cancelled.
+
+### DCO sign-off
+
+[`dco.yml`](../.github/workflows/dco.yml) reports the check `DCO` ([ADR 9](adr/0009-developer-certificate-of-origin.md)).
+It runs [`check-dco.sh`](../.github/scripts/check-dco.sh) on the commits of the pull request:
+every commit except merge commits needs a `Signed-off-by:` line whose e-mail is the author's.
+Pull requests opened by a bot from a branch of this repository (Dependabot, release automation)
+are skipped, because a bot cannot certify the DCO; commits that a maintainer pushes onto such a
+branch are not checked either. The checker fails closed: if it cannot read the commits, the check
+fails. It is tested by [`test-check-dco.sh`](../.github/scripts/test-check-dco.sh), which the same
+job runs first. It is a separate workflow so that `ci.yml` keeps a single required check; the
+ruleset requires `DCO` on its own, pinned to GitHub Actions like the other required checks.
 
 ### Adding a job
 
@@ -75,7 +88,8 @@ requires `CI result`, so the ruleset does not change. When the first service lan
 Ruleset **Protect main** (default branch):
 
 - changes only through pull requests, squash merge only, conversations resolved;
-- required checks: `CI result`, `PR title`, both from GitHub Actions, on an up-to-date branch;
+- required checks: `CI result`, `PR title`, `DCO`, all from GitHub Actions, on an up-to-date
+  branch;
 - required CodeQL results: no new alert of high or critical severity;
 - signed commits, linear history, no force push, no deletion; nobody can bypass these rules.
 

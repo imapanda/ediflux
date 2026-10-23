@@ -1,0 +1,70 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask about a trading partner's format, request a mapping, or share one.
+
+        > **This discussion is public. Never post confidential partner data.**
+        > Replace company names, addresses, GLNs, prices, references and any other identifier with
+        > fictitious values, in samples, logs and mappings alike. Never post credentials either
+        > (passwords, private keys, certificates, tokens). If in doubt, leave it out.
+        >
+        > Do not paste text from licensed specifications (UN/EDIFACT directories, GS1 or X12
+        > documents) either. Describe the structure in your own words, or point to the official
+        > source. See [ADR 7](https://github.com/imapanda/libredi/blob/main/docs/adr/0007-standards-licensing.md).
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What do you want to do?
+      options:
+        - I need a mapping for a partner's format
+        - I want to share a mapping or a description of a partner's format
+        - I have a question about a format or a mapping
+    validations:
+      required: true
+  - type: input
+    id: standard
+    attributes:
+      label: Standard, version and message type
+      placeholder: "EANCOM D96A ORDERS, X12 850 4010, CSV order file..."
+    validations:
+      required: true
+  - type: dropdown
+    id: direction
+    attributes:
+      label: Direction
+      options:
+        - Inbound (from the partner to the ERP)
+        - Outbound (from the ERP to the partner)
+        - Both
+  - type: input
+    id: transport
+    attributes:
+      label: Transport
+      placeholder: "SFTP, AS2, HTTP API, email..."
+  - type: textarea
+    id: details
+    attributes:
+      label: What is specific about this format?
+      description: Required segments, qualifiers, code lists, quirks of the partner's implementation guide.
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: Anonymized sample
+      description: Only a fully anonymized or fictitious message or mapping.
+      render: text
+  - type: checkboxes
+    id: confidential
+    attributes:
+      label: Confidential data
+      options:
+        - label: >-
+            Everything I posted is anonymized or fictitious: it contains no real partner data
+            and no credentials.
+          required: true
+        - label: >-
+            I have the right to share what I posted, and it contains no text copied from a licensed
+            specification.
+          required: true
