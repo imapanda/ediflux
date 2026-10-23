@@ -1,6 +1,6 @@
                               UN/EDIFACT
 
-                         DRAFT RECOMMENDATION
+                         INVENTED STATUS OF THE MESSAGE
 
                     Fictitious sample message
 

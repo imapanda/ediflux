@@ -1,6 +1,6 @@
                               UN/EDIFACT
 
-                UNITED NATIONS STANDARD MESSAGE (UNSM)
+                INVENTED STATUS OF THE MESSAGE
 
                     Fictitious sample message
 
