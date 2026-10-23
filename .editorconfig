@@ -9,6 +9,11 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 2
 
+# Go code (gofmt) and the Caddyfile (caddy fmt) are indented with tabs.
+[{*.go,Caddyfile}]
+indent_style = tab
+indent_size = unset
+
 # Markdown list continuations and the license text use free-form indentation.
 [{*.md,LICENSE}]
 indent_size = unset

@@ -1,0 +1,68 @@
+# Reverse proxy: the only container that publishes a port on the host.
+# Services are reached by name on the Compose network (see the networks in compose.yaml); the "dynamic a" upstreams look the
+# name up again every few seconds, so replicas added with `--scale` receive traffic at once.
+{
+	admin off
+	auto_https off
+}
+
+:80 {
+	encode zstd gzip
+
+	header {
+		-Server
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+	}
+
+	# Only answer to the expected host names. A web page cannot reach a proxy on 127.0.0.1
+	# through DNS rebinding: the browser sends the attacker's host name.
+	@allowed host {$LIBREDI_HOSTS:localhost 127.0.0.1}
+	handle @allowed {
+		# Liveness of the proxy itself.
+		handle /healthz {
+			respond "ok" 200
+		}
+
+		# Each routed service sees paths relative to its prefix: /api/healthz reaches /healthz.
+		handle_path /api/* {
+			reverse_proxy {
+				dynamic a {
+					name api
+					port 8080
+					refresh 5s
+				}
+				lb_policy round_robin
+				lb_try_duration 3s
+				lb_try_interval 250ms
+				fail_duration 10s
+				max_fails 3
+			}
+		}
+
+		handle_path /mcp/* {
+			reverse_proxy {
+				dynamic a {
+					name mcp
+					port 8080
+					refresh 5s
+				}
+				lb_policy round_robin
+				lb_try_duration 3s
+				lb_try_interval 250ms
+				fail_duration 10s
+				max_fails 3
+			}
+		}
+
+		# worker, translator and connectors are internal: they are not routed.
+		handle {
+			root * /srv/placeholder
+			file_server
+		}
+	}
+
+	handle {
+		respond "Unknown host" 421
+	}
+}

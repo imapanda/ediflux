@@ -1,0 +1,27 @@
+# pnpm workspace: shared packages and the TypeScript services.
+# services/connectors is written in Go and is not part of the workspace.
+packages:
+  - packages/*
+  - services/*
+
+# One place to pin the version of every tool shared by several packages.
+# Packages refer to them with "catalog:" so they cannot drift apart.
+catalog:
+  "@biomejs/biome": 2.5.15
+  "@seriousme/openapi-schema-validator": 2.11.0
+  "@types/node": 26.6.5
+  ajv: 8.20.0
+  ajv-formats: 3.0.1
+  esbuild: 0.28.2
+  fast-check: 4.10.2
+  typescript: 7.0.2
+  vitest: 4.1.12
+  yaml: 2.9.1
+
+# Supply chain: ignore versions published less than 7 days ago (same cooldown as
+# Dependabot, see .github/dependabot.yml), and refuse install scripts by default.
+minimumReleaseAge: 10080
+engineStrict: true
+savePrefix: ""
+allowBuilds:
+  esbuild: false

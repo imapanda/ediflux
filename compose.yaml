@@ -1,0 +1,131 @@
+# Libredi on one machine. See docs/development.md.
+#
+#   scripts/init-env.sh                       once: creates .env with a password
+#   docker compose up --build --wait          starts everything and waits until healthy
+#   docker compose up --scale worker=5 --wait add replicas, for example 5 workers
+#
+# No service publishes a port: they are reached through the proxy, so any number of
+# replicas can run. Only the proxy listens on the host, on 127.0.0.1.
+name: libredi
+
+# Networks enforce who may talk to whom (docs/architecture.md, ADR 2):
+#   edge    the proxy, and the services it routes to. It can reach the Internet.
+#   db      PostgreSQL and the services allowed to use it. No Internet access.
+#   work    worker and translator only. No Internet access.
+#   egress  connectors only, for outbound transports to partners.
+# The translator is on `work` alone: it cannot reach PostgreSQL, whatever its code does.
+networks:
+  edge:
+  db:
+    internal: true
+  work:
+    internal: true
+  egress:
+
+x-service: &service
+  restart: unless-stopped
+  init: true
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  # Longer than the 10 s the services wait for requests in flight, so they exit by themselves.
+  stop_grace_period: 20s
+
+services:
+  postgres:
+    build: ./infra/postgres
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    networks: [db]
+    environment:
+      POSTGRES_USER: libredi
+      POSTGRES_DB: libredi
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run scripts/init-env.sh, or copy .env.example to .env and set POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username=libredi --dbname=libredi"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  api:
+    <<: *service
+    networks: [edge, db]
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  worker:
+    <<: *service
+    networks: [db, work]
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # The translator is pure (bytes in, result out): it has no database access.
+  translator:
+    <<: *service
+    networks: [work]
+    build:
+      context: .
+      dockerfile: services/translator/Dockerfile
+
+  # The MCP server only talks to the api (through the proxy network).
+  mcp:
+    <<: *service
+    networks: [edge]
+    build:
+      context: .
+      dockerfile: services/mcp/Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+
+  connectors:
+    <<: *service
+    networks: [db, egress]
+    build: ./services/connectors
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  proxy:
+    image: caddy:2.11.7-alpine@sha256:eb4d35b7452d1ab6171fbdbe8d9275b2301dad6dad92115d91e19fb9b24d510f
+    restart: unless-stopped
+    networks: [edge]
+    environment:
+      # Host names the proxy answers to; any other Host header gets 421 (DNS rebinding).
+      LIBREDI_HOSTS: ${LIBREDI_HOSTS:-localhost 127.0.0.1}
+    read_only: true
+    tmpfs: [/data, /config]
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    security_opt: ["no-new-privileges:true"]
+    ports:
+      - "127.0.0.1:${LIBREDI_PORT:-8080}:80"
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./infra/caddy/site:/srv/placeholder:ro
+    depends_on:
+      api:
+        condition: service_healthy
+      mcp:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  postgres-data:

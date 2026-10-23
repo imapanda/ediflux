@@ -10,3 +10,4 @@
 | [Research: open source](research/open-source.md) | Bots EDI and alternatives, reusable building blocks, market |
 | [Research: languages](research/languages.md) | Language per service, benchmarks, rewrite triggers |
 | [Research: GitHub](research/github-setup.md) | GitHub features used by the project |
+| [Development](development.md) | Build, test and run the repository: tooling, monorepo layout, images, Compose |

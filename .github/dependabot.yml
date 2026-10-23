@@ -1,5 +1,4 @@
-# Dependency updates. Add an entry per ecosystem (docker, the application's
-# package manager...) when it appears in the repository.
+# Dependency updates, one entry per ecosystem present in the repository.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -16,4 +15,90 @@ updates:
         patterns: ["*"]
     commit-message:
       prefix: ci
+      include: scope
+
+  # pnpm workspace: the root lockfile covers every TypeScript package and service.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # The types follow the Node.js major pinned in .nvmrc, not the latest one.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: build
+      include: scope
+
+  - package-ecosystem: gomod
+    directory: /services/connectors
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      go-modules:
+        patterns: ["*"]
+    commit-message:
+      prefix: build
+      include: scope
+
+  # Base images of the Dockerfiles. Major upgrades of Node.js and PostgreSQL are decided
+  # by hand (LTS lines, database migration), so they are not proposed.
+  - package-ecosystem: docker
+    directories:
+      - /services/api
+      - /services/worker
+      - /services/translator
+      - /services/mcp
+      - /services/connectors
+      - /infra/postgres
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      docker-images:
+        patterns: ["*"]
+    ignore:
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
+      - dependency-name: postgres
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: build
+      include: scope
+
+  # Images used by compose.yaml (the reverse proxy).
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      compose-images:
+        patterns: ["*"]
+    commit-message:
+      prefix: build
+      include: scope
+
+  - package-ecosystem: devcontainers
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: build
       include: scope
