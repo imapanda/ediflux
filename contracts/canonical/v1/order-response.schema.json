@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/imapanda/libredi/main/contracts/canonical/v1/order-response.schema.json",
+  "title": "OrderResponse",
+  "description": "The answer of a supplier to an order: accepted, changed or rejected, as a whole and line by line (canonical document, version 1).",
+  "type": "object",
+  "properties": {
+    "documentType": { "const": "orderResponse" },
+    "schemaVersion": { "const": 1 },
+    "documentFunction": { "$ref": "common.schema.json#/$defs/documentFunction" },
+    "documentNumber": { "$ref": "common.schema.json#/$defs/identifier" },
+    "issueDate": { "$ref": "common.schema.json#/$defs/moment" },
+    "responseStatus": { "enum": ["accepted", "changed", "rejected"] },
+    "confirmedDeliveryDate": { "$ref": "common.schema.json#/$defs/date" },
+    "currency": { "$ref": "common.schema.json#/$defs/currency" },
+    "parties": {
+      "type": "object",
+      "properties": {
+        "buyer": { "$ref": "common.schema.json#/$defs/party" },
+        "supplier": { "$ref": "common.schema.json#/$defs/party" },
+        "shipTo": { "$ref": "common.schema.json#/$defs/party" }
+      },
+      "required": ["buyer", "supplier"],
+      "additionalProperties": false
+    },
+    "references": {
+      "description": "Includes the reference to the order that is answered.",
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/reference" }
+    },
+    "notes": { "$ref": "common.schema.json#/$defs/notes" },
+    "lines": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/line" } }
+  },
+  "required": [
+    "documentType",
+    "schemaVersion",
+    "documentNumber",
+    "issueDate",
+    "responseStatus",
+    "parties",
+    "lines"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "line": {
+      "title": "OrderResponseLine",
+      "description": "`confirmedQuantity` is zero for a rejected line, and `unitPrice` is the confirmed price.",
+      "type": "object",
+      "properties": {
+        "lineNumber": { "$ref": "common.schema.json#/$defs/lineNumber" },
+        "product": { "$ref": "common.schema.json#/$defs/product" },
+        "status": { "enum": ["accepted", "changed", "rejected"] },
+        "orderedQuantity": { "$ref": "common.schema.json#/$defs/quantity" },
+        "confirmedQuantity": { "$ref": "common.schema.json#/$defs/quantity" },
+        "unitPrice": { "$ref": "common.schema.json#/$defs/unitPrice" },
+        "notes": { "$ref": "common.schema.json#/$defs/notes" }
+      },
+      "required": ["lineNumber", "product", "status"],
+      "additionalProperties": false
+    }
+  }
+}

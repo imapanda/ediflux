@@ -7,6 +7,7 @@ them. A service in any language reads these files; none of them is generated fro
 | --- | --- | --- |
 | [`openapi/api.yaml`](openapi/api.yaml) | The REST API of the `api` service (OpenAPI 3.1) | Synchronous calls between services, the web console and the MCP server |
 | [`jobs/job-envelope.schema.json`](jobs/job-envelope.schema.json) | The envelope of every job in the PostgreSQL queue (JSON Schema 2020-12) | Asynchronous steps, through pgmq |
+| [`canonical/`](canonical/README.md) | The neutral order, order response, despatch advice and invoice (JSON Schema 2020-12, versioned) | The documents partner mappings produce and ERP exports read |
 
 ## Rules
 
@@ -25,5 +26,6 @@ them. A service in any language reads these files; none of them is generated fro
   service's code.
 
 Each job type will get its own payload schema next to the envelope, in `jobs/`, when the
-worker implements it. Generated TypeScript and Go clients and validators come with the
-contract tooling (issue #182).
+worker implements it. The TypeScript types of the canonical documents are generated into
+`packages/contracts`; generated TypeScript and Go clients and validators for the OpenAPI and
+job contracts come with the contract tooling (issue #182).

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/imapanda/libredi/main/contracts/canonical/v1/invoice.schema.json",
+  "title": "Invoice",
+  "description": "An invoice or a credit note, with its lines, taxes and totals (canonical document, version 1). Amounts of a credit note are positive: `invoiceKind` says which way they go.",
+  "type": "object",
+  "properties": {
+    "documentType": { "const": "invoice" },
+    "schemaVersion": { "const": 1 },
+    "invoiceKind": { "enum": ["invoice", "creditNote"] },
+    "documentNumber": { "$ref": "common.schema.json#/$defs/identifier" },
+    "issueDate": { "$ref": "common.schema.json#/$defs/moment" },
+    "deliveryDate": { "$ref": "common.schema.json#/$defs/date" },
+    "currency": { "$ref": "common.schema.json#/$defs/currency" },
+    "parties": {
+      "type": "object",
+      "properties": {
+        "supplier": { "$ref": "common.schema.json#/$defs/party" },
+        "buyer": { "$ref": "common.schema.json#/$defs/party" },
+        "invoicee": { "$ref": "common.schema.json#/$defs/party" },
+        "shipTo": { "$ref": "common.schema.json#/$defs/party" }
+      },
+      "required": ["buyer", "supplier"],
+      "additionalProperties": false
+    },
+    "references": {
+      "description": "Includes the orders and despatch advices that are invoiced, and the invoice a credit note corrects.",
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/reference" }
+    },
+    "payment": {
+      "type": "object",
+      "properties": {
+        "dueDate": { "$ref": "common.schema.json#/$defs/date" },
+        "terms": { "$ref": "common.schema.json#/$defs/text" },
+        "iban": { "type": "string", "pattern": "^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$" }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "notes": { "$ref": "common.schema.json#/$defs/notes" },
+    "lines": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/line" } },
+    "adjustments": {
+      "description": "Discounts and charges on the whole invoice.",
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/adjustment" }
+    },
+    "taxSubtotals": {
+      "description": "One entry per tax category and rate.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "title": "TaxSubtotal",
+        "type": "object",
+        "properties": {
+          "category": { "$ref": "common.schema.json#/$defs/taxCategory" },
+          "rate": { "$ref": "common.schema.json#/$defs/unsignedDecimal" },
+          "taxableAmount": { "$ref": "common.schema.json#/$defs/decimal" },
+          "taxAmount": { "$ref": "common.schema.json#/$defs/decimal" },
+          "exemptionReason": { "$ref": "common.schema.json#/$defs/text" }
+        },
+        "required": ["category", "taxableAmount", "taxAmount"],
+        "additionalProperties": false
+      }
+    },
+    "totals": {
+      "description": "`netTotal` adds the lines and the adjustments, without tax; `grossTotal` adds the tax; `payableAmount` is the gross total minus `prepaidAmount`.",
+      "type": "object",
+      "properties": {
+        "netTotal": { "$ref": "common.schema.json#/$defs/decimal" },
+        "taxTotal": { "$ref": "common.schema.json#/$defs/decimal" },
+        "grossTotal": { "$ref": "common.schema.json#/$defs/decimal" },
+        "prepaidAmount": { "$ref": "common.schema.json#/$defs/decimal" },
+        "payableAmount": { "$ref": "common.schema.json#/$defs/decimal" }
+      },
+      "required": ["netTotal", "taxTotal", "grossTotal", "payableAmount"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "documentType",
+    "schemaVersion",
+    "invoiceKind",
+    "documentNumber",
+    "issueDate",
+    "currency",
+    "parties",
+    "lines",
+    "taxSubtotals",
+    "totals"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "line": {
+      "title": "InvoiceLine",
+      "description": "`lineAmount` is the quantity times the price, after the line adjustments, without tax.",
+      "type": "object",
+      "properties": {
+        "lineNumber": { "$ref": "common.schema.json#/$defs/lineNumber" },
+        "product": { "$ref": "common.schema.json#/$defs/product" },
+        "quantity": { "$ref": "common.schema.json#/$defs/quantity" },
+        "unitPrice": { "$ref": "common.schema.json#/$defs/unitPrice" },
+        "adjustments": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/adjustment" }
+        },
+        "lineAmount": { "$ref": "common.schema.json#/$defs/decimal" },
+        "tax": { "$ref": "common.schema.json#/$defs/tax" },
+        "notes": { "$ref": "common.schema.json#/$defs/notes" }
+      },
+      "required": ["lineNumber", "product", "quantity", "unitPrice", "lineAmount", "tax"],
+      "additionalProperties": false
+    }
+  }
+}

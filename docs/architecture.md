@@ -12,7 +12,7 @@
 | **Endpoint** | How bytes travel to or from a partner or the ERP: an SFTP folder, a remote SFTP server, an AS2 station, an HTTP webhook, a mailbox, a local drop folder. |
 | **Flow** | Partner + direction + message type + version, e.g. *"Distributor X, inbound ORDERS EANCOM D96A → ERP CSV"*. A flow holds the envelope rules, validation level, acknowledgement policy, mapping version and destination. |
 | **Mapping** | A versioned, declarative file that turns a parsed message into a canonical document (and back), with sample files and expected outputs as tests. |
-| **Canonical document** | Libredi's neutral model of an order, order response, despatch advice, invoice… Partner mappings target it; ERP exports read it. This avoids writing one mapping per partner *and* per ERP format. |
+| **Canonical document** | Libredi's neutral model of an order, order response, despatch advice, invoice… Partner mappings target it; ERP exports read it. This avoids writing one mapping per partner *and* per ERP format. Defined as versioned JSON Schemas in [`contracts/canonical`](../contracts/canonical/README.md). |
 | **Message** | One document travelling through Libredi, with its raw bytes, its state history, its errors and its links to related messages (order → despatch advice → invoice). |
 
 ## Message lifecycle
