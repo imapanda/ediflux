@@ -1,0 +1,8 @@
+Dockerfile
+.dockerignore
+**/*_test.go
+**/.env*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx

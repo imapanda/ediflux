@@ -1,0 +1,18 @@
+# Build context of the TypeScript services: the repository root, reduced to what the
+# pnpm workspace needs. Everything is excluded first, then the needed paths are added back.
+*
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!tsconfig.base.json
+!packages
+!services
+services/connectors
+**/node_modules
+**/.env*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/dist
+**/*.test.ts

@@ -1,0 +1,26 @@
+{
+  "name": "libredi",
+  "private": true,
+  "description": "Open-source, self-hostable EDI gateway made of scalable services",
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imapanda/libredi.git"
+  },
+  "packageManager": "pnpm@12.15.0",
+  "engines": {
+    "node": ">=26.12.1 <27",
+    "pnpm": ">=12.15.0 <13"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "check": "biome check .",
+    "fix": "biome check --write .",
+    "verify": "pnpm check && pnpm typecheck && pnpm test"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:"
+  }
+}
