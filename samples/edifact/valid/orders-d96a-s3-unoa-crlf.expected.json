@@ -1,0 +1,22 @@
+{
+  "sample": "orders-d96a-s3-unoa-crlf.edi",
+  "kind": "valid",
+  "description": "Every segment, including UNA, is followed by CR LF. The line breaks are not part of the data.",
+  "interchange": {"syntaxIdentifier": "UNOA", "syntaxVersion": 3, "encoding": "ascii", "una": ":+.? '", "interchangeReference": "IC000105", "messages": [{"reference": "1", "type": "ORDERS", "version": "D", "release": "96A", "agency": "UN"}]},
+  "segments": [
+    {"tag": "UNB", "elements": [["UNOA", "3"], ["9520000000011", "14"], ["9520000000035", "14"], ["301015", "0830"], ["IC000105"]]},
+    {"tag": "UNH", "elements": [["1"], ["ORDERS", "D", "96A", "UN", "LBR001"]]},
+    {"tag": "BGM", "elements": [["220"], ["PO-0500"], ["9"]]},
+    {"tag": "DTM", "elements": [["137", "20301015", "102"]]},
+    {"tag": "NAD", "elements": [["BY"], ["9520000000011", "", "9"]]},
+    {"tag": "NAD", "elements": [["SU"], ["9520000000035", "", "9"]]},
+    {"tag": "LIN", "elements": [["1"], [], ["9520000010010", "EN"]]},
+    {"tag": "QTY", "elements": [["21", "10", "PCE"]]},
+    {"tag": "LIN", "elements": [["2"], [], ["9520000010027", "EN"]]},
+    {"tag": "QTY", "elements": [["21", "10", "PCE"]]},
+    {"tag": "UNS", "elements": [["S"]]},
+    {"tag": "CNT", "elements": [["2", "2"]]},
+    {"tag": "UNT", "elements": [["12"], ["1"]]},
+    {"tag": "UNZ", "elements": [["1"], ["IC000105"]]}
+  ]
+}

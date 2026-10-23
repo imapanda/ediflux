@@ -1,0 +1,16 @@
+{
+  "sample": "contrl-s3-unoa-accepted.edi",
+  "kind": "valid",
+  "description": "Syntax 3 CONTRL accepting the interchange and both messages of orders-d96a-s3-unoa-multi-message.",
+  "notes": "Answers valid/orders-d96a-s3-unoa-multi-message.edi. Sender and recipient are swapped; UCI repeats the references of the interchange being answered.",
+  "interchange": {"syntaxIdentifier": "UNOA", "syntaxVersion": 3, "encoding": "ascii", "una": ":+.? '", "interchangeReference": "IC000119", "messages": [{"reference": "1", "type": "CONTRL", "version": "D", "release": "3", "agency": "UN"}]},
+  "segments": [
+    {"tag": "UNB", "elements": [["UNOA", "3"], ["9520000000035", "14"], ["9520000000011", "14"], ["301015", "0830"], ["IC000119"]]},
+    {"tag": "UNH", "elements": [["1"], ["CONTRL", "D", "3", "UN"]]},
+    {"tag": "UCI", "elements": [["IC000005"], ["9520000000011", "14"], ["9520000000035", "14"], ["7"]]},
+    {"tag": "UCM", "elements": [["1"], ["ORDERS", "D", "96A", "UN"], ["7"]]},
+    {"tag": "UCM", "elements": [["2"], ["ORDERS", "D", "96A", "UN"], ["7"]]},
+    {"tag": "UNT", "elements": [["5"], ["1"]]},
+    {"tag": "UNZ", "elements": [["1"], ["IC000119"]]}
+  ]
+}

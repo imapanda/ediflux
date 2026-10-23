@@ -1,0 +1,15 @@
+{
+  "sample": "contrl-s4-unow-accepted.edi",
+  "kind": "valid",
+  "description": "Syntax 4 CONTRL, itself in UNOW, accepting the interchange and its message.",
+  "notes": "Answers valid/orders-d01b-s4-unow-utf8.edi.",
+  "interchange": {"syntaxIdentifier": "UNOW", "syntaxVersion": 4, "encoding": "utf-8", "una": ":+.?*'", "interchangeReference": "IC000120", "messages": [{"reference": "1", "type": "CONTRL", "version": "4", "release": "2", "agency": "UN"}]},
+  "segments": [
+    {"tag": "UNB", "elements": [["UNOW", "4"], ["9520000000035", "14"], ["9520000000011", "14"], ["20301015", "0830"], ["IC000120"]]},
+    {"tag": "UNH", "elements": [["1"], ["CONTRL", "4", "2", "UN"]]},
+    {"tag": "UCI", "elements": [["IC000114"], ["9520000000011", "14"], ["9520000000035", "14"], ["7"]]},
+    {"tag": "UCM", "elements": [["1"], ["ORDERS", "D", "01B", "UN"], ["7"]]},
+    {"tag": "UNT", "elements": [["4"], ["1"]]},
+    {"tag": "UNZ", "elements": [["1"], ["IC000120"]]}
+  ]
+}

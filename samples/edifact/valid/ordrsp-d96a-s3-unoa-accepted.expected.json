@@ -1,0 +1,32 @@
+{
+  "sample": "ordrsp-d96a-s3-unoa-accepted.edi",
+  "kind": "valid",
+  "description": "D.96A order response accepting the three lines of orders-d96a-s3-unoa-multi-line without amendment.",
+  "interchange": {"syntaxIdentifier": "UNOA", "syntaxVersion": 3, "encoding": "ascii", "una": ":+.? '", "interchangeReference": "IC000108", "messages": [{"reference": "1", "type": "ORDRSP", "version": "D", "release": "96A", "agency": "UN"}]},
+  "segments": [
+    {"tag": "UNB", "elements": [["UNOA", "3"], ["9520000000035", "14"], ["9520000000011", "14"], ["301015", "0830"], ["IC000108"]]},
+    {"tag": "UNH", "elements": [["1"], ["ORDRSP", "D", "96A", "UN", "LBR001"]]},
+    {"tag": "BGM", "elements": [["231"], ["ORS-0100"], ["29"]]},
+    {"tag": "DTM", "elements": [["137", "20301016", "102"]]},
+    {"tag": "DTM", "elements": [["2", "20301022", "102"]]},
+    {"tag": "RFF", "elements": [["ON", "PO-0100"]]},
+    {"tag": "NAD", "elements": [["BY"], ["9520000000011", "", "9"], [], ["SAMPLE RETAIL SA"], ["1 RUE FICTIVE"], ["EXEMPLEVILLE"], [], ["00000"], ["FR"]]},
+    {"tag": "NAD", "elements": [["SU"], ["9520000000035", "", "9"], [], ["SAMPLE SUPPLIER SARL"], ["2 RUE FICTIVE"], ["EXEMPLEVILLE"], [], ["00000"], ["FR"]]},
+    {"tag": "LIN", "elements": [["1"], ["5"], ["9520000010010", "EN"]]},
+    {"tag": "QTY", "elements": [["21", "12", "PCE"]]},
+    {"tag": "QTY", "elements": [["113", "12", "PCE"]]},
+    {"tag": "PRI", "elements": [["AAA", "1.00"]]},
+    {"tag": "LIN", "elements": [["2"], ["5"], ["9520000010027", "EN"]]},
+    {"tag": "QTY", "elements": [["21", "24", "PCE"]]},
+    {"tag": "QTY", "elements": [["113", "24", "PCE"]]},
+    {"tag": "PRI", "elements": [["AAA", "2.50"]]},
+    {"tag": "LIN", "elements": [["3"], ["5"], ["9520000010034", "EN"]]},
+    {"tag": "QTY", "elements": [["21", "6", "PCE"]]},
+    {"tag": "QTY", "elements": [["113", "6", "PCE"]]},
+    {"tag": "PRI", "elements": [["AAA", "12.00"]]},
+    {"tag": "UNS", "elements": [["S"]]},
+    {"tag": "CNT", "elements": [["2", "3"]]},
+    {"tag": "UNT", "elements": [["22"], ["1"]]},
+    {"tag": "UNZ", "elements": [["1"], ["IC000108"]]}
+  ]
+}

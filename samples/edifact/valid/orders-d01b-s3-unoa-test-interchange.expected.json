@@ -1,0 +1,20 @@
+{
+  "sample": "orders-d01b-s3-unoa-test-interchange.edi",
+  "kind": "valid",
+  "description": "UNB requests an acknowledgement, carries an agreement identifier and sets the test indicator.",
+  "interchange": {"syntaxIdentifier": "UNOA", "syntaxVersion": 3, "encoding": "ascii", "una": ":+.? '", "interchangeReference": "IC000112", "messages": [{"reference": "1", "type": "ORDERS", "version": "D", "release": "01B", "agency": "UN"}]},
+  "segments": [
+    {"tag": "UNB", "elements": [["UNOA", "3"], ["9520000000011", "14"], ["9520000000035", "14"], ["301015", "0830"], ["IC000112"], [], [], [], ["1"], ["LBRTEST"], ["1"]]},
+    {"tag": "UNH", "elements": [["1"], ["ORDERS", "D", "01B", "UN", "LBR001"]]},
+    {"tag": "BGM", "elements": [["220"], ["PO-1200"], ["9"]]},
+    {"tag": "DTM", "elements": [["137", "20301015", "102"]]},
+    {"tag": "NAD", "elements": [["BY"], ["9520000000011", "", "9"]]},
+    {"tag": "NAD", "elements": [["SU"], ["9520000000035", "", "9"]]},
+    {"tag": "LIN", "elements": [["1"], [], ["9520000010010", "EN"]]},
+    {"tag": "QTY", "elements": [["21", "10", "PCE"]]},
+    {"tag": "UNS", "elements": [["S"]]},
+    {"tag": "CNT", "elements": [["2", "1"]]},
+    {"tag": "UNT", "elements": [["10"], ["1"]]},
+    {"tag": "UNZ", "elements": [["1"], ["IC000112"]]}
+  ]
+}

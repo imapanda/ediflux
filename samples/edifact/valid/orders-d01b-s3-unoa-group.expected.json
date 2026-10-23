@@ -1,0 +1,22 @@
+{
+  "sample": "orders-d01b-s3-unoa-group.edi",
+  "kind": "valid",
+  "description": "The message is wrapped in a functional group (UNG/UNE) inside the interchange.",
+  "interchange": {"syntaxIdentifier": "UNOA", "syntaxVersion": 3, "encoding": "ascii", "una": ":+.? '", "interchangeReference": "IC000111", "messages": [{"reference": "1", "type": "ORDERS", "version": "D", "release": "01B", "agency": "UN"}]},
+  "segments": [
+    {"tag": "UNB", "elements": [["UNOA", "3"], ["9520000000011", "14"], ["9520000000035", "14"], ["301015", "0830"], ["IC000111"]]},
+    {"tag": "UNG", "elements": [["ORDERS"], ["9520000000011", "14"], ["9520000000035", "14"], ["301015", "0830"], ["GRP001"], ["UN"], ["D", "01B"]]},
+    {"tag": "UNH", "elements": [["1"], ["ORDERS", "D", "01B", "UN", "LBR001"]]},
+    {"tag": "BGM", "elements": [["220"], ["PO-1100"], ["9"]]},
+    {"tag": "DTM", "elements": [["137", "20301015", "102"]]},
+    {"tag": "NAD", "elements": [["BY"], ["9520000000011", "", "9"]]},
+    {"tag": "NAD", "elements": [["SU"], ["9520000000035", "", "9"]]},
+    {"tag": "LIN", "elements": [["1"], [], ["9520000010010", "EN"]]},
+    {"tag": "QTY", "elements": [["21", "10", "PCE"]]},
+    {"tag": "UNS", "elements": [["S"]]},
+    {"tag": "CNT", "elements": [["2", "1"]]},
+    {"tag": "UNT", "elements": [["10"], ["1"]]},
+    {"tag": "UNE", "elements": [["1"], ["GRP001"]]},
+    {"tag": "UNZ", "elements": [["1"], ["IC000111"]]}
+  ]
+}

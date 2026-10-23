@@ -1,0 +1,14 @@
+{
+  "sample": "contrl-s3-unoa-rejected.edi",
+  "kind": "valid",
+  "description": "Syntax 3 CONTRL rejecting the whole interchange because the UNZ reference does not match UNB.",
+  "notes": "Answers invalid/unz-reference-mismatch.edi. 28 stands for references that do not match; the code is written from memory of ISO 9735 and is unverified.",
+  "interchange": {"syntaxIdentifier": "UNOA", "syntaxVersion": 3, "encoding": "ascii", "una": ":+.? '", "interchangeReference": "IC000121", "messages": [{"reference": "1", "type": "CONTRL", "version": "D", "release": "3", "agency": "UN"}]},
+  "segments": [
+    {"tag": "UNB", "elements": [["UNOA", "3"], ["9520000000035", "14"], ["9520000000011", "14"], ["301015", "0830"], ["IC000121"]]},
+    {"tag": "UNH", "elements": [["1"], ["CONTRL", "D", "3", "UN"]]},
+    {"tag": "UCI", "elements": [["IC000001"], ["9520000000011", "14"], ["9520000000035", "14"], ["4"], ["28"], ["UNZ"], ["2"]]},
+    {"tag": "UNT", "elements": [["3"], ["1"]]},
+    {"tag": "UNZ", "elements": [["1"], ["IC000121"]]}
+  ]
+}

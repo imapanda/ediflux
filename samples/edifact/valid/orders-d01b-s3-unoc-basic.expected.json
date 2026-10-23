@@ -1,0 +1,31 @@
+{
+  "sample": "orders-d01b-s3-unoc-basic.edi",
+  "kind": "valid",
+  "description": "D.01B ORDERS over syntax 3 with UNOC text, a requested delivery date and prices.",
+  "interchange": {"syntaxIdentifier": "UNOC", "syntaxVersion": 3, "encoding": "iso-8859-1", "una": ":+.? '", "interchangeReference": "IC000110", "messages": [{"reference": "1", "type": "ORDERS", "version": "D", "release": "01B", "agency": "UN"}]},
+  "segments": [
+    {"tag": "UNB", "elements": [["UNOC", "3"], ["9520000000011", "14"], ["9520000000035", "14"], ["301015", "0830"], ["IC000110"]]},
+    {"tag": "UNH", "elements": [["1"], ["ORDERS", "D", "01B", "UN", "LBR001"]]},
+    {"tag": "BGM", "elements": [["220"], ["PO-1000"], ["9"]]},
+    {"tag": "DTM", "elements": [["137", "203010150830", "203"]]},
+    {"tag": "DTM", "elements": [["2", "20301022", "102"]]},
+    {"tag": "RFF", "elements": [["CT", "CONTRACT-X1"]]},
+    {"tag": "NAD", "elements": [["BY"], ["9520000000011", "", "9"], [], ["SOCIÉTÉ FICTIVE ACHAT"], ["1 RUE FICTIVE"], ["EXEMPLEVILLE"], [], ["00000"], ["FR"]]},
+    {"tag": "NAD", "elements": [["SU"], ["9520000000035", "", "9"], [], ["SAMPLE SUPPLIER SARL"], ["2 RUE FICTIVE"], ["EXEMPLEVILLE"], [], ["00000"], ["FR"]]},
+    {"tag": "CUX", "elements": [["2", "EUR", "9"]]},
+    {"tag": "LIN", "elements": [["1"], [], ["9520000010010", "EN"]]},
+    {"tag": "PIA", "elements": [["1"], ["SUP-001", "SA"]]},
+    {"tag": "IMD", "elements": [["F"], [], ["", "", "", "Biscuits chocolat 200 g"]]},
+    {"tag": "QTY", "elements": [["21", "12", "PCE"]]},
+    {"tag": "PRI", "elements": [["AAA", "1.00"]]},
+    {"tag": "LIN", "elements": [["2"], [], ["9520000010027", "EN"]]},
+    {"tag": "PIA", "elements": [["1"], ["SUP-002", "SA"]]},
+    {"tag": "IMD", "elements": [["F"], [], ["", "", "", "Boisson à l'orange 1 l"]]},
+    {"tag": "QTY", "elements": [["21", "24", "PCE"]]},
+    {"tag": "PRI", "elements": [["AAA", "2.50"]]},
+    {"tag": "UNS", "elements": [["S"]]},
+    {"tag": "CNT", "elements": [["2", "2"]]},
+    {"tag": "UNT", "elements": [["21"], ["1"]]},
+    {"tag": "UNZ", "elements": [["1"], ["IC000110"]]}
+  ]
+}
