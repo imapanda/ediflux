@@ -40,6 +40,8 @@ Every sample added to this directory must follow these rules.
    a sample, and check your editor does not add a final newline or change the encoding.
 5. **One expected-result file per sample**, next to it, with the same name and the suffix
    `.expected.json`. A sample without an expected file, or the other way round, is a defect.
+   The JSON files follow the repository formatter (Biome, `pnpm fix`), so that `pnpm check`
+   accepts them.
 6. **Expected results never come from Libredi's own code.** Otherwise a bug in the tokenizer
    would silently "confirm" itself. The current files were produced with a throwaway script and
    cross-checked with [pydifact](https://github.com/nerdocs/pydifact) 0.2.3 (MIT), which
@@ -70,10 +72,28 @@ samples/edifact/
   "sample": "orders-d96a-s3-unoa-minimal.edi",
   "kind": "valid",
   "description": "Smallest useful ORDERS: one line, two parties, no free text.",
-  "interchange": {"syntaxIdentifier": "UNOA", "syntaxVersion": 3, "encoding": "ascii", "una": ":+.? '", "interchangeReference": "IC000001", "messages": [{"reference": "1", "type": "ORDERS", "version": "D", "release": "96A", "agency": "UN"}]},
+  "interchange": {
+    "syntaxIdentifier": "UNOA",
+    "syntaxVersion": 3,
+    "encoding": "ascii",
+    "una": ":+.? '",
+    "interchangeReference": "IC000001",
+    "messages": [
+      { "reference": "1", "type": "ORDERS", "version": "D", "release": "96A", "agency": "UN" }
+    ]
+  },
   "segments": [
-    {"tag": "UNB", "elements": [["UNOA", "3"], ["9520000000011", "14"], ["9520000000035", "14"], ["301015", "0830"], ["IC000001"]]},
-    {"tag": "UNH", "elements": [["1"], ["ORDERS", "D", "96A", "UN", "LBR001"]]}
+    {
+      "tag": "UNB",
+      "elements": [
+        ["UNOA", "3"],
+        ["9520000000011", "14"],
+        ["9520000000035", "14"],
+        ["301015", "0830"],
+        ["IC000001"]
+      ]
+    },
+    { "tag": "UNH", "elements": [["1"], ["ORDERS", "D", "96A", "UN", "LBR001"]] }
   ]
 }
 ```
@@ -102,7 +122,13 @@ samples/edifact/
   "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
   "layer": "structure",
   "expectedErrors": [
-    {"code": "MISSING_MANDATORY_SEGMENT", "severity": "error", "position": {"segment": 3, "tag": "DTM", "element": null, "component": null}, "expected": "BGM", "found": "DTM"}
+    {
+      "code": "MISSING_MANDATORY_SEGMENT",
+      "severity": "error",
+      "position": { "segment": 3, "tag": "DTM", "element": null, "component": null },
+      "expected": "BGM",
+      "found": "DTM"
+    }
   ]
 }
 ```

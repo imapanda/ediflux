@@ -5,6 +5,12 @@
   "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
   "layer": "structure",
   "expectedErrors": [
-    {"code": "TOO_MANY_REPETITIONS", "severity": "error", "position": {"segment": 4, "tag": "BGM", "element": null, "component": null}, "expected": "at most 1 occurrence of BGM", "found": "2 occurrences"}
+    {
+      "code": "TOO_MANY_REPETITIONS",
+      "severity": "error",
+      "position": { "segment": 4, "tag": "BGM", "element": null, "component": null },
+      "expected": "at most 1 occurrence of BGM",
+      "found": "2 occurrences"
+    }
   ]
 }

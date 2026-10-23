@@ -2,31 +2,75 @@
   "sample": "ordrsp-d01b-s4-unoc-changes.edi",
   "kind": "valid",
   "description": "Syntax 4 order response with one accepted line, one changed line (quantity and price) and one rejected line; new delivery date.",
-  "interchange": {"syntaxIdentifier": "UNOC", "syntaxVersion": 4, "encoding": "iso-8859-1", "una": ":+.?*'", "interchangeReference": "IC000116", "messages": [{"reference": "1", "type": "ORDRSP", "version": "D", "release": "01B", "agency": "UN"}]},
+  "interchange": {
+    "syntaxIdentifier": "UNOC",
+    "syntaxVersion": 4,
+    "encoding": "iso-8859-1",
+    "una": ":+.?*'",
+    "interchangeReference": "IC000116",
+    "messages": [
+      { "reference": "1", "type": "ORDRSP", "version": "D", "release": "01B", "agency": "UN" }
+    ]
+  },
   "segments": [
-    {"tag": "UNB", "elements": [["UNOC", "4"], ["9520000000035", "14"], ["9520000000011", "14"], ["20301016", "0830"], ["IC000116"]]},
-    {"tag": "UNH", "elements": [["1"], ["ORDRSP", "D", "01B", "UN", "LBR001"]]},
-    {"tag": "BGM", "elements": [["231"], ["ORS-1000"], ["30"]]},
-    {"tag": "DTM", "elements": [["137", "20301016", "102"]]},
-    {"tag": "DTM", "elements": [["2", "20301024", "102"]]},
-    {"tag": "RFF", "elements": [["ON", "PO-1000"]]},
-    {"tag": "NAD", "elements": [["BY"], ["9520000000011", "", "9"], [], ["SAMPLE RETAIL SA"], ["1 RUE FICTIVE"], ["EXEMPLEVILLE"], [], ["00000"], ["FR"]]},
-    {"tag": "NAD", "elements": [["SU"], ["9520000000035", "", "9"], [], ["SAMPLE SUPPLIER SARL"], ["2 RUE FICTIVE"], ["EXEMPLEVILLE"], [], ["00000"], ["FR"]]},
-    {"tag": "LIN", "elements": [["1"], ["5"], ["9520000010010", "EN"]]},
-    {"tag": "QTY", "elements": [["21", "12", "PCE"]]},
-    {"tag": "QTY", "elements": [["113", "12", "PCE"]]},
-    {"tag": "PRI", "elements": [["AAA", "1.00"]]},
-    {"tag": "LIN", "elements": [["2"], ["3"], ["9520000010027", "EN"]]},
-    {"tag": "QTY", "elements": [["21", "24", "PCE"]]},
-    {"tag": "QTY", "elements": [["113", "18", "PCE"]]},
-    {"tag": "PRI", "elements": [["AAA", "2.60"]]},
-    {"tag": "LIN", "elements": [["3"], ["7"], ["9520000010034", "EN"]]},
-    {"tag": "QTY", "elements": [["21", "6", "PCE"]]},
-    {"tag": "QTY", "elements": [["113", "0", "PCE"]]},
-    {"tag": "PRI", "elements": [["AAA", "12.00"]]},
-    {"tag": "UNS", "elements": [["S"]]},
-    {"tag": "CNT", "elements": [["2", "3"]]},
-    {"tag": "UNT", "elements": [["22"], ["1"]]},
-    {"tag": "UNZ", "elements": [["1"], ["IC000116"]]}
+    {
+      "tag": "UNB",
+      "elements": [
+        ["UNOC", "4"],
+        ["9520000000035", "14"],
+        ["9520000000011", "14"],
+        ["20301016", "0830"],
+        ["IC000116"]
+      ]
+    },
+    { "tag": "UNH", "elements": [["1"], ["ORDRSP", "D", "01B", "UN", "LBR001"]] },
+    { "tag": "BGM", "elements": [["231"], ["ORS-1000"], ["30"]] },
+    { "tag": "DTM", "elements": [["137", "20301016", "102"]] },
+    { "tag": "DTM", "elements": [["2", "20301024", "102"]] },
+    { "tag": "RFF", "elements": [["ON", "PO-1000"]] },
+    {
+      "tag": "NAD",
+      "elements": [
+        ["BY"],
+        ["9520000000011", "", "9"],
+        [],
+        ["SAMPLE RETAIL SA"],
+        ["1 RUE FICTIVE"],
+        ["EXEMPLEVILLE"],
+        [],
+        ["00000"],
+        ["FR"]
+      ]
+    },
+    {
+      "tag": "NAD",
+      "elements": [
+        ["SU"],
+        ["9520000000035", "", "9"],
+        [],
+        ["SAMPLE SUPPLIER SARL"],
+        ["2 RUE FICTIVE"],
+        ["EXEMPLEVILLE"],
+        [],
+        ["00000"],
+        ["FR"]
+      ]
+    },
+    { "tag": "LIN", "elements": [["1"], ["5"], ["9520000010010", "EN"]] },
+    { "tag": "QTY", "elements": [["21", "12", "PCE"]] },
+    { "tag": "QTY", "elements": [["113", "12", "PCE"]] },
+    { "tag": "PRI", "elements": [["AAA", "1.00"]] },
+    { "tag": "LIN", "elements": [["2"], ["3"], ["9520000010027", "EN"]] },
+    { "tag": "QTY", "elements": [["21", "24", "PCE"]] },
+    { "tag": "QTY", "elements": [["113", "18", "PCE"]] },
+    { "tag": "PRI", "elements": [["AAA", "2.60"]] },
+    { "tag": "LIN", "elements": [["3"], ["7"], ["9520000010034", "EN"]] },
+    { "tag": "QTY", "elements": [["21", "6", "PCE"]] },
+    { "tag": "QTY", "elements": [["113", "0", "PCE"]] },
+    { "tag": "PRI", "elements": [["AAA", "12.00"]] },
+    { "tag": "UNS", "elements": [["S"]] },
+    { "tag": "CNT", "elements": [["2", "3"]] },
+    { "tag": "UNT", "elements": [["22"], ["1"]] },
+    { "tag": "UNZ", "elements": [["1"], ["IC000116"]] }
   ]
 }

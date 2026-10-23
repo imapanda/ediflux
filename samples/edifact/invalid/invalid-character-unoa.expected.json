@@ -5,6 +5,12 @@
   "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
   "layer": "tokenizer",
   "expectedErrors": [
-    {"code": "INVALID_CHARACTER", "severity": "error", "position": {"segment": 5, "tag": "NAD", "element": 4, "component": 1}, "expected": "a character of UNOA", "found": "byte 0xC9"}
+    {
+      "code": "INVALID_CHARACTER",
+      "severity": "error",
+      "position": { "segment": 5, "tag": "NAD", "element": 4, "component": 1 },
+      "expected": "a character of UNOA",
+      "found": "byte 0xC9"
+    }
   ]
 }

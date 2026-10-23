@@ -2,24 +2,80 @@
   "sample": "orders-d96a-s3-unoc-accents.edi",
   "kind": "valid",
   "description": "UNOC (ISO 8859-1) text with accented letters, the degree sign, one half and an escaped apostrophe, stored as single bytes.",
-  "interchange": {"syntaxIdentifier": "UNOC", "syntaxVersion": 3, "encoding": "iso-8859-1", "una": ":+.? '", "interchangeReference": "IC000103", "messages": [{"reference": "1", "type": "ORDERS", "version": "D", "release": "96A", "agency": "UN"}]},
+  "interchange": {
+    "syntaxIdentifier": "UNOC",
+    "syntaxVersion": 3,
+    "encoding": "iso-8859-1",
+    "una": ":+.? '",
+    "interchangeReference": "IC000103",
+    "messages": [
+      { "reference": "1", "type": "ORDERS", "version": "D", "release": "96A", "agency": "UN" }
+    ]
+  },
   "segments": [
-    {"tag": "UNB", "elements": [["UNOC", "3"], ["9520000000011", "14"], ["9520000000035", "14"], ["301015", "0830"], ["IC000103"]]},
-    {"tag": "UNH", "elements": [["1"], ["ORDERS", "D", "96A", "UN", "LBR001"]]},
-    {"tag": "BGM", "elements": [["220"], ["PO-0200"], ["9"]]},
-    {"tag": "DTM", "elements": [["137", "20301015", "102"]]},
-    {"tag": "FTX", "elements": [["AAI"], [], [], ["Livraison côté quai n°3, entre 8h et 12h.", "Prévenir l'entrepôt (Müller / Núñez / Øster)"], ["FR"]]},
-    {"tag": "NAD", "elements": [["BY"], ["9520000000011", "", "9"], [], ["SOCIÉTÉ FICTIVE DES ÉPICERIES"], ["12 RUE DE L'ÉCOLE"], ["EXEMPLEVILLE"], [], ["00000"], ["FR"]]},
-    {"tag": "NAD", "elements": [["SU"], ["9520000000035", "", "9"], [], ["FOURNISSEUR FICTIF NIÑO & ÆBLE"], ["3 RUE DU CAFÉ"], ["EXEMPLEVILLE"], [], ["00000"], ["FR"]]},
-    {"tag": "LIN", "elements": [["1"], [], ["9520000010010", "EN"]]},
-    {"tag": "IMD", "elements": [["F"], [], ["", "", "", "Crème brûlée surgelée 4x100 g"]]},
-    {"tag": "QTY", "elements": [["21", "10", "PCE"]]},
-    {"tag": "LIN", "elements": [["2"], [], ["9520000010027", "EN"]]},
-    {"tag": "IMD", "elements": [["F"], [], ["", "", "", "Pâté de campagne ½ boîte"]]},
-    {"tag": "QTY", "elements": [["21", "5", "PCE"]]},
-    {"tag": "UNS", "elements": [["S"]]},
-    {"tag": "CNT", "elements": [["2", "2"]]},
-    {"tag": "UNT", "elements": [["15"], ["1"]]},
-    {"tag": "UNZ", "elements": [["1"], ["IC000103"]]}
+    {
+      "tag": "UNB",
+      "elements": [
+        ["UNOC", "3"],
+        ["9520000000011", "14"],
+        ["9520000000035", "14"],
+        ["301015", "0830"],
+        ["IC000103"]
+      ]
+    },
+    { "tag": "UNH", "elements": [["1"], ["ORDERS", "D", "96A", "UN", "LBR001"]] },
+    { "tag": "BGM", "elements": [["220"], ["PO-0200"], ["9"]] },
+    { "tag": "DTM", "elements": [["137", "20301015", "102"]] },
+    {
+      "tag": "FTX",
+      "elements": [
+        ["AAI"],
+        [],
+        [],
+        [
+          "Livraison côté quai n°3, entre 8h et 12h.",
+          "Prévenir l'entrepôt (Müller / Núñez / Øster)"
+        ],
+        ["FR"]
+      ]
+    },
+    {
+      "tag": "NAD",
+      "elements": [
+        ["BY"],
+        ["9520000000011", "", "9"],
+        [],
+        ["SOCIÉTÉ FICTIVE DES ÉPICERIES"],
+        ["12 RUE DE L'ÉCOLE"],
+        ["EXEMPLEVILLE"],
+        [],
+        ["00000"],
+        ["FR"]
+      ]
+    },
+    {
+      "tag": "NAD",
+      "elements": [
+        ["SU"],
+        ["9520000000035", "", "9"],
+        [],
+        ["FOURNISSEUR FICTIF NIÑO & ÆBLE"],
+        ["3 RUE DU CAFÉ"],
+        ["EXEMPLEVILLE"],
+        [],
+        ["00000"],
+        ["FR"]
+      ]
+    },
+    { "tag": "LIN", "elements": [["1"], [], ["9520000010010", "EN"]] },
+    { "tag": "IMD", "elements": [["F"], [], ["", "", "", "Crème brûlée surgelée 4x100 g"]] },
+    { "tag": "QTY", "elements": [["21", "10", "PCE"]] },
+    { "tag": "LIN", "elements": [["2"], [], ["9520000010027", "EN"]] },
+    { "tag": "IMD", "elements": [["F"], [], ["", "", "", "Pâté de campagne ½ boîte"]] },
+    { "tag": "QTY", "elements": [["21", "5", "PCE"]] },
+    { "tag": "UNS", "elements": [["S"]] },
+    { "tag": "CNT", "elements": [["2", "2"]] },
+    { "tag": "UNT", "elements": [["15"], ["1"]] },
+    { "tag": "UNZ", "elements": [["1"], ["IC000103"]] }
   ]
 }

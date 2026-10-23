@@ -5,6 +5,12 @@
   "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
   "layer": "envelope",
   "expectedErrors": [
-    {"code": "UNT_REFERENCE_MISMATCH", "severity": "error", "position": {"segment": 11, "tag": "UNT", "element": 2, "component": null}, "expected": "1", "found": "2"}
+    {
+      "code": "UNT_REFERENCE_MISMATCH",
+      "severity": "error",
+      "position": { "segment": 11, "tag": "UNT", "element": 2, "component": null },
+      "expected": "1",
+      "found": "2"
+    }
   ]
 }

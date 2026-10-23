@@ -5,6 +5,12 @@
   "basedOn": "valid/orders-d01b-s4-unow-utf8.edi",
   "layer": "tokenizer",
   "expectedErrors": [
-    {"code": "INVALID_CHARACTER", "severity": "error", "position": {"segment": 6, "tag": "NAD", "element": 4, "component": 1}, "expected": "well-formed UTF-8", "found": "byte 0x28 after lead byte 0xC5"}
+    {
+      "code": "INVALID_CHARACTER",
+      "severity": "error",
+      "position": { "segment": 6, "tag": "NAD", "element": 4, "component": 1 },
+      "expected": "well-formed UTF-8",
+      "found": "byte 0x28 after lead byte 0xC5"
+    }
   ]
 }

@@ -5,6 +5,12 @@
   "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
   "layer": "envelope",
   "expectedErrors": [
-    {"code": "UNZ_REFERENCE_MISMATCH", "severity": "error", "position": {"segment": 12, "tag": "UNZ", "element": 2, "component": null}, "expected": "IC000001", "found": "IC999999"}
+    {
+      "code": "UNZ_REFERENCE_MISMATCH",
+      "severity": "error",
+      "position": { "segment": 12, "tag": "UNZ", "element": 2, "component": null },
+      "expected": "IC000001",
+      "found": "IC999999"
+    }
   ]
 }

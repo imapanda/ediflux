@@ -2,22 +2,69 @@
   "sample": "orders-d01b-s4-unow-utf8.edi",
   "kind": "valid",
   "description": "Syntax 4 with UNOW (UTF-8): characters outside ISO 8859-1 encoded on two, three and four bytes.",
-  "interchange": {"syntaxIdentifier": "UNOW", "syntaxVersion": 4, "encoding": "utf-8", "una": ":+.?*'", "interchangeReference": "IC000114", "messages": [{"reference": "1", "type": "ORDERS", "version": "D", "release": "01B", "agency": "UN"}]},
+  "interchange": {
+    "syntaxIdentifier": "UNOW",
+    "syntaxVersion": 4,
+    "encoding": "utf-8",
+    "una": ":+.?*'",
+    "interchangeReference": "IC000114",
+    "messages": [
+      { "reference": "1", "type": "ORDERS", "version": "D", "release": "01B", "agency": "UN" }
+    ]
+  },
   "segments": [
-    {"tag": "UNB", "elements": [["UNOW", "4"], ["9520000000011", "14"], ["9520000000035", "14"], ["20301015", "0830"], ["IC000114"]]},
-    {"tag": "UNH", "elements": [["1"], ["ORDERS", "D", "01B", "UN", "LBR001"]]},
-    {"tag": "BGM", "elements": [["220"], ["PO-1400"], ["9"]]},
-    {"tag": "DTM", "elements": [["137", "203010150830", "203"]]},
-    {"tag": "FTX", "elements": [["AAI"], [], [], ["Prix indicatif 10 € — œuvre 🥖", "東京 Łódź Ñandú"], ["FR"]]},
-    {"tag": "NAD", "elements": [["BY"], ["9520000000011", "", "9"], [], ["SAMPLE ŁÓDŹ CAFÉ 東京 SP."], ["1 ULICA FIKCYJNA"], ["ŁÓDŹ"], [], ["00000"], ["PL"]]},
-    {"tag": "NAD", "elements": [["SU"], ["9520000000035", "", "9"], [], ["SAMPLE SUPPLIER SARL"], ["2 RUE FICTIVE"], ["EXEMPLEVILLE"], [], ["00000"], ["FR"]]},
-    {"tag": "LIN", "elements": [["1"], [], ["9520000010010", "EN"]]},
-    {"tag": "IMD", "elements": [["F"], [], ["", "", "", "Pain d'épeautre 🥖 500 g"]]},
-    {"tag": "QTY", "elements": [["21", "8", "PCE"]]},
-    {"tag": "PRI", "elements": [["AAA", "1.00"]]},
-    {"tag": "UNS", "elements": [["S"]]},
-    {"tag": "CNT", "elements": [["2", "1"]]},
-    {"tag": "UNT", "elements": [["13"], ["1"]]},
-    {"tag": "UNZ", "elements": [["1"], ["IC000114"]]}
+    {
+      "tag": "UNB",
+      "elements": [
+        ["UNOW", "4"],
+        ["9520000000011", "14"],
+        ["9520000000035", "14"],
+        ["20301015", "0830"],
+        ["IC000114"]
+      ]
+    },
+    { "tag": "UNH", "elements": [["1"], ["ORDERS", "D", "01B", "UN", "LBR001"]] },
+    { "tag": "BGM", "elements": [["220"], ["PO-1400"], ["9"]] },
+    { "tag": "DTM", "elements": [["137", "203010150830", "203"]] },
+    {
+      "tag": "FTX",
+      "elements": [["AAI"], [], [], ["Prix indicatif 10 € — œuvre 🥖", "東京 Łódź Ñandú"], ["FR"]]
+    },
+    {
+      "tag": "NAD",
+      "elements": [
+        ["BY"],
+        ["9520000000011", "", "9"],
+        [],
+        ["SAMPLE ŁÓDŹ CAFÉ 東京 SP."],
+        ["1 ULICA FIKCYJNA"],
+        ["ŁÓDŹ"],
+        [],
+        ["00000"],
+        ["PL"]
+      ]
+    },
+    {
+      "tag": "NAD",
+      "elements": [
+        ["SU"],
+        ["9520000000035", "", "9"],
+        [],
+        ["SAMPLE SUPPLIER SARL"],
+        ["2 RUE FICTIVE"],
+        ["EXEMPLEVILLE"],
+        [],
+        ["00000"],
+        ["FR"]
+      ]
+    },
+    { "tag": "LIN", "elements": [["1"], [], ["9520000010010", "EN"]] },
+    { "tag": "IMD", "elements": [["F"], [], ["", "", "", "Pain d'épeautre 🥖 500 g"]] },
+    { "tag": "QTY", "elements": [["21", "8", "PCE"]] },
+    { "tag": "PRI", "elements": [["AAA", "1.00"]] },
+    { "tag": "UNS", "elements": [["S"]] },
+    { "tag": "CNT", "elements": [["2", "1"]] },
+    { "tag": "UNT", "elements": [["13"], ["1"]] },
+    { "tag": "UNZ", "elements": [["1"], ["IC000114"]] }
   ]
 }

@@ -3,14 +3,38 @@
   "kind": "valid",
   "description": "Syntax 3 CONTRL acknowledging the interchange, accepting the first message and rejecting the second one because of its UNT count.",
   "notes": "Answers invalid/unt-count-mismatch.edi. 29 stands for a control count that does not match; the code is written from memory of ISO 9735 and is unverified. Whether an interchange-level 7 may sit above a rejected message (UCM 4) is also unconfirmed.",
-  "interchange": {"syntaxIdentifier": "UNOA", "syntaxVersion": 3, "encoding": "ascii", "una": ":+.? '", "interchangeReference": "IC000122", "messages": [{"reference": "1", "type": "CONTRL", "version": "D", "release": "3", "agency": "UN"}]},
+  "interchange": {
+    "syntaxIdentifier": "UNOA",
+    "syntaxVersion": 3,
+    "encoding": "ascii",
+    "una": ":+.? '",
+    "interchangeReference": "IC000122",
+    "messages": [
+      { "reference": "1", "type": "CONTRL", "version": "D", "release": "3", "agency": "UN" }
+    ]
+  },
   "segments": [
-    {"tag": "UNB", "elements": [["UNOA", "3"], ["9520000000035", "14"], ["9520000000011", "14"], ["301015", "0830"], ["IC000122"]]},
-    {"tag": "UNH", "elements": [["1"], ["CONTRL", "D", "3", "UN"]]},
-    {"tag": "UCI", "elements": [["IC000005"], ["9520000000011", "14"], ["9520000000035", "14"], ["7"]]},
-    {"tag": "UCM", "elements": [["1"], ["ORDERS", "D", "96A", "UN"], ["7"]]},
-    {"tag": "UCM", "elements": [["2"], ["ORDERS", "D", "96A", "UN"], ["4"], ["29"], ["UNT"], ["1"]]},
-    {"tag": "UNT", "elements": [["5"], ["1"]]},
-    {"tag": "UNZ", "elements": [["1"], ["IC000122"]]}
+    {
+      "tag": "UNB",
+      "elements": [
+        ["UNOA", "3"],
+        ["9520000000035", "14"],
+        ["9520000000011", "14"],
+        ["301015", "0830"],
+        ["IC000122"]
+      ]
+    },
+    { "tag": "UNH", "elements": [["1"], ["CONTRL", "D", "3", "UN"]] },
+    {
+      "tag": "UCI",
+      "elements": [["IC000005"], ["9520000000011", "14"], ["9520000000035", "14"], ["7"]]
+    },
+    { "tag": "UCM", "elements": [["1"], ["ORDERS", "D", "96A", "UN"], ["7"]] },
+    {
+      "tag": "UCM",
+      "elements": [["2"], ["ORDERS", "D", "96A", "UN"], ["4"], ["29"], ["UNT"], ["1"]]
+    },
+    { "tag": "UNT", "elements": [["5"], ["1"]] },
+    { "tag": "UNZ", "elements": [["1"], ["IC000122"]] }
   ]
 }

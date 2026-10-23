@@ -5,6 +5,12 @@
   "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
   "layer": "element",
   "expectedErrors": [
-    {"code": "INVALID_DATA_TYPE", "severity": "error", "position": {"segment": 7, "tag": "LIN", "element": 1, "component": 1}, "expected": "numeric (n..6)", "found": "ONE"}
+    {
+      "code": "INVALID_DATA_TYPE",
+      "severity": "error",
+      "position": { "segment": 7, "tag": "LIN", "element": 1, "component": 1 },
+      "expected": "numeric (n..6)",
+      "found": "ONE"
+    }
   ]
 }

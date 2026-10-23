@@ -5,6 +5,12 @@
   "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
   "layer": "element",
   "expectedErrors": [
-    {"code": "MISSING_MANDATORY_ELEMENT", "severity": "error", "position": {"segment": 8, "tag": "QTY", "element": 1, "component": 2}, "expected": "quantity (6060)", "found": "empty"}
+    {
+      "code": "MISSING_MANDATORY_ELEMENT",
+      "severity": "error",
+      "position": { "segment": 8, "tag": "QTY", "element": 1, "component": 2 },
+      "expected": "quantity (6060)",
+      "found": "empty"
+    }
   ]
 }

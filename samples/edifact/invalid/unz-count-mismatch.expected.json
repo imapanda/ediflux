@@ -5,6 +5,12 @@
   "basedOn": "valid/orders-d96a-s3-unoa-minimal.edi",
   "layer": "envelope",
   "expectedErrors": [
-    {"code": "UNZ_COUNT_MISMATCH", "severity": "error", "position": {"segment": 12, "tag": "UNZ", "element": 1, "component": null}, "expected": "1", "found": "2"}
+    {
+      "code": "UNZ_COUNT_MISMATCH",
+      "severity": "error",
+      "position": { "segment": 12, "tag": "UNZ", "element": 1, "component": null },
+      "expected": "1",
+      "found": "2"
+    }
   ]
 }

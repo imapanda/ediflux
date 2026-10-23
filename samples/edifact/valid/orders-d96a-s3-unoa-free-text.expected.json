@@ -2,20 +2,52 @@
   "sample": "orders-d96a-s3-unoa-free-text.edi",
   "kind": "valid",
   "description": "Free text (FTX) containing every service character escaped with the release character: colon, plus, question mark and apostrophe.",
-  "interchange": {"syntaxIdentifier": "UNOA", "syntaxVersion": 3, "encoding": "ascii", "una": ":+.? '", "interchangeReference": "IC000102", "messages": [{"reference": "1", "type": "ORDERS", "version": "D", "release": "96A", "agency": "UN"}]},
+  "interchange": {
+    "syntaxIdentifier": "UNOA",
+    "syntaxVersion": 3,
+    "encoding": "ascii",
+    "una": ":+.? '",
+    "interchangeReference": "IC000102",
+    "messages": [
+      { "reference": "1", "type": "ORDERS", "version": "D", "release": "96A", "agency": "UN" }
+    ]
+  },
   "segments": [
-    {"tag": "UNB", "elements": [["UNOA", "3"], ["9520000000011", "14"], ["9520000000035", "14"], ["301015", "0830"], ["IC000102"]]},
-    {"tag": "UNH", "elements": [["1"], ["ORDERS", "D", "96A", "UN", "LBR001"]]},
-    {"tag": "BGM", "elements": [["220"], ["PO-0001"], ["9"]]},
-    {"tag": "DTM", "elements": [["137", "20301015", "102"]]},
-    {"tag": "FTX", "elements": [["AAI"], [], [], ["PLEASE DELIVER BEFORE 9:00 + CALL DEPOT FIRST", "REF ?? 12", "QUOTE 'URGENT' ENDS WITH QUESTION?", "A+B=C"], ["EN"]]},
-    {"tag": "NAD", "elements": [["BY"], ["9520000000011", "", "9"]]},
-    {"tag": "NAD", "elements": [["SU"], ["9520000000035", "", "9"]]},
-    {"tag": "LIN", "elements": [["1"], [], ["9520000010010", "EN"]]},
-    {"tag": "QTY", "elements": [["21", "10", "PCE"]]},
-    {"tag": "UNS", "elements": [["S"]]},
-    {"tag": "CNT", "elements": [["2", "1"]]},
-    {"tag": "UNT", "elements": [["11"], ["1"]]},
-    {"tag": "UNZ", "elements": [["1"], ["IC000102"]]}
+    {
+      "tag": "UNB",
+      "elements": [
+        ["UNOA", "3"],
+        ["9520000000011", "14"],
+        ["9520000000035", "14"],
+        ["301015", "0830"],
+        ["IC000102"]
+      ]
+    },
+    { "tag": "UNH", "elements": [["1"], ["ORDERS", "D", "96A", "UN", "LBR001"]] },
+    { "tag": "BGM", "elements": [["220"], ["PO-0001"], ["9"]] },
+    { "tag": "DTM", "elements": [["137", "20301015", "102"]] },
+    {
+      "tag": "FTX",
+      "elements": [
+        ["AAI"],
+        [],
+        [],
+        [
+          "PLEASE DELIVER BEFORE 9:00 + CALL DEPOT FIRST",
+          "REF ?? 12",
+          "QUOTE 'URGENT' ENDS WITH QUESTION?",
+          "A+B=C"
+        ],
+        ["EN"]
+      ]
+    },
+    { "tag": "NAD", "elements": [["BY"], ["9520000000011", "", "9"]] },
+    { "tag": "NAD", "elements": [["SU"], ["9520000000035", "", "9"]] },
+    { "tag": "LIN", "elements": [["1"], [], ["9520000010010", "EN"]] },
+    { "tag": "QTY", "elements": [["21", "10", "PCE"]] },
+    { "tag": "UNS", "elements": [["S"]] },
+    { "tag": "CNT", "elements": [["2", "1"]] },
+    { "tag": "UNT", "elements": [["11"], ["1"]] },
+    { "tag": "UNZ", "elements": [["1"], ["IC000102"]] }
   ]
 }
