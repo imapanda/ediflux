@@ -178,10 +178,10 @@ directories with invented tags and texts that imitate the layout of the D.96A an
 including their oddities (change indicators in several places, names that go over two lines, notes
 under a segment, a table that wraps a name, an annex after the table).
 
-To check the generator against the real files, run it on archives you downloaded, from a script outside
-the repository, and keep the output out of it. Never commit an archive, a file taken out of one, or a
-registry built from them: the guard of [#34](https://github.com/imapanda/libredi/issues/34) exists
-to catch exactly that.
+To check the generator against the real files, run it on archives you downloaded, from a script
+outside the repository, and keep the output out of it. Never commit an archive, a file taken out of
+one, or a registry built from them: the guard of
+[#34](https://github.com/imapanda/libredi/issues/34) exists to catch exactly that.
 
 ## Using the registry in a service
 
