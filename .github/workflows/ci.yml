@@ -182,6 +182,7 @@ jobs:
               - 'contracts/**'
               - 'packages/**'
               - 'release-please-config.json'
+              - 'samples/**'
               - 'scripts/check-pins.sh'
               - 'services/**'
             compose:

@@ -1,0 +1,73 @@
+{
+  "documentType": "order",
+  "schemaVersion": 1,
+  "documentNumber": "PO-0100",
+  "issueDate": "2030-10-15",
+  "requestedDeliveryDate": "2030-10-22",
+  "currency": "EUR",
+  "parties": {
+    "buyer": {
+      "gln": "9520000000011",
+      "name": "SAMPLE RETAIL SA",
+      "address": {
+        "street": "1 RUE FICTIVE",
+        "city": "EXEMPLEVILLE",
+        "postalCode": "00000",
+        "country": "FR"
+      }
+    },
+    "supplier": {
+      "gln": "9520000000035",
+      "name": "SAMPLE SUPPLIER SARL",
+      "address": {
+        "street": "1 RUE FICTIVE",
+        "city": "EXEMPLEVILLE",
+        "postalCode": "00000",
+        "country": "FR"
+      }
+    },
+    "shipTo": {
+      "gln": "9520000000028",
+      "name": "SAMPLE DEPOT NORD",
+      "address": {
+        "street": "1 RUE FICTIVE",
+        "city": "EXEMPLEVILLE",
+        "postalCode": "00000",
+        "country": "FR"
+      }
+    }
+  },
+  "references": [{ "type": "contract", "value": "CONTRACT-X1" }],
+  "lines": [
+    {
+      "lineNumber": 1,
+      "product": {
+        "gtin": "9520000010010",
+        "supplierItemId": "SUP-001",
+        "description": "SAMPLE BISCUITS 200G"
+      },
+      "quantity": { "value": "12", "unit": "PCE" },
+      "unitPrice": { "amount": "1.00" }
+    },
+    {
+      "lineNumber": 2,
+      "product": {
+        "gtin": "9520000010027",
+        "supplierItemId": "SUP-002",
+        "description": "SAMPLE JUICE 1L"
+      },
+      "quantity": { "value": "24", "unit": "PCE" },
+      "unitPrice": { "amount": "2.50" }
+    },
+    {
+      "lineNumber": 3,
+      "product": {
+        "gtin": "9520000010034",
+        "supplierItemId": "SUP-003",
+        "description": "SAMPLE COFFEE 250G"
+      },
+      "quantity": { "value": "6", "unit": "PCE" },
+      "unitPrice": { "amount": "12.00" }
+    }
+  ]
+}
