@@ -1,0 +1,459 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:libredi:schema:edifact-registry",
+  "title": "EDIFACT definition registry",
+  "description": "What a parser and a validator need to know about one UN/EDIFACT directory (for example D.01B): data elements, composites, segments, code lists and message structures. A registry is generated at install time from the official UNECE files and never committed or shipped (ADR 7). Rules a schema cannot express, such as references that must resolve, are listed in contracts/registry/README.md.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "directory",
+    "syntaxVersions",
+    "source",
+    "dataElements",
+    "composites",
+    "segments",
+    "codeLists",
+    "messages"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "description": "Version of this format. Readers refuse a version they do not know.",
+      "type": "integer",
+      "const": 1
+    },
+    "directory": {
+      "description": "Which directory this registry describes. The three parts are the ones a UNH segment carries in its message identifier (S009), which is how a message finds its registry.",
+      "type": "object",
+      "required": ["agency", "version", "release"],
+      "properties": {
+        "agency": {
+          "description": "Controlling agency, for example UN.",
+          "type": "string",
+          "pattern": "^[A-Z0-9]{1,3}$"
+        },
+        "version": {
+          "description": "Directory version, for example D.",
+          "type": "string",
+          "pattern": "^[A-Z0-9]{1,3}$"
+        },
+        "release": {
+          "description": "Directory release, for example 01B.",
+          "type": "string",
+          "pattern": "^[A-Z0-9]{1,3}$"
+        }
+      }
+    },
+    "syntaxVersions": {
+      "description": "ISO 9735 syntax versions this registry can be used with. Element repetition (maxOccurs above 1 on a segment element) only applies from syntax version 4.",
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 4
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "source": {
+      "description": "Where the registry comes from, to reproduce it and to know which licence applies to it. A registry built from UNECE files must say which files, which generator and when.",
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "enum": ["unece-directory", "handwritten"]
+        },
+        "archives": {
+          "description": "The files the registry was built from.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "sha256"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "generator": {
+          "type": "object",
+          "required": ["name", "version"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "if": {
+        "required": ["kind"],
+        "properties": {
+          "kind": {
+            "const": "unece-directory"
+          }
+        }
+      },
+      "then": {
+        "required": ["archives", "generator", "generatedAt"],
+        "properties": {
+          "archives": true,
+          "generator": true,
+          "generatedAt": true
+        }
+      }
+    },
+    "dataElements": {
+      "description": "Simple data elements, by tag.",
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/dataElementTag"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/dataElement"
+      }
+    },
+    "composites": {
+      "description": "Composite data elements, by tag.",
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/compositeTag"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/composite"
+      }
+    },
+    "segments": {
+      "description": "Segments, by tag.",
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/segmentTag"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/segment"
+      }
+    },
+    "codeLists": {
+      "description": "Code lists, by identifier. A data element points to its list with codeList.",
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/codeListId"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/codeList"
+      }
+    },
+    "messages": {
+      "description": "Message structures, by message type. A registry may hold only some of the messages of its directory.",
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/messageType"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/message"
+      }
+    }
+  },
+  "$defs": {
+    "dataElementTag": {
+      "description": "Four digits, for example 1004.",
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "compositeTag": {
+      "description": "C for a composite of a message, S for a service composite, then three digits.",
+      "type": "string",
+      "pattern": "^[CS][0-9]{3}$"
+    },
+    "segmentTag": {
+      "description": "Three upper-case letters.",
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "messageType": {
+      "description": "Six upper-case letters, for example ORDERS.",
+      "type": "string",
+      "pattern": "^[A-Z]{6}$"
+    },
+    "codeListId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$"
+    },
+    "status": {
+      "description": "M: mandatory, at least one occurrence. C: conditional, may be absent. The minimum number of occurrences follows from it: 1 or 0. A mandatory component of a composite is only required where the composite is present, and a mandatory node inside a group only inside an occurrence of the group.",
+      "enum": ["M", "C"]
+    },
+    "maxOccurs": {
+      "description": "Largest number of occurrences allowed. 1 when absent.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "dataElement": {
+      "description": "A simple data element and its representation.",
+      "type": "object",
+      "required": ["name", "type", "minLength", "maxLength"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "type": {
+          "description": "a: alphabetic, n: numeric, an: alphanumeric.",
+          "enum": ["a", "an", "n"]
+        },
+        "minLength": {
+          "description": "Fewest characters in a value. The decimal mark and the sign of a number do not count. Equal to maxLength for a fixed-length element (an3); 1 for a variable one (an..35).",
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxLength": {
+          "description": "Most characters in a value. Not less than minLength.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "codeList": {
+          "description": "Key of the code list that gives the values of this element. Absent when the element is free.",
+          "$ref": "#/$defs/codeListId"
+        }
+      }
+    },
+    "composite": {
+      "description": "A composite data element: an ordered list of simple data elements. The position of a component is its index in components, starting at 1.",
+      "type": "object",
+      "required": ["name", "components"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["ref", "status"],
+            "properties": {
+              "ref": {
+                "description": "Tag of a simple data element.",
+                "$ref": "#/$defs/dataElementTag"
+              },
+              "status": {
+                "$ref": "#/$defs/status"
+              }
+            }
+          }
+        }
+      }
+    },
+    "segment": {
+      "description": "A segment: an ordered list of data elements. The position of an element is its index in elements, starting at 1, and a composite counts as one element.",
+      "type": "object",
+      "required": ["name", "elements"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "elements": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["ref", "status"],
+            "properties": {
+              "ref": {
+                "description": "Tag of a simple data element or of a composite.",
+                "type": "string",
+                "pattern": "^([0-9]{4}|[CS][0-9]{3})$"
+              },
+              "status": {
+                "$ref": "#/$defs/status"
+              },
+              "maxOccurs": {
+                "$ref": "#/$defs/maxOccurs"
+              }
+            }
+          }
+        }
+      }
+    },
+    "codeList": {
+      "type": "object",
+      "required": ["name", "closed", "codes"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "closed": {
+          "description": "True when codes holds every valid value. False when the list is maintained elsewhere (by a standards body or by a trading community): codes is then only what the directory knows, and a value outside it is not necessarily an error.",
+          "type": "boolean"
+        },
+        "codes": {
+          "description": "The values of the list, by code.",
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "message": {
+      "description": "The structure of a message: the segments and groups between UNH and UNT, in the order they must appear. UNH and UNT themselves are left out: the service definitions of the syntax describe them.",
+      "type": "object",
+      "required": ["name", "nodes"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "nodes": {
+          "$ref": "#/$defs/nodes"
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    },
+    "node": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/segmentNode"
+        },
+        {
+          "$ref": "#/$defs/groupNode"
+        }
+      ]
+    },
+    "segmentNode": {
+      "description": "One segment of the message, with its status and repetition at this place of the structure.",
+      "type": "object",
+      "required": ["kind", "tag", "status"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "segment"
+        },
+        "tag": {
+          "$ref": "#/$defs/segmentTag"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "maxOccurs": {
+          "$ref": "#/$defs/maxOccurs"
+        },
+        "sequence": {
+          "$ref": "#/$defs/sequence"
+        },
+        "section": {
+          "$ref": "#/$defs/section"
+        }
+      }
+    },
+    "groupNode": {
+      "description": "A segment group: nodes that repeat together, up to maxOccurs times. Groups may be nested.",
+      "type": "object",
+      "required": ["kind", "id", "status", "trigger"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "group"
+        },
+        "id": {
+          "description": "SG followed by a number, unique in the message.",
+          "type": "string",
+          "pattern": "^SG[0-9]+$"
+        },
+        "status": {
+          "$ref": "#/$defs/status"
+        },
+        "maxOccurs": {
+          "$ref": "#/$defs/maxOccurs"
+        },
+        "sequence": {
+          "$ref": "#/$defs/sequence"
+        },
+        "section": {
+          "$ref": "#/$defs/section"
+        },
+        "trigger": {
+          "description": "The segment that opens each occurrence of the group. It is mandatory and occurs once per occurrence of the group, so it has neither status nor maxOccurs.",
+          "type": "object",
+          "required": ["tag"],
+          "properties": {
+            "tag": {
+              "$ref": "#/$defs/segmentTag"
+            },
+            "sequence": {
+              "$ref": "#/$defs/sequence"
+            }
+          }
+        },
+        "nodes": {
+          "description": "What follows the trigger inside the group, in order. Absent when the group is only its trigger.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/node"
+          }
+        }
+      }
+    },
+    "sequence": {
+      "description": "Position of the node in the message structure table of the directory, for example 0020. Informative.",
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "section": {
+      "description": "Section of the message, set on top-level nodes. Informative.",
+      "enum": ["header", "detail", "summary"]
+    }
+  }
+}

@@ -50,7 +50,8 @@ access; only `connectors` can reach partners. `scripts/smoke-compose.sh` checks 
 | `services/connectors` | Go service, with its own `go.mod` and `Dockerfile`. |
 | `packages/service-kit` | Shared runtime of the TypeScript services: `/healthz`, port handling, graceful shutdown. |
 | `packages/contracts` | Tests that check that the files in `contracts/` are valid. Each service tests its own responses against them. |
-| `contracts/` | OpenAPI (`openapi/`) and job JSON Schemas (`jobs/`), written before the code. See its [README](../contracts/README.md). |
+| `packages/registry` | Tests of the EDIFACT definition registry schema in `contracts/registry/` against its fictitious example, and `checkRegistry()`, which checks the rules a schema cannot express. |
+| `contracts/` | OpenAPI (`openapi/`), job JSON Schemas (`jobs/`) and the EDIFACT registry schema (`registry/`), written before the code. See its [README](../contracts/README.md). |
 | `infra/postgres`, `infra/caddy` | Image of PostgreSQL with pgmq; configuration of the reverse proxy. |
 | `compose.yaml`, `.env.example` | The stack on one machine. |
 | `scripts/` | `init-env.sh`, `check-pins.sh`, `smoke-image.sh`, `smoke-compose.sh`. |

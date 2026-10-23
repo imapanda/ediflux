@@ -1,0 +1,23 @@
+{
+  "name": "@libredi/registry",
+  "version": "0.0.0",
+  "private": true,
+  "description": "EDIFACT definition registry: checks the registry documents against contracts/registry and their cross-references",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "ajv": "catalog:",
+    "ajv-formats": "catalog:",
+    "fast-check": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
