@@ -98,6 +98,10 @@ git push --force-with-lease
 
 ## Running the checks locally
 
+To set up the development environment (Node.js, pnpm, Go, Docker Compose) and run the code
+checks (`pnpm verify`, Go tests, image and Compose smoke tests), see
+[docs/development.md](docs/development.md). The documentation and workflow checks are below.
+
 The CI tools all run without installing anything permanently. Where a version is given, it is
 the one of [`ci.yml`](.github/workflows/ci.yml):
 
