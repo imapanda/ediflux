@@ -2,7 +2,7 @@
   "name": "Libredi",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
   "features": {
-    "ghcr.io/devcontainers/features/node:1": {
+    "ghcr.io/devcontainers/features/node:2": {
       "version": "26.12.1",
       "pnpmVersion": "none"
     },
