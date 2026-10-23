@@ -17,6 +17,10 @@
     "ajv": "catalog:",
     "ajv-formats": "catalog:"
   },
+  "dependencies": {
+    "ajv": "catalog:",
+    "ajv-formats": "catalog:"
+  },
   "devDependencies": {
     "@types/node": "catalog:",
     "fast-check": "catalog:",
