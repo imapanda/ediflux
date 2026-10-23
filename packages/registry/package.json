@@ -10,7 +10,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "libredi": "node src/main.ts"
   },
   "dependencies": {
     "ajv": "catalog:",
