@@ -52,12 +52,14 @@ Remaining:
 
 - **Project governance**: code of conduct, support and governance files, DCO sign-off,
   labels, milestones, project board, Discussions categories and forms.
-- **Architecture decisions** recorded as ADRs (this pull request).
-- **Repository skeleton**: pnpm monorepo (`services/*`, `packages/*`, `docs/`), shared
-  TypeScript tooling (strict mode, Vitest, fast-check), Docker Compose with PostgreSQL and
-  a reverse proxy, devcontainer.
-- **Container pipeline**: one multi-role image built on native amd64 and arm64 runners,
-  pushed to GHCR with SBOM and provenance attestations; CI job per package with path
+- **Architecture decisions** recorded as ADRs 1–10 (done in #3 and the ADR 10 pull request).
+- **Repository skeleton**: monorepo with one folder per service (`services/*`: TypeScript,
+  and Go for `connectors`), shared packages (`packages/*`), language-neutral contracts
+  (`contracts/`: OpenAPI, JSON Schema), shared tooling (strict TypeScript, Vitest,
+  fast-check, Go toolchain), Docker Compose with PostgreSQL + pgmq and a reverse proxy,
+  devcontainer.
+- **Container pipeline**: one image per service built on native amd64 and arm64 runners,
+  pushed to GHCR with SBOM and provenance attestations; one CI job per service with path
   filters, all aggregated in `CI result`.
 - **Documentation site** (Astro Starlight) on GitHub Pages.
 - **Synthetic sample corpus**: fictitious ORDERS, ORDRSP, DESADV, CONTRL interchanges in
@@ -76,7 +78,9 @@ Remaining:
 - **CONTRL** generation and parsing.
 - **CLI** `libredi inspect <file>`: tree, JSON and validation report.
 - **Quality**: golden files, property-based tests (round-trip, fuzzing), StAEDI as a test
-  oracle in CI, performance benchmark.
+  oracle in CI.
+- **Performance**: service-level objectives and per-service budgets written down; benchmarks
+  in CI with regression thresholds ([ADR 10](adr/0010-service-boundaries-and-communication.md)).
 - **Checkpoint** after two weeks: confirm the translator language on real-world-shaped
   samples (see ADR on languages).
 
@@ -94,15 +98,21 @@ Remaining:
 - **Reference flows**: ORDERS → CSV, CSV → ORDRSP, CSV → DESADV.
 - **Local MCP server (stdio)** wrapping the CLI: inspect, validate, run a mapping on
   fixtures, explain an error. Used by the team to build mappings with an AI assistant.
+- **PostgreSQL and pgmq load test**, before M3: SQL-only pgmq on the target PostgreSQL,
+  sustained throughput with the real number of writes per message; the results shape the
+  M3 schema (writes per message, partitioning, autovacuum).
 
 ## M3 — Reliable core (v0.3) — *"never lose a message"*
 
 - **Data model and migrations**: environments, partners, endpoints, flows, mapping
   versions, messages, transitions, numbering counters.
 - **`api` service**: REST + OpenAPI, authentication, configuration, message intake.
-- **`worker` service**: state machine on the PostgreSQL job queue, retries with backoff,
-  dead-letter, scheduled jobs, alerts (email, webhook).
-- **`translator` service**: the M1/M2 engine behind a stateless interface.
+- **`worker` service**: state machine on pgmq queues, retries with backoff, dead-letter,
+  scheduled jobs, alerts (email, webhook).
+- **`translator` service**: the M1/M2 engine behind a stateless REST interface, with a
+  worker-thread pool.
+- **Contracts**: OpenAPI and job schemas with generated TypeScript and Go clients and
+  contract tests; one PostgreSQL schema and role per service.
 - **Archive**: content-addressed raw and rendered files on a volume or S3.
 - **Guarantees**: archive-first intake, duplicate detection, transactional outbox,
   gap-free numbering, replay with a chosen mapping version.

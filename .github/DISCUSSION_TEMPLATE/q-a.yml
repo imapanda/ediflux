@@ -1,0 +1,38 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask how to do something, or why Libredi behaves the way it does. Search the existing
+        discussions first: your question may already have an answer.
+
+        Found a bug? [Open an issue](https://github.com/imapanda/libredi/issues/new/choose).
+        Found a security issue? Follow the
+        [security policy](https://github.com/imapanda/libredi/security/policy) and do not post it
+        here.
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: What are you trying to do, and what is unclear?
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you tried
+      description: Commands, configuration and exact error messages, anonymized.
+  - type: input
+    id: version
+    attributes:
+      label: Libredi version
+      placeholder: "0.1.0, a commit SHA, or \"not installed yet\""
+  - type: checkboxes
+    id: confidential
+    attributes:
+      label: Confidential data
+      options:
+        - label: >-
+            I removed or anonymized any real partner data (company names, addresses, GLNs,
+            prices, references) and any credentials (passwords, private keys, certificates,
+            tokens) from what I posted.
+          required: true

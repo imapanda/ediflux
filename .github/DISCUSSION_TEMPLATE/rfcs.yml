@@ -1,0 +1,55 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        An RFC proposes a significant or hard-to-reverse change: a new service, a new message format
+        or contract, a change of licence or of a core technology. Smaller changes start as an
+        [issue](https://github.com/imapanda/libredi/issues/new/choose).
+
+        The RFC stays open for comments for at least a week. If it is accepted, the decision is
+        recorded as an [ADR](https://github.com/imapanda/libredi/tree/main/docs/adr). See the
+        [governance](https://github.com/imapanda/libredi/blob/main/GOVERNANCE.md).
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: The proposal in a few sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: What problem does it solve, and for whom? Link the issues and ADRs involved.
+    validations:
+      required: true
+  - type: textarea
+    id: design
+    attributes:
+      label: Proposed design
+      description: How it works, what changes for users and for contributors, and how to roll it out.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Including doing nothing, and why you rejected them.
+    validations:
+      required: true
+  - type: textarea
+    id: questions
+    attributes:
+      label: Open questions
+      description: What is still undecided and where you want input.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you post
+      options:
+        - label: >-
+            I searched the existing RFCs, issues and ADRs, and none already covers this.
+          required: true
+        - label: >-
+            It contains no real partner data and no credentials.
+          required: true

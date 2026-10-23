@@ -1,0 +1,41 @@
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share an idea or a real-world EDI requirement. Ideas still taking shape belong here; once the
+        approach is agreed, a maintainer turns it into an issue. A change that is already clear
+        can go straight to a [feature request](https://github.com/imapanda/libredi/issues/new/choose).
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and what gets in the way today?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: How could Libredi handle it? A rough sketch is enough.
+    validations:
+      required: true
+  - type: input
+    id: standards
+    attributes:
+      label: Standards, message types and transports involved
+      placeholder: "EANCOM D96A ORDERS over AS2, X12 850 over SFTP..."
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: What do you use or do today, and what did you consider instead?
+  - type: checkboxes
+    id: confidential
+    attributes:
+      label: Confidential data
+      options:
+        - label: >-
+            I removed or anonymized any real partner data (company names, addresses, GLNs,
+            prices, references) and any credentials (passwords, private keys, certificates,
+            tokens) from what I posted.
+          required: true
