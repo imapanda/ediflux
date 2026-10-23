@@ -1,7 +1,10 @@
 # 2. Technical services and horizontal scaling
 
-- Status: accepted
+- Status: accepted, partly superseded by [ADR 10](0010-service-boundaries-and-communication.md)
 - Date: 2026-10-17
+
+> Partly superseded by ADR 10: decision 4 (database access) is replaced by one PostgreSQL
+> schema and role per service.
 
 ## Context
 

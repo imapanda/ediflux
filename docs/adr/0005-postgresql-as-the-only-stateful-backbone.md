@@ -1,7 +1,10 @@
 # 5. PostgreSQL as the only stateful backbone
 
-- Status: accepted
+- Status: accepted, partly superseded by [ADR 10](0010-service-boundaries-and-communication.md)
 - Date: 2026-10-17
+
+> Partly superseded by ADR 10: the job queue is pgmq, used through its SQL API from any
+> language, instead of a queue library per language (pg-boss, River).
 
 ## Context
 
