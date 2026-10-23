@@ -2,7 +2,7 @@
  * Types of the canonical documents, version 1.
  *
  * Generated from contracts/canonical/v1/*.schema.json by src/generate-types.ts.
- * Do not edit: change the schemas, then run `pnpm --filter @libredi/contracts generate`.
+ * Do not edit: change the contract, then run `pnpm --filter @libredi/contracts generate`.
  * The tests fail when this file is out of date.
  */
 

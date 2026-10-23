@@ -1,6 +1,6 @@
 import { Validator } from "@seriousme/openapi-schema-validator";
 import { describe, expect, it } from "vitest";
-import { loadYaml } from "./load.ts";
+import { loadYaml, readContract } from "./load.ts";
 
 interface OpenApiDocument {
   openapi: string;
@@ -24,6 +24,10 @@ describe("contracts/openapi/api.yaml", () => {
 
   it("is served under /api, the prefix the reverse proxy strips", () => {
     expect(document.servers.map((server) => server.url)).toEqual(["/api"]);
+  });
+
+  it("declares no x-go-* extension, which the Go generator would turn into code", () => {
+    expect(readContract("openapi/api.yaml")).not.toMatch(/x-go-/);
   });
 
   it("gives every operation a unique operationId", () => {
