@@ -8,6 +8,7 @@ import {
   loadCanonicalExample,
   loadCanonicalSchema,
 } from "./canonical.ts";
+import { edit as editDocument } from "./edit.ts";
 
 const ajv = canonicalAjv();
 const validators = Object.fromEntries(
@@ -23,19 +24,8 @@ function validate(type: string, document: unknown): boolean {
   return validator(document) as boolean;
 }
 
-/** Copy of the example with the value at `path` (dot separated) replaced, or removed if undefined. */
 function edit(type: string, path: string, value?: unknown): unknown {
-  const copy = structuredClone(examples[type]);
-  const keys = path.split(".");
-  const last = keys.pop() as string;
-  let node = copy as Record<string, unknown>;
-  for (const key of keys) {
-    node[key] ??= {};
-    node = node[key] as Record<string, unknown>;
-  }
-  if (value === undefined) delete node[last];
-  else node[last] = value;
-  return copy;
+  return editDocument(examples[type], path, value);
 }
 
 describe("canonical documents, version 1", () => {

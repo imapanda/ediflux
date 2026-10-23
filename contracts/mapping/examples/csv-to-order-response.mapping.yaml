@@ -1,0 +1,166 @@
+# yaml-language-server: $schema=../mapping.schema.json
+formatVersion: 1
+name: ERP order confirmation (CSV) to order response
+description: >-
+  Drafted by an AI assistant from the export guide of the ERP, to be reviewed. Reads the rows of
+  the confirmation file, one per order line, and builds the canonical order response.
+version: 1
+flow:
+  direction: inbound
+  message:
+    syntax: csv
+    type: order-confirmation
+    version: "2"
+  canonical:
+    documentType: orderResponse
+    schemaVersion: 1
+lookups:
+  lineStatus:
+    A: accepted
+    C: changed
+    R: rejected
+  units:
+    ST: PCE
+    KG: KGM
+fields:
+  documentType:
+    expression: '"orderResponse"'
+  schemaVersion:
+    expression: "1"
+  documentNumber:
+    expression: rows[0].confirmation_number
+    confidence: high
+  issueDate:
+    expression: rows[0].confirmation_date
+    confidence: high
+  responseStatus:
+    expression: >-
+      $count(rows[status_code != "A"]) = 0 ? "accepted"
+      : $count(rows[status_code != "R"]) = 0 ? "rejected" : "changed"
+    confidence: medium
+    note: The guide gives a status per line only; the status of the whole order is deduced from them.
+  confirmedDeliveryDate:
+    expression: rows[0].delivery_date
+    confidence: high
+  parties:
+    fields:
+      buyer:
+        fields:
+          gln:
+            expression: rows[0].buyer_gln
+      supplier:
+        fields:
+          gln:
+            expression: rows[0].supplier_gln
+  references:
+    expression: '[{"type": "order", "value": rows[0].order_number}]'
+  lines:
+    forEach: rows
+    fields:
+      lineNumber:
+        expression: $number(line)
+      product:
+        fields:
+          gtin:
+            expression: gtin
+      status:
+        expression: $lookup($lookups.lineStatus, status_code)
+        confidence: high
+        specRef:
+          source: Sample ERP confirmation export guide, version 2
+          location: Column STATUS_CODE, values A, C and R
+      orderedQuantity:
+        fields:
+          value:
+            expression: ordered_qty
+          unit:
+            expression: $lookup($lookups.units, unit)
+      confirmedQuantity:
+        fields:
+          value:
+            expression: confirmed_qty
+          unit:
+            expression: $lookup($lookups.units, unit)
+      unitPrice:
+        fields:
+          amount:
+            expression: unit_price
+        confidence: low
+        note: The guide does not say whether the price is net or gross.
+        specRef:
+          source: Sample ERP confirmation export guide, version 2
+          location: Column UNIT_PRICE
+fixtures:
+  - name: one line accepted, one changed, one rejected
+    input:
+      rows:
+        - order_number: PO-1000
+          confirmation_number: ORS-1000
+          confirmation_date: "2030-10-16"
+          delivery_date: "2030-10-24"
+          buyer_gln: "9520000000011"
+          supplier_gln: "9520000000035"
+          line: "1"
+          gtin: "9520000010010"
+          status_code: A
+          ordered_qty: "12"
+          confirmed_qty: "12"
+          unit: ST
+          unit_price: "1.00"
+        - order_number: PO-1000
+          confirmation_number: ORS-1000
+          confirmation_date: "2030-10-16"
+          delivery_date: "2030-10-24"
+          buyer_gln: "9520000000011"
+          supplier_gln: "9520000000035"
+          line: "2"
+          gtin: "9520000010027"
+          status_code: C
+          ordered_qty: "24"
+          confirmed_qty: "18"
+          unit: ST
+          unit_price: "2.60"
+        - order_number: PO-1000
+          confirmation_number: ORS-1000
+          confirmation_date: "2030-10-16"
+          delivery_date: "2030-10-24"
+          buyer_gln: "9520000000011"
+          supplier_gln: "9520000000035"
+          line: "3"
+          gtin: "9520000010034"
+          status_code: R
+          ordered_qty: "6"
+          confirmed_qty: "0"
+          unit: ST
+          unit_price: "12.00"
+    expected:
+      documentType: orderResponse
+      schemaVersion: 1
+      documentNumber: ORS-1000
+      issueDate: "2030-10-16"
+      responseStatus: changed
+      confirmedDeliveryDate: "2030-10-24"
+      parties:
+        buyer: { gln: "9520000000011" }
+        supplier: { gln: "9520000000035" }
+      references:
+        - { type: order, value: PO-1000 }
+      lines:
+        - lineNumber: 1
+          product: { gtin: "9520000010010" }
+          status: accepted
+          orderedQuantity: { value: "12", unit: PCE }
+          confirmedQuantity: { value: "12", unit: PCE }
+          unitPrice: { amount: "1.00" }
+        - lineNumber: 2
+          product: { gtin: "9520000010027" }
+          status: changed
+          orderedQuantity: { value: "24", unit: PCE }
+          confirmedQuantity: { value: "18", unit: PCE }
+          unitPrice: { amount: "2.60" }
+        - lineNumber: 3
+          product: { gtin: "9520000010034" }
+          status: rejected
+          orderedQuantity: { value: "6", unit: PCE }
+          confirmedQuantity: { value: "0", unit: PCE }
+          unitPrice: { amount: "12.00" }
