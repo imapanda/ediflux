@@ -1,0 +1,59 @@
+# Developer Certificate of Origin (ADR 9): every commit of a pull request must
+# carry a "Signed-off-by:" line matching its author (git commit -s). The check
+# is reported as "DCO"; the ruleset on main requires it. See CONTRIBUTING.md
+# and docs/ci-cd.md.
+#
+# It is a separate workflow so that ci.yml keeps a single required check.
+# Pull requests opened by a bot from a branch of this repository (Dependabot,
+# release automation) are not checked: a bot cannot certify the DCO.
+name: DCO
+
+on:
+  pull_request:
+    branches: [main]
+    # "synchronize" re-runs the check on each push, because a required check
+    # must be reported for the latest commit of the pull request.
+    types: [opened, reopened, synchronize]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  signoff:
+    name: DCO
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Decide whether the pull request is checked
+        id: scope
+        env:
+          AUTHOR_TYPE: ${{ github.event.pull_request.user.type }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          BASE_REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ "$AUTHOR_TYPE" = "Bot" ] && [ "$HEAD_REPOSITORY" = "$BASE_REPOSITORY" ]; then
+            echo "Pull request opened by a bot, no DCO sign-off required."
+            echo "checked=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "checked=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.scope.outputs.checked == 'true'
+        with:
+          # The whole history, to list the commits of the pull request.
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Test the checker
+        if: steps.scope.outputs.checked == 'true'
+        run: bash .github/scripts/test-check-dco.sh
+      - name: Check the sign-off of every commit
+        if: steps.scope.outputs.checked == 'true'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: bash .github/scripts/check-dco.sh "$BASE_SHA" "$HEAD_SHA"
