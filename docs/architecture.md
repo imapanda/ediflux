@@ -70,8 +70,10 @@ The split follows technical responsibilities, so each service can be developed, 
 scaled and replaced on its own, and written in the language that suits it best. Business
 rules live in the workers and in the mappings, not spread across services.
 
-Custom services are written in TypeScript and share packages in one monorepo; SFTP uses a
-proven third-party container, and AS2 too unless our own service passes its interop tests ([ADR 4](adr/0004-language-per-service.md)).
+Each service is its own Docker image with its own CI pipeline, in one monorepo. Custom
+services are written in TypeScript, except `connectors` in Go; SFTP uses a proven
+third-party container, and AS2 too unless our own service passes its interop tests
+([ADR 4](adr/0004-language-per-service.md), [ADR 10](adr/0010-service-boundaries-and-communication.md)).
 
 ```mermaid
 flowchart LR
@@ -90,7 +92,7 @@ flowchart LR
       TR[translator ×N]
       UI[web ×N]
       MCP[mcp ×N]
-      DB[(PostgreSQL: state + job queue)]
+      DB[(PostgreSQL: state + pgmq queues)]
       ARCH[(archive: filesystem or S3)]
     end
     ERP[ERP import / export folders or API]
@@ -99,12 +101,12 @@ flowchart LR
     P2 <--> LB
     LB <--> AS2
     P3 <--> CONN
-    SFTP --> API
-    AS2 --> API
-    CONN <--> DB
+    SFTP -->|HTTP| API
+    AS2 -->|HTTP| API
+    CONN <-->|queue| DB
     API --- DB
-    WK --- DB
-    WK <--> TR
+    WK ---|queue| DB
+    WK <-->|HTTP| TR
     API --- ARCH
     WK --- ARCH
     WK <--> ERP
@@ -118,7 +120,7 @@ flowchart LR
 | Service | Responsibility | How it scales |
 | --- | --- | --- |
 | `api` | REST API: configuration, message intake from gateways, queries for the console and the MCP server, promotion test → production. | Stateless HTTP behind the load balancer; any number of replicas. |
-| `worker` | Message state machine: routing, calls to the translator, delivery, numbering, retries, acknowledgements, alerts, scheduled jobs. | Competing consumers on the job queue (`SELECT … FOR UPDATE SKIP LOCKED` or a broker); add replicas to drain the queue faster. Per-partner ordering, when a flow needs it, uses a partition key or an advisory lock. |
+| `worker` | Message state machine: routing, calls to the translator, delivery, numbering, retries, acknowledgements, alerts, scheduled jobs. | Competing consumers on pgmq queues (read with a visibility timeout); add replicas to drain the queues faster. Per-partner ordering, when a flow needs it, uses a partition key or an advisory lock. |
 | `translator` | Parse, validate, serialize EDIFACT/X12; run mappings; render outputs. Input bytes + configuration in, result out. | Pure and stateless, CPU-bound; scale with the message volume. |
 | `sftp-gateway` | SFTP/FTPS server for partners and the ERP to drop and pick up files. | Several replicas behind a TCP load balancer, sharing their user store (database) and file storage (S3 or a shared volume). See [ADR 0003](adr/0003-reuse-before-build.md). |
 | `as2-gateway` | AS2 send/receive, signatures, encryption, MDN, certificates. | Our own service: stateless HTTP receivers behind the load balancer, keys and certificates in the database. If it fails the interoperability gate, OpenAS2 runs instead as an active/passive exception ([ADR 4](adr/0004-language-per-service.md)). Milestone 8. |
@@ -127,6 +129,38 @@ flowchart LR
 | `mcp` | MCP server for AI assistants. Talks only to the `api` with the caller's rights; writes only drafts in the test environment. | Stateless Streamable HTTP; any number of replicas. |
 | `postgres` | State, configuration, job queue. | The one stateful core component: one primary, scaled vertically first, then with read replicas or a managed/HA PostgreSQL for the hosted offer. |
 | archive | Raw and rendered files. | Filesystem volume on a single machine; any S3-compatible storage as soon as replicas run on several machines. |
+
+### Communication
+
+Decided in [ADR 10](adr/0010-service-boundaries-and-communication.md):
+
+- **Synchronous calls use REST/JSON** with OpenAPI contracts in `contracts/openapi/`: clients
+  (`web`, `mcp`, ERPs) and gateways call `api`; `worker` calls `translator`. No gRPC.
+- **Asynchronous steps use pgmq queues** in PostgreSQL, through their SQL API, with job
+  payloads described by JSON Schemas in `contracts/jobs/`; consumers are idempotent.
+- **Files travel by reference**: requests and jobs carry SHA-256 references to the archive.
+- **Each service owns its PostgreSQL schema and role**; `translator`, `web` and `mcp` have
+  no database access.
+
+```mermaid
+sequenceDiagram
+    participant P as Partner
+    participant G as sftp-gateway
+    participant A as api
+    participant Q as pgmq (PostgreSQL)
+    participant W as worker
+    participant T as translator
+    participant C as connectors
+    P->>G: upload ORDERS
+    G->>A: HTTP intake (archive reference)
+    A->>Q: message + "translate" job (one transaction)
+    W->>Q: read job
+    W->>T: HTTP translate (archive reference)
+    T-->>W: result (archive reference)
+    W->>Q: "deliver" job
+    C->>Q: read job
+    C->>C: write CSV to the ERP folder
+```
 
 ### Scaling rules every service follows
 
