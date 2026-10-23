@@ -10,8 +10,6 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@libredi/api": "workspace:*",
-    "@libredi/service-kit": "workspace:*",
     "@seriousme/openapi-schema-validator": "catalog:",
     "@types/node": "catalog:",
     "ajv": "catalog:",

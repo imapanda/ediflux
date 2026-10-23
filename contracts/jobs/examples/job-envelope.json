@@ -1,10 +1,11 @@
 {
-  "schemaVersion": 1,
   "type": "message.parse",
+  "version": 1,
   "messageId": "0b0a5f5e-5d0c-4f43-9d52-4a3f0d9d7a11",
   "correlationId": "7c1d3a52-93f6-4a7b-8d19-2f6a1b0c5e34",
   "environment": "test",
   "enqueuedAt": "2026-01-15T09:30:00Z",
+  "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa1c3d02e7-01",
   "payload": {
     "archiveSha256": "0000000000000000000000000000000000000000000000000000000000000000"
   }

@@ -7,13 +7,13 @@ import { loadJson } from "./load.ts";
 const ajv = new Ajv2020({ strict: true, allErrors: true });
 addFormats(ajv);
 
-const schema = loadJson("jsonschema/job-envelope.schema.json") as Record<string, unknown>;
-const example = loadJson("jsonschema/examples/job-envelope.json") as Record<string, unknown>;
+const schema = loadJson("jobs/job-envelope.schema.json") as Record<string, unknown>;
+const example = loadJson("jobs/examples/job-envelope.json") as Record<string, unknown>;
 const validate = ajv.compile(schema);
 
-const REQUIRED = ["schemaVersion", "type", "messageId", "environment", "enqueuedAt", "payload"];
+const REQUIRED = ["type", "version", "messageId", "environment", "enqueuedAt", "payload"];
 
-describe("contracts/jsonschema/job-envelope.schema.json", () => {
+describe("contracts/jobs/job-envelope.schema.json", () => {
   it("accepts the documented example", () => {
     expect(validate(example), JSON.stringify(validate.errors)).toBe(true);
   });
@@ -37,7 +37,9 @@ describe("contracts/jsonschema/job-envelope.schema.json", () => {
   });
 
   it.each([
-    ["an unknown schema version", { schemaVersion: 2 }],
+    ["a version of 0", { version: 0 }],
+    ["a fractional version", { version: 1.5 }],
+    ["a malformed traceparent", { traceparent: "00-abc" }],
     ["a job type without a dot", { type: "parse" }],
     ["a job type in upper case", { type: "Message.Parse" }],
     ["a message id that is not a UUID", { messageId: "123" }],

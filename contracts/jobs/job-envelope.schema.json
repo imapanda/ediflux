@@ -1,20 +1,21 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:libredi:schema:job-envelope:1",
+  "$id": "urn:libredi:schema:job-envelope",
   "title": "Job envelope",
-  "description": "Common shape of every message sent through the PostgreSQL job queue (pgmq). The payload is described by the schema of its job type. Raw EDI bytes never travel in the queue: the payload holds an archive reference (claim check).",
+  "description": "Common shape of every job sent through the PostgreSQL queue (pgmq). The payload is described by the JSON Schema of its job type, next to this file. Files never travel in the queue: the payload holds archive references (SHA-256), not bytes.",
   "type": "object",
-  "required": ["schemaVersion", "type", "messageId", "environment", "enqueuedAt", "payload"],
+  "required": ["type", "version", "messageId", "environment", "enqueuedAt", "payload"],
   "properties": {
-    "schemaVersion": {
-      "description": "Version of this envelope. Readers ignore unknown properties within a version.",
-      "const": 1
-    },
     "type": {
       "description": "Job type, lower case, dot separated: domain then action.",
       "type": "string",
       "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$",
       "examples": ["message.parse"]
+    },
+    "version": {
+      "description": "Version of the job type, that is of its payload schema. Readers ignore unknown properties within a version.",
+      "type": "integer",
+      "minimum": 1
     },
     "messageId": {
       "description": "The Libredi message this job works on.",
@@ -33,6 +34,11 @@
     "enqueuedAt": {
       "type": "string",
       "format": "date-time"
+    },
+    "traceparent": {
+      "description": "W3C Trace Context, to follow a message across services.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{2}-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$"
     },
     "payload": {
       "description": "Job-specific data, validated against the schema of the job type.",

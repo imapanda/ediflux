@@ -205,12 +205,6 @@ importers:
 
   packages/contracts:
     devDependencies:
-      '@libredi/api':
-        specifier: workspace:*
-        version: link:../../services/api
-      '@libredi/service-kit':
-        specifier: workspace:*
-        version: link:../service-kit
       '@seriousme/openapi-schema-validator':
         specifier: 'catalog:'
         version: 2.11.0
@@ -260,6 +254,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.5
+      ajv:
+        specifier: 'catalog:'
+        version: 8.20.0
       esbuild:
         specifier: 'catalog:'
         version: 0.28.2
@@ -269,6 +266,9 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.12(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(esbuild@0.28.2)(yaml@2.9.1))
+      yaml:
+        specifier: 'catalog:'
+        version: 2.9.1
 
   services/mcp:
     dependencies:

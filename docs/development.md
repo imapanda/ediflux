@@ -49,8 +49,8 @@ access; only `connectors` can reach partners. `scripts/smoke-compose.sh` checks 
 | `services/api`, `worker`, `translator`, `mcp` | TypeScript services. Each has its `Dockerfile`, a `src/main.ts` entry point and tests. |
 | `services/connectors` | Go service, with its own `go.mod` and `Dockerfile`. |
 | `packages/service-kit` | Shared runtime of the TypeScript services: `/healthz`, port handling, graceful shutdown. |
-| `packages/contracts` | Tests that check the files in `contracts/` and that services honour them. |
-| `contracts/` | OpenAPI and JSON Schema files, written before the code. See its [README](../contracts/README.md). |
+| `packages/contracts` | Tests that check that the files in `contracts/` are valid. Each service tests its own responses against them. |
+| `contracts/` | OpenAPI (`openapi/`) and job JSON Schemas (`jobs/`), written before the code. See its [README](../contracts/README.md). |
 | `infra/postgres`, `infra/caddy` | Image of PostgreSQL with pgmq; configuration of the reverse proxy. |
 | `compose.yaml`, `.env.example` | The stack on one machine. |
 | `scripts/` | `init-env.sh`, `check-pins.sh`, `smoke-image.sh`, `smoke-compose.sh`. |
@@ -135,8 +135,9 @@ directory.
   Registry links an image to it.
 - Services stop cleanly on `SIGTERM`: no new connections, requests in flight finish, exit 0.
 
-ADR 4 still describes one image with several roles; the decision since then is one image per
-service, and the ADR is updated separately.
+One image and one CI job per service, and no service importing another service's code, are
+decision 1 of [ADR 10](adr/0010-service-boundaries-and-communication.md): code shared between
+services lives in `packages/*` and language-neutral interfaces in `contracts/`.
 
 To add a service, copy `services/api` (or `services/connectors`), then:
 
