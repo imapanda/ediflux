@@ -1,0 +1,70 @@
+FICTITIOUS SEGMENT DIRECTORY
+A test fixture that imitates the layout of a segment directory (D.01B style).
+
+────────────────────────────────────────────────────────────────────
+
+       XHD  EXAMPLE HEADER
+
+       Function: To identify the invented document, with a description
+                 that goes over two lines.
+
+010    C901 EXAMPLE DOCUMENT IDENTIFICATION            M    1
+       9002  Example document number                   M      an..35
+       9001  Example function code                     C      an..3
+
+020 X  C902 EXAMPLE DATE                               C    5
+       9003  Example date qualifier                    M      an..3
+       9004  Example date value                        M      n8
+
+030    9011 EXAMPLE FLAG                               C    1 a..1
+
+       Note:
+            This note explains the segment. It is not an item.
+
+────────────────────────────────────────────────────────────────────
+
+       XPT  EXAMPLE PARTY
+
+       Function: To name an invented party.
+
+010    9005 EXAMPLE PARTY ROLE                         M    1 a2
+020    9006 EXAMPLE PARTY IDENTIFIER                   M    1 an..35
+030    9007 EXAMPLE NAME LINE                          C    3 an..35
+
+────────────────────────────────────────────────────────────────────
+
+    X  XDT  EXAMPLE DATE
+
+       Function: To give an invented date.
+
+010    C902 EXAMPLE DATE                               M    1
+       9003  Example date qualifier                    M      an..3
+       9004  Example date value                        M      n8
+
+────────────────────────────────────────────────────────────────────
+
+       XLN  EXAMPLE LINE
+
+       Function: To give an invented line.
+
+010    9008 EXAMPLE LINE NUMBER                        M    1 n..6
+020    9006 EXAMPLE PRODUCT IDENTIFIER, WHICH HAS A
+            NAME TOO LONG FOR ONE LINE                 C    1 an..35
+
+────────────────────────────────────────────────────────────────────
+
+       XQT  EXAMPLE QUANTITY
+
+       Function: To give an invented quantity.
+
+010    C904 EXAMPLE QUANTITY                           M    1
+       9010  Example quantity qualifier                M      an..3
+       9009  Example quantity value                    C      n..15
+
+────────────────────────────────────────────────────────────────────
+
+       XTT  EXAMPLE TOTAL
+
+       Function: To count the invented lines.
+
+010    9008 EXAMPLE LINE COUNT                         M    1 n..6

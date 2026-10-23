@@ -1,0 +1,19 @@
+FICTITIOUS CODE LISTS, FIRST FILE
+A test fixture that imitates the layout of a code list file (D.96A style).
+
+────────────────────────────────────┐
+* 9001  Example function code, coded
+  Desc: Code that tells what an invented test document does.
+  Repr: an..3
+        1 First issue
+             The invented document is sent for the first time.
+        2 Reissue
+             The invented document replaces an earlier one, and
+             this description goes over two lines.
+       14 Fourth code whose name is too long for one line, so
+          it goes on
+────────────────────────────────────┐
+  9003  Example date qualifier, coded
+  Repr: an..3
+       10 Date of issue
+       20 Requested date

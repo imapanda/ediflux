@@ -1,0 +1,48 @@
+                              UN/EDIFACT
+
+                         DRAFT RECOMMENDATION
+
+                    Fictitious sample message
+
+----------------------------------------------------------------------
+This message is an invented test fixture.
+
+                                            Message Type : SAMPLE
+                                            Version      : Z
+                                            Release      : 96A
+                                            Contr. Agency: UN
+
+           4.3.1 Segment table
+
+4.3.1  Segment table
+
+Pos    Tag Name                                      S   R
+
+           HEADER SECTION
+
+0010   UNH Message header                            M   1
+0020   XHD Example header                            M   1
+0030   XDT Example date                              C   5
+
+0040       ───── Segment group 1  ────────────────── C   9──────────┐
+0050   XPT Example party                             M   1           │
+0060   XDT Example date                              C   5───────────┘
+
+           DETAIL SECTION
+
+0070   UNS Section control                           M   1
+
+0080       ───── Segment group 2  ────────────────── C   99─────────┐
+0090   XLN Example line                              M   1           │
+0100   XQT Example quantity                          C   5───────────┘
+
+           SUMMARY SECTION
+
+0110   UNS Section control                           M   1
+0120   XTT Example total                             C   1
+0130   UNT Message trailer                           M   1
+
+Annex GLOSSARY OF INVENTED TERMS
+
+Word
+A line that follows the table and must not be read as part of it.

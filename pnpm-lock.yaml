@@ -231,16 +231,17 @@ importers:
         version: 2.9.1
 
   packages/registry:
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.6.5
+    dependencies:
       ajv:
         specifier: 'catalog:'
         version: 8.20.0
       ajv-formats:
         specifier: 'catalog:'
         version: 3.0.1(ajv@8.20.0)
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.5
       fast-check:
         specifier: 'catalog:'
         version: 4.10.2
