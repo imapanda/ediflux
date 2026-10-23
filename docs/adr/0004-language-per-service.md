@@ -1,7 +1,11 @@
 # 4. Language per service
 
-- Status: accepted
+- Status: accepted, partly superseded by [ADR 10](0010-service-boundaries-and-communication.md)
 - Date: 2026-10-17
+
+> Partly superseded by ADR 10: one image per service instead of one image with several
+> entrypoints, `connectors` in Go, pgmq instead of pg-boss, and the `as2-gateway` language
+> left to the milestone 8 spike.
 
 ## Context
 
