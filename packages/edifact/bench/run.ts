@@ -12,7 +12,13 @@
  */
 import { cpus } from "node:os";
 import { performance } from "node:perf_hooks";
-import { splitMessages, Tokenizer, TokenKind } from "../src/index.ts";
+import {
+  parseInterchanges,
+  parseMessages,
+  splitMessages,
+  Tokenizer,
+  TokenKind,
+} from "../src/index.ts";
 import { generateOrders } from "./generate.ts";
 import { parseToObjectTree } from "./object-tree.ts";
 
@@ -117,6 +123,49 @@ function splitAll(bytes: Uint8Array, checkCharacters = true): number {
   return segments;
 }
 
+/** The parser at its cheapest: every message is built, nothing is read from it. */
+function parseOnly(bytes: Uint8Array): number {
+  let segments = 0;
+  for (const message of parseMessages(bytes)) {
+    segments += message.segmentCount;
+  }
+  return segments;
+}
+
+/** What a validator does first: visit every segment, element and component of every message. */
+function parseAndWalk(bytes: Uint8Array): number {
+  let components = 0;
+  for (const message of parseMessages(bytes)) {
+    for (const segment of message.segments) {
+      for (const element of segment.elements) {
+        components += element.components.length;
+      }
+    }
+  }
+  return components;
+}
+
+/** ... and what a mapping does: turn every value into text. */
+function parseAndRead(bytes: Uint8Array): number {
+  let characters = 0;
+  for (const message of parseMessages(bytes)) {
+    for (const segment of message.segments) {
+      for (const element of segment.elements) {
+        for (const component of element.components) {
+          characters += component.text().length;
+        }
+      }
+    }
+  }
+  return characters;
+}
+
+/** The whole file as one tree, kept in memory. */
+function parseWhole(bytes: Uint8Array): number {
+  const { interchanges } = parseInterchanges(bytes);
+  return interchanges.length + (interchanges[0]?.items.length ?? 0);
+}
+
 /** One tokenizer per message, as a worker will see them when the file has been split (see `splitMessages`). */
 function perMessage(
   bytes: Uint8Array,
@@ -208,6 +257,79 @@ function splitMemory(bytes: Uint8Array): number {
   return peak;
 }
 
+/**
+ * Memory of the parser: the arrays it needs for one message, which is what bounds it (exact),
+ * and the growth of the heap and of the buffers while it runs (sampled, so it also counts the
+ * garbage of messages not yet collected), then what the whole tree keeps.
+ */
+function parserMemory(bytes: Uint8Array): {
+  workingBytes: number;
+  freeRunning: number;
+  live: number;
+  messages: number;
+  wholeTree: number | null;
+} {
+  const loop = (
+    collectEvery: number,
+  ): { peak: number; stream: ReturnType<typeof parseMessages> } => {
+    gc?.();
+    gc?.();
+    const base = heapNow();
+    const stream = parseMessages(bytes);
+    let peak = 0;
+    let count = 0;
+    for (const message of stream) {
+      sink ^= message.segmentCount;
+      if (++count % 64 === 0) {
+        if (collectEvery > 0 && count % collectEvery === 0) {
+          gc?.();
+        }
+        peak = Math.max(peak, heapNow() - base);
+      }
+    }
+    return { peak, stream };
+  };
+  // Left to itself the engine collects when the buffers it has been handed pile up; with a
+  // collection every 64 messages, what is left is what the parser really holds.
+  const free = loop(0);
+  const live = loop(64);
+  gc?.();
+  gc?.();
+  let wholeTree: number | null = null;
+  if (options.wholeTree) {
+    const baseTree = heapNow();
+    const result = parseInterchanges(bytes);
+    gc?.();
+    gc?.();
+    wholeTree = heapNow() - baseTree;
+    sink ^= result.interchanges.length;
+  }
+  return {
+    workingBytes: live.stream.peakWorkingBytes,
+    freeRunning: free.peak,
+    live: live.peak,
+    messages: live.stream.messageCount,
+    wholeTree,
+  };
+}
+
+/**
+ * What the whole tree keeps for a file of tiny messages (16 bytes each): the fixed cost of a
+ * message, which the ratio of 3.8 for ordinary orders hides.
+ */
+function tinyMessagesRetained(): { inputBytes: number; retained: number } {
+  const bytes = new TextEncoder().encode("UNH+1+X'UNT+1+1'".repeat(50_000));
+  gc?.();
+  gc?.();
+  const base = heapNow();
+  const result = parseInterchanges(bytes, { maxTreeBytes: 1 << 30 });
+  gc?.();
+  gc?.();
+  const retained = heapNow() - base;
+  sink ^= result.interchanges.length;
+  return { inputBytes: bytes.length, retained };
+}
+
 /** Memory still held by the tree once it is built, after a full collection. */
 function objectTreeRetained(bytes: Uint8Array): number {
   gc?.();
@@ -293,6 +415,41 @@ addThroughput(
   `the check adds ${fixed((splitTiming.medianMs / unCheckedTiming.medianMs - 1) * 100)} % to the time`,
 );
 
+const parseTiming = time(() => parseOnly(big.bytes));
+const parseOrdersPerSecond = big.messages.length / (parseTiming.medianMs / 1000);
+const parseRate = addThroughput(
+  "parseMessages, building every message",
+  bigBytes,
+  parseTiming,
+  `${fixed(parseOrdersPerSecond)} orders/s, ${fixed(1e6 / parseOrdersPerSecond, 1)} µs per order`,
+);
+
+const walkTiming = time(() => parseAndWalk(big.bytes));
+const walkRate = addThroughput(
+  "parseMessages, then visiting every segment, element and component",
+  bigBytes,
+  walkTiming,
+  `${fixed(big.messages.length / (walkTiming.medianMs / 1000))} orders/s`,
+);
+
+const textTiming = time(() => parseAndRead(big.bytes));
+const textOrdersPerSecond = big.messages.length / (textTiming.medianMs / 1000);
+const textRate = addThroughput(
+  "parseMessages, then reading every value as text",
+  bigBytes,
+  textTiming,
+  `${fixed(textOrdersPerSecond)} orders/s, ${fixed(1e6 / textOrdersPerSecond, 1)} µs per order`,
+);
+
+if (options.wholeTree) {
+  addThroughput(
+    "parseInterchanges, the whole file as one tree",
+    bigBytes,
+    time(() => parseWhole(big.bytes), Math.max(3, options.runs >> 3), 2),
+    "everything stays in memory",
+  );
+}
+
 const bigMessageTiming = time(() => perMessage(big.bytes, big.messages));
 const bigMessageRate = big.messages.length / (bigMessageTiming.medianMs / 1000);
 addThroughput(
@@ -328,6 +485,8 @@ if (options.baseline) {
 
 const memory = tokenizerMemory(big.bytes);
 const splitting = splitMemory(big.bytes);
+const parsing = parserMemory(big.bytes);
+const tiny = options.wholeTree ? tinyMessagesRetained() : null;
 const retained = options.baseline ? objectTreeRetained(big.bytes) : null;
 
 const lines: string[] = [];
@@ -344,6 +503,19 @@ lines.push(
   `| tokenizer, while scanning (its batch, sampled) | ${fixed(memory.workingSet / 1024, 1)} KiB | ${fixed(memory.workingSet / bigBytes, 4)}× |`,
   `| tokenizer, after the scan and a collection | ${fixed(memory.retained / 1024, 1)} KiB | ${fixed(memory.retained / bigBytes, 4)}× |`,
   `| splitMessages, heap and buffers while it runs (sampled) | ${fixed(splitting / 1024, 1)} KiB | ${fixed(splitting / bigBytes, 4)}× |`,
+  `| parseMessages, arrays for one message (exact, the bound) | ${fixed(parsing.workingBytes / 1024, 1)} KiB | ${fixed(parsing.workingBytes / bigBytes, 4)}× |`,
+  `| parseMessages, live heap and buffers (collected every 64 messages, sampled) | ${fixed(parsing.live / 1024)} KiB | ${fixed(parsing.live / bigBytes, 4)}× |`,
+  `| parseMessages, left to collect itself (sampled, includes garbage) | ${fixed(parsing.freeRunning / 1024)} KiB | ${fixed(parsing.freeRunning / bigBytes, 4)}× |`,
+  ...(tiny === null
+    ? []
+    : [
+        `| parseInterchanges, 16-byte messages (retained, the fixed cost of a message) | ${fixed(tiny.retained / 1e6, 1)} MB | ${fixed(tiny.retained / tiny.inputBytes, 0)}× |`,
+      ]),
+  ...(parsing.wholeTree === null
+    ? []
+    : [
+        `| parseInterchanges, the whole tree (retained) | ${fixed(parsing.wholeTree / 1e6, 1)} MB | ${fixed(parsing.wholeTree / bigBytes, 2)}× |`,
+      ]),
   ...(retained === null || treeRate === null
     ? []
     : [
@@ -375,10 +547,23 @@ if (options.json) {
         raw: mbPerSecond(bigBytes, rawTiming.medianMs),
         tokenizer: readRate,
         split: splitRate,
+        parse: parseRate,
+        parseAndWalk: walkRate,
+        parseAndRead: textRate,
         objectTree: treeRate,
       },
-      ordersPerSecond: { large: bigMessageRate, small: smallMessageRate },
+      ordersPerSecond: {
+        tokenizeLarge: bigMessageRate,
+        tokenizeSmall: smallMessageRate,
+        split: splitOrdersPerSecond,
+        parse: parseOrdersPerSecond,
+        parseAndRead: textOrdersPerSecond,
+      },
       memoryBytes: {
+        parserWorkingBytes: parsing.workingBytes,
+        parserLive: parsing.live,
+        parserFreeRunning: parsing.freeRunning,
+        wholeTree: parsing.wholeTree,
         tokenizerWorkingSet: memory.workingSet,
         tokenizerRetained: memory.retained,
         objectTreeRetained: retained,
@@ -400,6 +585,7 @@ function parseOptions(argv: string[]): {
   sweep: boolean;
   json: boolean;
   baseline: boolean;
+  wholeTree: boolean;
 } {
   const result = {
     sizeMb: 10,
@@ -409,6 +595,7 @@ function parseOptions(argv: string[]): {
     sweep: false,
     json: false,
     baseline: true,
+    wholeTree: true,
   };
   for (const arg of argv) {
     const [name, value] = arg.split("=");
@@ -435,11 +622,14 @@ function parseOptions(argv: string[]): {
       case "--no-baseline":
         result.baseline = false;
         break;
+      case "--no-whole-tree":
+        result.wholeTree = false;
+        break;
       case "--":
         break;
       default:
         console.error(
-          `Unknown option ${arg}. Known: --size-mb --runs --warmup --seed --sweep --json --no-baseline`,
+          `Unknown option ${arg}. Known: --size-mb --runs --warmup --seed --sweep --json --no-baseline --no-whole-tree`,
         );
         process.exit(1);
     }
