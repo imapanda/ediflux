@@ -1,3 +1,4 @@
+import { type CodeListCheck, checkSegment } from "./elements.ts";
 import { EnvelopeChecker, type IssueSink } from "./envelope.ts";
 import { ParseError, TokenizeError } from "./errors.ts";
 import {
@@ -5,10 +6,14 @@ import {
   type IssueDraft,
   isIssueCode,
   makeIssue,
+  shown,
   type ValidationIssue,
 } from "./issues.ts";
 import type { LineColumn } from "./line-index.ts";
 import { type ParseOptions, parseMessages } from "./parser.ts";
+import { findRegistry, type RegistryView } from "./registry.ts";
+import { StructureChecker } from "./structure.ts";
+import type { Message, Segment } from "./tree.ts";
 import type { ParseIssue } from "./types.ts";
 
 export interface ValidateOptions {
@@ -16,6 +21,18 @@ export interface ValidateOptions {
   readonly maxIssues?: number;
   /** Most memory, in bytes, for the arrays of one message; see {@link ParseOptions}. */
   readonly memoryBudget?: number;
+  /**
+   * Registries (contracts/registry) to check the structure and the data of the messages against.
+   * The one that matches the message identifier of UNH (agency, version, release) is used; a
+   * message that none matches is not checked and gets a warning. Without registries, only the
+   * file and its envelopes are checked.
+   */
+  readonly registries?: readonly RegistryView[];
+  /**
+   * Which code lists are enforced: `closed` (default) the lists that hold every valid value,
+   * `all` also the open lists, which are only what the directory knows, as warnings, `off` none.
+   */
+  readonly codeLists?: CodeListCheck;
 }
 
 export interface ValidationReport {
@@ -41,14 +58,14 @@ export interface ValidationReport {
 const DEFAULT_MAX_ISSUES = 1000;
 
 /**
- * Keeps the first issues, counts all of them. The envelope check and the reader of the values find
- * theirs in two sequences that are each in file order and each cut at the limit, so that the first
- * issues of the file are among the ones kept: they are merged by offset at the end.
+ * Keeps the first issues of the file, counts all of them. The checkers find their issues message by
+ * message, and the ones of a message in the order of the checks and not of the file, so the kept
+ * ones are a list sorted by offset and cut at the limit: an issue that would come after the last
+ * one kept, when the list is full, is only counted.
  */
 class Collector implements IssueSink {
   readonly #max: number;
-  readonly #byChecker: ValidationIssue[] = [];
-  readonly #byReader: ValidationIssue[] = [];
+  readonly #kept: ValidationIssue[] = [];
   count = 0;
   errors = 0;
   warnings = 0;
@@ -58,13 +75,30 @@ class Collector implements IssueSink {
   }
 
   add(draft: IssueDraft, locate: (offset: number) => LineColumn): void {
-    this.#keep(this.#byChecker, draft, locate);
+    this.count++;
+    if ((draft.severity ?? ISSUE_CATALOGUE[draft.code].severity) === "error") {
+      this.errors++;
+    } else {
+      this.warnings++;
+    }
+    const kept = this.#kept;
+    if (kept.length >= this.#max && draft.offset >= (kept[kept.length - 1]?.offset ?? 0)) {
+      return;
+    }
+    const issue = makeIssue(draft, locate);
+    let at = kept.length;
+    while (at > 0 && (kept[at - 1] as ValidationIssue).offset > issue.offset) {
+      at--;
+    }
+    kept.splice(at, 0, issue);
+    if (kept.length > this.#max) {
+      kept.pop();
+    }
   }
 
   /** An issue the splitter found in a value (INVALID_CHARACTER, UNSUPPORTED_CHARSET). */
   addParseIssue(issue: ParseIssue): void {
-    this.#keep(
-      this.#byReader,
+    this.add(
       {
         code: issue.code,
         segment: issue.position.segment,
@@ -104,23 +138,67 @@ class Collector implements IssueSink {
     this.errors += count;
   }
 
-  /** The kept issues in file order. */
+  /** The kept issues, in file order. */
   issues(): ValidationIssue[] {
-    return [...this.#byChecker, ...this.#byReader]
-      .sort((a, b) => a.offset - b.offset)
-      .slice(0, this.#max);
+    return this.#kept;
   }
+}
 
-  #keep(into: ValidationIssue[], draft: IssueDraft, locate: (offset: number) => LineColumn): void {
-    this.count++;
-    if ((draft.severity ?? ISSUE_CATALOGUE[draft.code].severity) === "error") {
-      this.errors++;
-    } else {
-      this.warnings++;
+/** The structure and the data of one message, against the registry that describes it. */
+function checkMessage(
+  message: Message,
+  registries: readonly RegistryView[],
+  sink: IssueSink,
+  codeLists: CodeListCheck,
+): void {
+  const { unh, unt } = message;
+  const type = unh.text(2, 1);
+  const version = unh.text(2, 2);
+  const release = unh.text(2, 3);
+  const agency = unh.text(2, 4);
+  if (
+    type === undefined ||
+    version === undefined ||
+    release === undefined ||
+    agency === undefined
+  ) {
+    return; // the identifier is incomplete: the envelope check has said so
+  }
+  const locate = (offset: number): LineColumn => message.interchange.locate(offset);
+  const registry = findRegistry(registries, agency, version, release);
+  const def = registry?.message(type);
+  if (registry === undefined || def === undefined) {
+    sink.add(
+      {
+        code: "MESSAGE_NOT_CHECKED",
+        segment: unh.number,
+        tag: "UNH",
+        element: 2,
+        found: shown(`${type} ${version} ${release} ${agency}`),
+        offset: unh.element(2)?.start ?? unh.start,
+      },
+      locate,
+    );
+    return;
+  }
+  const structure = new StructureChecker(def, sink, locate);
+  const context = { interchange: message.interchange, sink, locate, codeLists };
+  // Segments are made one at a time and dropped: the list of a message is not built.
+  const count = message.segmentCount;
+  const last = unt === null ? count : count - 1;
+  for (let i = 1; i < last; i++) {
+    const segment = message.segment(i) as Segment;
+    const tag = segment.tag;
+    structure.feed(tag, segment.number, segment.start);
+    const definition = registry.segment(tag);
+    if (definition !== undefined) {
+      checkSegment(segment, definition, context);
     }
-    if (into.length < this.#max) {
-      into.push(makeIssue(draft, locate));
-    }
+  }
+  if (unt === null) {
+    structure.end(null, unh.number + count, message.end);
+  } else {
+    structure.end(unt.tag, unt.number, unt.start);
   }
 }
 
@@ -146,6 +224,11 @@ export function validate(bytes: Uint8Array, options: ValidateOptions = {}): Vali
     maxIssues,
     ...(options.memoryBudget === undefined ? {} : { memoryBudget: options.memoryBudget }),
   };
+  const registries = options.registries ?? [];
+  const codeLists = options.codeLists ?? "closed";
+  if (codeLists !== "closed" && codeLists !== "all" && codeLists !== "off") {
+    throw new RangeError(`codeLists must be "closed", "all" or "off", not ${String(codeLists)}`);
+  }
   const stream = parseMessages(bytes, parseOptions);
   let complete = true;
   let messageCount = 0;
@@ -156,6 +239,9 @@ export function validate(bytes: Uint8Array, options: ValidateOptions = {}): Vali
       if (item.kind === "message") {
         messageCount++;
         envelope.message(item);
+        if (registries.length > 0) {
+          checkMessage(item, registries, collector, codeLists);
+        }
       } else {
         envelope.envelope(item);
       }

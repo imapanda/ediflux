@@ -140,7 +140,8 @@ samples/edifact/
   UNA string is segment 0. For a missing segment it is the first segment after the gap.
 - `position.element` and `position.component` are 1-based. The tag does not count, and a
   composite element counts as one element. They are `null` when the error concerns the whole
-  segment or the whole file.
+  segment or the whole file. `component` is also `null` for an error on a simple data element
+  (one that is not a composite), whatever its value.
 - `layer` is the first validation layer that can detect the error: `tokenizer` (service string,
   character set, file integrity), `envelope` (UNB, UNG, UNH, UNT, UNE, UNZ), `structure`
   (segment order and repetition), `element` (type, length, mandatory values) or `code`

@@ -76,8 +76,9 @@ A composite lists its `components`, a segment its `elements`, in order:
 - `maxOccurs` on a segment element is how many times it may be repeated, 1 when absent. Repetition
   needs the repetition separator of syntax version 4: under syntax version 3 an element cannot be
   repeated, whatever `maxOccurs` says.
-- A **simple** data element has no components. How an error on one is positioned (`component`
-  `null` or 1) is for the error model to fix (issue #46); the sample corpus uses both today.
+- A **simple** data element has no components. An error on one has `component` `null`: the error
+  model ([validation errors](../../docs/validation-errors.md)) puts `component` only where the
+  element is a composite.
 
 ### Code lists
 

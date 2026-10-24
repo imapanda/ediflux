@@ -248,6 +248,74 @@ Message: UNZ closes interchange IC999999, but UNB opened interchange IC000001.
 What to do: Write the interchange control reference of UNB (its fifth element) as the second
 element of UNZ.
 
+### Message structure
+
+Segment order, groups and how often a segment may occur, from the message structure of the
+registry.
+
+#### `MESSAGE_NOT_CHECKED`
+
+**A message has no definition, so it was not checked.** Severity: warning.
+
+Registries were given, but none describes the message type, version, release and agency that UNH
+names. The structure and the data of that message are not checked; its envelope is.
+
+Message: No definition of the message ORDERS D 96A UN is loaded, so its structure and its data
+were not checked.
+
+What to do: Load the registry of that directory (the one made from the UN/ECE files for the
+version in UNH), or ignore this warning if the message is not meant to be checked.
+
+#### `MISSING_MANDATORY_SEGMENT`
+
+**A mandatory segment is missing.** Severity: error.
+
+The message structure requires a segment (or a group, by its first segment) that the message does
+not have. The position is the segment found where the missing one belongs: the next segment, or
+UNT when the message ends.
+
+Message: The mandatory BGM segment is missing before the DTM segment.
+
+What to do: Add the segment where the message structure puts it. The order of the segments
+matters: a segment in the wrong place can look like a missing one.
+
+#### `TOO_MANY_REPETITIONS`
+
+**A segment or group occurs too often.** Severity: error.
+
+A segment, or a group (counted by its first segment), occurs more times in its place than the
+message structure allows. The position is the first occurrence that is too many.
+
+Message: The BGM segment occurs more often than the message allows: 2 occurrences, and at most 1
+occurrence.
+
+What to do: Remove the extra occurrences, or check that a segment that starts a new group is not
+missing in between.
+
+#### `SEGMENT_OUT_OF_ORDER`
+
+**A segment is in the wrong place.** Severity: error.
+
+A segment that the message structure has stands where the structure cannot continue with it: it
+belongs before the segments that precede it, or in a group that has not started.
+
+Message: The FTX segment is out of order: at this point the message can continue with NAD, LIN or
+UNS.
+
+What to do: Move the segment to its place in the message structure. Segments of a group follow the
+segment that opens the group.
+
+#### `UNKNOWN_SEGMENT`
+
+**A segment is not part of the message.** Severity: error.
+
+The segment is not in the structure of this message at all.
+
+Message: The XYZ segment is not part of the structure of this message.
+
+What to do: Remove the segment, or check the message type and version in UNH: this segment may
+belong to another message.
+
 ### Data elements
 
 The values: mandatory data, types and lengths, from the segment and data element definitions of
@@ -274,12 +342,92 @@ A value does not match the data type of its element: letters where digits are ex
 where letters are expected. The counts of UNT, UNE and UNZ are checked without a registry: for
 them the issue has the layer `envelope`.
 
-Message: The UNT segment has THREE where a whole number is expected.
+Message: The LIN segment has ONE for line number (1082), but the value must be a number.
 
 What to do: Check the value against the type of the element: numeric elements hold digits (and a
-sign and a decimal mark), alphabetic elements hold letters.
+minus sign and the decimal mark of the UNA string), alphabetic elements hold letters.
 
-## Not yet reported
+#### `UNEXPECTED_ELEMENT`
 
-`MISSING_MANDATORY_SEGMENT`, `TOO_MANY_REPETITIONS`, `SEGMENT_OUT_OF_ORDER`, `VALUE_TOO_LONG`,
-`UNKNOWN_CODE`
+**A segment has more elements than its definition.** Severity: error.
+
+A segment has an element after the last one that its definition has.
+
+Message: The BGM segment has 5 elements, but its definition has at most 4 elements.
+
+What to do: Remove the extra elements, or check for a separator in a value that should have been
+written with the release character in front.
+
+#### `UNEXPECTED_COMPONENT`
+
+**An element has more components than its definition.** Severity: error.
+
+An element has a component after the last one that its definition has; a simple data element has
+none. The position is that of the first component too many.
+
+Message: The DTM segment has 4 components in an element that is defined with at most 3 components.
+
+What to do: Remove the extra components, or write a component separator that is part of a value
+with the release character in front.
+
+#### `REPETITION_NOT_ALLOWED`
+
+**An element is repeated in syntax version 3.** Severity: error.
+
+An element uses the repetition separator, which only syntax version 4 has, and the interchange is
+of an earlier version.
+
+Message: The FTX segment repeats an element, which syntax version 3 does not allow.
+
+What to do: Use syntax version 4 in UNB, or declare no repetition separator in the UNA string (a
+space in its seventh position) and send the values in separate segments.
+
+#### `ELEMENT_REPEATED_TOO_OFTEN`
+
+**An element is repeated more often than allowed.** Severity: error.
+
+An element has more repetitions than its definition allows.
+
+Message: The FTX segment repeats an element 4 times, and the definition allows at most 3 times.
+
+What to do: Remove the extra repetitions.
+
+#### `VALUE_TOO_LONG`
+
+**A value is longer than its element allows.** Severity: error.
+
+A value has more characters than the maximum length of its data element.
+
+Message: The BGM segment has 36 characters in document identifier (1004), where the element allows
+35 characters at most.
+
+What to do: Shorten the value to the length of the data element, or send it in a longer element if
+the message has one.
+
+#### `VALUE_TOO_SHORT`
+
+**A value is shorter than its element requires.** Severity: error.
+
+A value has fewer characters than the minimum length of its data element.
+
+Message: The DTM segment has 6 characters in date value (2380), where the element needs 8
+characters at least.
+
+What to do: Write the value in full: fixed-length elements are not padded for you.
+
+### Code lists
+
+Coded values, against the code lists of the registry.
+
+#### `UNKNOWN_CODE`
+
+**A coded value is not in its code list.** Severity: error.
+
+A value of an element that has a code list is not one of its codes. For a list that is only what
+the directory knows (an open list) it is a warning, and only when the setting asks for it.
+
+Message: The NAD segment has the code QQQ in party qualifier (3035), which is not in its code
+list.
+
+What to do: Use one of the codes of the list. The documentation of the message guideline of your
+partner says which of them it uses.

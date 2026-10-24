@@ -1,5 +1,6 @@
 export type { CharacterSet } from "./charset.ts";
 export { decodeText } from "./charset.ts";
+export type { CodeListCheck } from "./elements.ts";
 export {
   ParseError,
   ParseErrorCode,
@@ -28,6 +29,14 @@ export {
   parseInterchanges,
   parseMessages,
 } from "./parser.ts";
+export type {
+  CodeListView,
+  DataElementView,
+  NodeView,
+  PositionView,
+  RegistryView,
+  Status,
+} from "./registry.ts";
 export {
   DEFAULT_SEPARATORS,
   type Separators,

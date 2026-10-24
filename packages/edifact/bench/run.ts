@@ -24,6 +24,7 @@ import {
   TokenKind,
   validate,
 } from "../src/index.ts";
+import { corpusRegistries } from "../src/testing/corpus-registry.ts";
 import { generateOrders } from "./generate.ts";
 import { parseToObjectTree } from "./object-tree.ts";
 
@@ -168,6 +169,11 @@ function parseAndRead(bytes: Uint8Array): number {
 /** The validator: the file and its envelopes, and nothing built beyond what the parser builds. */
 function validateAll(bytes: Uint8Array): number {
   return validate(bytes).issueCount + 1;
+}
+
+/** The validator with a registry: structure, and the type, length and codes of every value. */
+function validateWithRegistry(bytes: Uint8Array): number {
+  return validate(bytes, { registries: corpusRegistries }).issueCount + 1;
 }
 
 /** The whole file as one tree, kept in memory. */
@@ -483,6 +489,15 @@ const validateRate = addThroughput(
   `${fixed(validateOrdersPerSecond)} orders/s, ${fixed(1e6 / validateOrdersPerSecond, 1)} µs per order`,
 );
 
+const registryTiming = time(() => validateWithRegistry(big.bytes));
+const registryOrdersPerSecond = big.messages.length / (registryTiming.medianMs / 1000);
+const registryRate = addThroughput(
+  "validate, with a registry (structure and every value)",
+  bigBytes,
+  registryTiming,
+  `${fixed(registryOrdersPerSecond)} orders/s, ${fixed(1e6 / registryOrdersPerSecond, 1)} µs per order`,
+);
+
 const walkTiming = time(() => parseAndWalk(big.bytes));
 const walkRate = addThroughput(
   "parseMessages, then visiting every segment, element and component",
@@ -649,6 +664,7 @@ if (options.json) {
         parseAndWalk: walkRate,
         parseAndRead: textRate,
         validate: validateRate,
+        validateWithRegistry: registryRate,
         serializeData: buildRate,
         objectTree: treeRate,
       },
@@ -659,6 +675,7 @@ if (options.json) {
         parse: parseOrdersPerSecond,
         parseAndRead: textOrdersPerSecond,
         validate: validateOrdersPerSecond,
+        validateWithRegistry: registryOrdersPerSecond,
         serializeData: buildOrdersPerSecond,
         parseEditWrite: editOrdersPerSecond,
       },
