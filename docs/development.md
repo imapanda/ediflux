@@ -10,7 +10,7 @@ How to build, test and run Libredi on your machine. For how a change reaches `ma
 | Docker | Engine 28 or later, with Compose v2 | Runs the whole stack and builds the images. Older engines can expose a port published on `127.0.0.1` to other hosts of the same network. |
 | Node.js | 26.12.1 | Pinned in [`.nvmrc`](../.nvmrc); `engine-strict` refuses other majors. |
 | pnpm | 12.15.0 | Pinned in `package.json` (`packageManager`). Node.js no longer ships Corepack: `npm install --global pnpm@12.15.0`. |
-| Go | 1.27.3 | Only for `services/connectors`; pinned in its `go.mod`. |
+| Go | 1.27.3 | For `services/connectors` and `tools/codegen`; pinned in their `go.mod`. |
 
 No local install is needed in a Codespace or the VS Code dev container
 ([`.devcontainer`](../.devcontainer/devcontainer.json)): it provides all of the above and runs
@@ -49,13 +49,15 @@ access; only `connectors` can reach partners. `scripts/smoke-compose.sh` checks 
 | `services/api`, `worker`, `translator`, `mcp` | TypeScript services. Each has its `Dockerfile`, a `src/main.ts` entry point and tests. |
 | `services/connectors` | Go service, with its own `go.mod` and `Dockerfile`. |
 | `packages/service-kit` | Shared runtime of the TypeScript services: `/healthz`, port handling, graceful shutdown. |
-| `packages/contracts` | Tests that check that the files in `contracts/` are valid. Each service tests its own responses against them. |
+| `packages/contracts` | Tests that check that the files in `contracts/` are valid, and the TypeScript types generated from them (`@libredi/contracts/canonical/v1`, `/api`, `/jobs`). Each service tests its own responses against the contracts. |
 | `packages/edifact` | The UN/EDIFACT engine. Today: the tokenizer (bytes in, flat tokens out), tested against `samples/edifact`, and its benchmark. See its [README](../packages/edifact/README.md). |
+| `packages/registry` | The registry generator ([docs](registry-generator.md)): downloads the UN/ECE directories, parses them into the EDIFACT definition registry of `contracts/registry/`, and checks the result. Tests use fictitious files only. |
 | `samples/edifact` | Fictitious EDIFACT interchanges with expected results, for the tokenizer, parser and validator. See its [README](../samples/edifact/README.md). |
-| `contracts/` | OpenAPI (`openapi/`) and job JSON Schemas (`jobs/`), written before the code. See its [README](../contracts/README.md). |
+| `contracts/` | OpenAPI (`openapi/`), job JSON Schemas (`jobs/`), canonical documents (`canonical/`), the mapping format (`mapping/`) and the EDIFACT registry schema (`registry/`), written before the code. See its [README](../contracts/README.md). |
 | `infra/postgres`, `infra/caddy` | Image of PostgreSQL with pgmq; configuration of the reverse proxy. |
 | `compose.yaml`, `.env.example` | The stack on one machine. |
-| `scripts/` | `init-env.sh`, `check-pins.sh`, `smoke-image.sh`, `smoke-compose.sh`. |
+| `tools/codegen` | Go module that pins the generators of the Go code (`oapi-codegen`, `go-jsonschema`). |
+| `scripts/` | `init-env.sh`, `check-pins.sh`, `check-derived-data.sh`, `generate-go.sh`, `smoke-image.sh`, `smoke-compose.sh`. |
 
 Services are stubs for now: each answers `GET /healthz` and nothing else. Business logic comes
 with the milestones of the [roadmap](roadmap.md).
@@ -70,8 +72,12 @@ with the milestones of the [roadmap](roadmap.md).
 | `pnpm build` | Bundle every service into `dist/main.js` with esbuild. |
 | `pnpm --filter @libredi/edifact bench` | Benchmark the EDIFACT tokenizer on a generated 10 MB interchange: throughput and memory. Never part of `verify`. |
 | `pnpm verify` | `check`, `typecheck` and `test`. Run it before every push. |
+| `pnpm --filter @libredi/contracts generate` | Regenerate the TypeScript types after changing a contract in `contracts/`. The tests fail when they are out of date. |
+| `scripts/generate-go.sh` | Regenerate the Go code of `services/connectors/internal/generated` from the contracts. The Go job of the CI fails when it is out of date. |
 | `pnpm --filter @libredi/api dev` | Run a service from source with `node --watch`. |
 | `scripts/check-pins.sh` | Check that the Node.js, pnpm, Go and Biome versions agree across files. |
+| `scripts/check-derived-data.sh` | Check that Git tracks no UN/EDIFACT directory file and no registry built from one ([ADR 7](adr/0007-standards-licensing.md)). |
+| `pnpm --filter @libredi/registry libredi registry build` | Build the EDIFACT definition registry from the UN/ECE directories ([docs](registry-generator.md)). |
 | `scripts/smoke-image.sh api` | Build one image, run it locked down, check health, user and shutdown. |
 | `scripts/smoke-compose.sh` | The acceptance test: whole stack, three workers, routes, network isolation, pgmq. |
 
@@ -172,7 +178,7 @@ in [`infra/postgres/Dockerfile`](../infra/postgres/Dockerfile) and follow pgmq's
 | --- | --- |
 | Node.js | `.nvmrc`, `engines.node` in `package.json`, the two `FROM` lines of each TypeScript `Dockerfile`, `--target=node26` in each service's `build` script, the major of `@types/node` in `pnpm-workspace.yaml`, `.devcontainer/devcontainer.json`, this page |
 | pnpm | `packageManager` and `engines.pnpm` in `package.json`, the `npm install` line of each TypeScript `Dockerfile`, `.devcontainer/devcontainer.json`, this page |
-| Go | `go.mod`, the build `FROM` line of `services/connectors/Dockerfile`, `.devcontainer/devcontainer.json`, this page |
+| Go | `go.mod` of `services/connectors` and of `tools/codegen`, the build `FROM` line of `services/connectors/Dockerfile`, `.devcontainer/devcontainer.json`, this page |
 | Biome | the `catalog:` of `pnpm-workspace.yaml` and the `$schema` URL of `biome.json` |
 
 Dependabot proposes the Docker and npm updates and leaves the other places alone, so

@@ -1,0 +1,57 @@
+{
+  "documentType": "despatchAdvice",
+  "schemaVersion": 1,
+  "documentNumber": "DES-0001",
+  "issueDate": "2030-10-20T09:00:00+02:00",
+  "despatchDate": "2030-10-20",
+  "estimatedDeliveryDate": "2030-10-21",
+  "parties": {
+    "supplier": { "gln": "9520000000035" },
+    "buyer": { "gln": "9520000000011" },
+    "shipTo": { "gln": "9520000000028" }
+  },
+  "references": [{ "type": "order", "value": "PO-0001" }],
+  "notes": ["Unload at dock 7, delivery before 09:00."],
+  "lines": [
+    {
+      "lineNumber": 1,
+      "product": { "gtin": "9520000010010" },
+      "quantity": { "value": "60", "unit": "PCE" }
+    },
+    {
+      "lineNumber": 2,
+      "product": { "gtin": "9520000010027" },
+      "quantity": { "value": "30", "unit": "PCE" }
+    }
+  ],
+  "packages": [
+    {
+      "type": "pallet",
+      "sscc": "395200000000000012",
+      "packages": [
+        {
+          "type": "carton",
+          "sscc": "395200000000000029",
+          "contents": [
+            {
+              "lineNumber": 1,
+              "quantity": { "value": "60", "unit": "PCE" },
+              "batchNumber": "LOT-0001"
+            }
+          ]
+        },
+        {
+          "type": "carton",
+          "sscc": "395200000000000036",
+          "contents": [
+            {
+              "lineNumber": 2,
+              "quantity": { "value": "30", "unit": "PCE" },
+              "batchNumber": "LOT-0002"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

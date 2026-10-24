@@ -1,0 +1,14 @@
+FICTITIOUS CODE LISTS, SECOND FILE
+A test fixture that imitates the layout of a code list file (D.96A style).
+
+────────────────────────────────────┐
+  9005  Example party role, coded
+  Desc: Two letters that say what an invented party does.
+  Repr: a2
+      BU Buying party
+      SL Selling party
+────────────────────────────────────┐
+  9010  Example quantity qualifier, coded
+  Repr: an..3
+      Q1 Ordered quantity
+      Q2 Delivered quantity

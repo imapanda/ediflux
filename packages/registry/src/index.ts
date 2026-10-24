@@ -1,0 +1,10 @@
+export type { BuildOptions, BuildResult } from "./build.ts";
+export { buildRegistryFromArchive, RegistryBuildError } from "./build.ts";
+export type { Problem } from "./check.ts";
+export { checkRegistry } from "./check.ts";
+export type { DirectoryPin } from "./directories.ts";
+export { DIRECTORIES, findDirectory } from "./directories.ts";
+export type { DownloadOptions, ObtainedDirectory, ObtainOptions } from "./download.ts";
+export { DownloadError, obtainDirectory, sha256Hex } from "./download.ts";
+export { validateRegistry } from "./schema.ts";
+export type * from "./types.ts";

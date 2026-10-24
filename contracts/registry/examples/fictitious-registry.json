@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 1,
+  "directory": {
+    "agency": "ZZ",
+    "version": "Z",
+    "release": "00A"
+  },
+  "syntaxVersions": [3, 4],
+  "source": {
+    "kind": "handwritten"
+  },
+  "dataElements": {
+    "0081": {
+      "name": "Example section marker",
+      "description": "Tells which section of the message starts after the separator.",
+      "type": "a",
+      "minLength": 1,
+      "maxLength": 1,
+      "codeList": "0081"
+    },
+    "9001": {
+      "name": "Example function code",
+      "type": "an",
+      "minLength": 1,
+      "maxLength": 3,
+      "codeList": "9001"
+    },
+    "9002": {
+      "name": "Example document number",
+      "type": "an",
+      "minLength": 1,
+      "maxLength": 35
+    },
+    "9003": {
+      "name": "Example date qualifier",
+      "type": "an",
+      "minLength": 1,
+      "maxLength": 3,
+      "codeList": "9003"
+    },
+    "9004": {
+      "name": "Example date value",
+      "description": "A calendar date as eight digits, year first.",
+      "type": "n",
+      "minLength": 8,
+      "maxLength": 8
+    },
+    "9005": {
+      "name": "Example party role",
+      "type": "a",
+      "minLength": 2,
+      "maxLength": 2,
+      "codeList": "9005"
+    },
+    "9006": {
+      "name": "Example party identifier",
+      "type": "an",
+      "minLength": 1,
+      "maxLength": 35
+    },
+    "9007": {
+      "name": "Example name line",
+      "type": "an",
+      "minLength": 1,
+      "maxLength": 35
+    },
+    "9008": {
+      "name": "Example line number",
+      "type": "n",
+      "minLength": 1,
+      "maxLength": 6
+    },
+    "9009": {
+      "name": "Example product code",
+      "type": "an",
+      "minLength": 1,
+      "maxLength": 35
+    },
+    "9010": {
+      "name": "Example product code type",
+      "type": "an",
+      "minLength": 1,
+      "maxLength": 3,
+      "codeList": "9010"
+    },
+    "9011": {
+      "name": "Example quantity qualifier",
+      "type": "an",
+      "minLength": 1,
+      "maxLength": 3,
+      "codeList": "9011"
+    },
+    "9012": {
+      "name": "Example quantity value",
+      "type": "n",
+      "minLength": 1,
+      "maxLength": 15
+    },
+    "9013": {
+      "name": "Example unit",
+      "type": "an",
+      "minLength": 1,
+      "maxLength": 3
+    },
+    "9014": {
+      "name": "Example count of lines",
+      "type": "n",
+      "minLength": 1,
+      "maxLength": 6
+    }
+  },
+  "composites": {
+    "C901": {
+      "name": "Example document identification",
+      "components": [
+        {
+          "ref": "9002",
+          "status": "M"
+        },
+        {
+          "ref": "9001",
+          "status": "C"
+        }
+      ]
+    },
+    "C902": {
+      "name": "Example date",
+      "components": [
+        {
+          "ref": "9003",
+          "status": "M"
+        },
+        {
+          "ref": "9004",
+          "status": "M"
+        }
+      ]
+    },
+    "C904": {
+      "name": "Example quantity",
+      "components": [
+        {
+          "ref": "9011",
+          "status": "M"
+        },
+        {
+          "ref": "9012",
+          "status": "M"
+        },
+        {
+          "ref": "9013",
+          "status": "C"
+        }
+      ]
+    }
+  },
+  "segments": {
+    "XHD": {
+      "name": "Example header",
+      "description": "Identifies the document.",
+      "elements": [
+        {
+          "ref": "C901",
+          "status": "M"
+        }
+      ]
+    },
+    "XDT": {
+      "name": "Example date",
+      "elements": [
+        {
+          "ref": "C902",
+          "status": "M"
+        }
+      ]
+    },
+    "XPT": {
+      "name": "Example party",
+      "description": "The name may be spread over up to three lines (a repeated element, syntax 4).",
+      "elements": [
+        {
+          "ref": "9005",
+          "status": "M"
+        },
+        {
+          "ref": "9006",
+          "status": "M"
+        },
+        {
+          "ref": "9007",
+          "status": "C",
+          "maxOccurs": 3
+        }
+      ]
+    },
+    "XLN": {
+      "name": "Example line",
+      "elements": [
+        {
+          "ref": "9008",
+          "status": "M"
+        },
+        {
+          "ref": "9009",
+          "status": "C"
+        },
+        {
+          "ref": "9010",
+          "status": "C"
+        }
+      ]
+    },
+    "XQT": {
+      "name": "Example quantity",
+      "elements": [
+        {
+          "ref": "C904",
+          "status": "M"
+        }
+      ]
+    },
+    "UNS": {
+      "name": "Example section separator",
+      "elements": [
+        {
+          "ref": "0081",
+          "status": "M"
+        }
+      ]
+    },
+    "XTT": {
+      "name": "Example total",
+      "elements": [
+        {
+          "ref": "9014",
+          "status": "M"
+        }
+      ]
+    }
+  },
+  "codeLists": {
+    "0081": {
+      "name": "Example section markers",
+      "closed": true,
+      "codes": {
+        "D": {
+          "name": "Detail section starts"
+        },
+        "S": {
+          "name": "Summary section starts"
+        }
+      }
+    },
+    "9001": {
+      "name": "Example function codes",
+      "closed": true,
+      "codes": {
+        "1": {
+          "name": "First issue"
+        },
+        "2": {
+          "name": "Reissue"
+        }
+      }
+    },
+    "9003": {
+      "name": "Example date qualifiers",
+      "closed": true,
+      "codes": {
+        "10": {
+          "name": "Date of issue"
+        },
+        "20": {
+          "name": "Requested date"
+        }
+      }
+    },
+    "9005": {
+      "name": "Example party roles",
+      "closed": true,
+      "codes": {
+        "BU": {
+          "name": "Buying party"
+        },
+        "SL": {
+          "name": "Selling party"
+        }
+      }
+    },
+    "9010": {
+      "name": "Example product code types",
+      "description": "Kept by the trading community, not by the directory: the codes listed are only those it knows.",
+      "closed": false,
+      "codes": {
+        "X1": {
+          "name": "Example scheme one"
+        }
+      }
+    },
+    "9011": {
+      "name": "Example quantity qualifiers",
+      "closed": true,
+      "codes": {
+        "Q1": {
+          "name": "Ordered quantity",
+          "description": "The quantity the buyer asked for."
+        },
+        "Q2": {
+          "name": "Delivered quantity"
+        }
+      }
+    }
+  },
+  "messages": {
+    "SAMPLE": {
+      "name": "Sample document",
+      "description": "A made-up message: a header, parties, repeating lines with an optional party each, and a total.",
+      "nodes": [
+        {
+          "kind": "segment",
+          "tag": "XHD",
+          "status": "M",
+          "sequence": "0010",
+          "section": "header"
+        },
+        {
+          "kind": "segment",
+          "tag": "XDT",
+          "status": "C",
+          "maxOccurs": 5,
+          "sequence": "0020",
+          "section": "header"
+        },
+        {
+          "kind": "group",
+          "id": "SG1",
+          "status": "C",
+          "maxOccurs": 9,
+          "sequence": "0030",
+          "section": "header",
+          "trigger": {
+            "tag": "XPT",
+            "sequence": "0040"
+          }
+        },
+        {
+          "kind": "segment",
+          "tag": "UNS",
+          "status": "M",
+          "sequence": "0050",
+          "section": "detail"
+        },
+        {
+          "kind": "group",
+          "id": "SG2",
+          "status": "M",
+          "maxOccurs": 999,
+          "sequence": "0060",
+          "section": "detail",
+          "trigger": {
+            "tag": "XLN",
+            "sequence": "0070"
+          },
+          "nodes": [
+            {
+              "kind": "segment",
+              "tag": "XQT",
+              "status": "C",
+              "maxOccurs": 5,
+              "sequence": "0080"
+            },
+            {
+              "kind": "group",
+              "id": "SG3",
+              "status": "C",
+              "maxOccurs": 3,
+              "sequence": "0090",
+              "trigger": {
+                "tag": "XPT",
+                "sequence": "0100"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "segment",
+          "tag": "UNS",
+          "status": "M",
+          "sequence": "0110",
+          "section": "summary"
+        },
+        {
+          "kind": "segment",
+          "tag": "XTT",
+          "status": "C",
+          "sequence": "0120",
+          "section": "summary"
+        }
+      ]
+    }
+  }
+}

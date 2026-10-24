@@ -5,3 +5,7 @@
 *.edi -text diff
 *.edifact -text diff
 *.x12 -text diff
+
+# Code generated from contracts/: collapsed in pull requests.
+packages/*/src/generated/** linguist-generated=true
+services/*/internal/generated/** linguist-generated=true

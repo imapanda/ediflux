@@ -1,0 +1,23 @@
+                              UN/EDIFACT
+
+                INVENTED STATUS OF THE MESSAGE
+
+                    Fictitious message with a segment nobody defines
+
+                                           Message Type : ODDITY
+                                           Version      : Z
+                                           Release      : 01B
+                                           Contr. Agency: UN
+
+4.3    Message structure
+
+4.3.1  Segment table
+
+Pos    Tag Name                                      S   R
+
+           HEADER SECTION
+
+0010   UNH Message header                            M   1
+0020   XHD Example header                            M   1
+0030   XZZ Example segment that no file defines      C   1
+0040   UNT Message trailer                           M   1

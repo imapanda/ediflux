@@ -42,6 +42,10 @@ flowchart LR
   enforces `.editorconfig` (UTF-8, LF, final newline, no trailing spaces).
 - **Local links**: [lychee](https://github.com/lycheeverse/lychee) checks relative links and
   anchors, configured in `lychee.toml`.
+- **Derived data**: `scripts/check-derived-data.sh` fails when Git tracks a UN/EDIFACT directory
+  file or a registry built from one ([ADR 7](adr/0007-standards-licensing.md)). Unlike the jobs that
+  wait for **Changes**, it runs on every pull request, because such a file can be committed
+  anywhere in the tree.
 - **actionlint**: [actionlint](https://github.com/rhysd/actionlint) checks workflow syntax,
   expressions and shell scripts.
 - **zizmor**: [zizmor](https://github.com/zizmorcore/zizmor) audits workflow security.
@@ -55,13 +59,15 @@ flowchart LR
 - **Workspace**: [Biome](https://biomejs.dev/) over the whole repository, `scripts/check-pins.sh`
   (the Node.js, pnpm, Go and Biome versions agree across the files that pin them), then
   typecheck and tests of the shared packages, including the checks of the files in
-  `contracts/` and the tokenizer tests against `samples/`.
+  `contracts/`, of the examples against the sample corpus, and the tokenizer tests against
+  `samples/`.
 - **Service (api, worker, translator, mcp)**: one job per TypeScript service, run when the
   service or a shared package changed. Typecheck, tests, build, then
   `scripts/smoke-image.sh`: build the image, run it read-only without capabilities, wait for
   its health check, check that it is not root and that `SIGTERM` stops it with exit code 0.
-- **Service (connectors)**: the same for the Go service: `gofmt`, `go vet`, `go test -race`,
-  then the image smoke test.
+- **Service (connectors)**: the same for the Go service: the generated Go code must be what
+  `scripts/generate-go.sh` produces from `contracts/` (the job also runs when `contracts/openapi` or
+  `contracts/jobs` changes), then `gofmt`, `go vet`, `go test -race`, then the image smoke test.
 - **Compose (3 workers)**: `scripts/smoke-compose.sh` starts PostgreSQL with pgmq, the five
   services and the proxy with `--scale worker=3`, and checks that everything is healthy, that
   no service publishes a host port, that the proxy routes work, that the translator cannot
@@ -72,14 +78,16 @@ flowchart LR
 ### DCO sign-off
 
 [`dco.yml`](../.github/workflows/dco.yml) reports the check `DCO` ([ADR 9](adr/0009-developer-certificate-of-origin.md)).
-It runs [`check-dco.sh`](../.github/scripts/check-dco.sh) on the commits of the pull request:
-every commit except merge commits needs a `Signed-off-by:` line whose e-mail is the author's.
-Pull requests opened by a bot from a branch of this repository (Dependabot, release automation)
-are skipped, because a bot cannot certify the DCO; commits that a maintainer pushes onto such a
-branch are not checked either. The checker fails closed: if it cannot read the commits, the check
-fails. It is tested by [`test-check-dco.sh`](../.github/scripts/test-check-dco.sh), which the same
-job runs first. It is a separate workflow so that `ci.yml` keeps a single required check; the
-ruleset requires `DCO` on its own, pinned to GitHub Actions like the other required checks.
+It runs [`check-dco.sh`](../.github/scripts/check-dco.sh) on the commits of the pull request: every
+commit except merge commits needs a `Signed-off-by:` line whose e-mail is the author's. Pull
+requests opened by a bot from a branch of this repository (Dependabot, release automation) are
+skipped, because a bot cannot certify the DCO; commits that a maintainer pushes onto such a branch
+are not checked either. The checker fails closed: if it cannot read the commits, the check fails. It
+is tested by [`test-check-dco.sh`](../.github/scripts/test-check-dco.sh), which the same job runs
+first. Both scripts are taken from the base branch, not from the pull request, so a pull request
+cannot weaken the check it is checked by; a change to the checker takes effect once merged. It is a
+separate workflow so that `ci.yml` keeps a single required check; the ruleset requires `DCO` on its
+own, pinned to GitHub Actions like the other required checks.
 
 ### Adding a job
 

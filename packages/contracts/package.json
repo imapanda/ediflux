@@ -2,10 +2,11 @@
   "name": "@libredi/contracts",
   "version": "0.0.0",
   "private": true,
-  "description": "Checks that the OpenAPI and JSON Schema files in contracts/ are valid and that services honour them",
+  "description": "Types generated from the schemas in contracts/ (canonical documents, REST API, job envelope), and checks that those files are valid and that services honour them",
   "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
+    "generate": "node src/generate-types.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
@@ -15,8 +16,15 @@
     "ajv": "catalog:",
     "ajv-formats": "catalog:",
     "fast-check": "catalog:",
+    "json-schema-to-typescript": "catalog:",
+    "jsonata": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "yaml": "catalog:"
+  },
+  "exports": {
+    "./canonical/v1": "./src/generated/canonical-v1.ts",
+    "./api": "./src/generated/api.ts",
+    "./jobs": "./src/generated/jobs.ts"
   }
 }

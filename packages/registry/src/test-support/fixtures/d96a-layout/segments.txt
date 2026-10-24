@@ -1,0 +1,39 @@
+FICTITIOUS SEGMENT DIRECTORY
+A test fixture that imitates the layout of a segment directory (D.96A style).
+
+────────────────────────────────────┐
+      XHD    EXAMPLE HEADER
+      Function: To identify the invented document.
+010   C901  EXAMPLE DOCUMENT IDENTIFICATION              M
+      9002   Example document number                     M  an..35
+      9001   Example function code, coded                C  an..3
+020   C902  EXAMPLE DATE                                 C
+      9003   Example date qualifier, coded               M  an..3
+      9004   Example date value                          M  n8
+────────────────────────────────────┐
+      XPT    EXAMPLE PARTY
+      Function: To name an invented party.
+010   9005  EXAMPLE PARTY ROLE, CODED                    M  a2
+020   9006  EXAMPLE PARTY IDENTIFIER                     M  an..35
+030   9007  EXAMPLE NAME LINE                            C  an..35
+────────────────────────────────────┐
+      XDT    EXAMPLE DATE
+      Function: To give an invented date.
+010   C902  EXAMPLE DATE                                 M
+      9003   Example date qualifier, coded               M  an..3
+      9004   Example date value                          M  n8
+────────────────────────────────────┐
+      XLN    EXAMPLE LINE
+      Function: To give an invented line.
+010   9008  EXAMPLE LINE NUMBER                          M  n..6
+020   9006  EXAMPLE PRODUCT IDENTIFIER                   C  an..35
+────────────────────────────────────┐
+      XQT    EXAMPLE QUANTITY
+      Function: To give an invented quantity.
+010   C904  EXAMPLE QUANTITY                             M
+      9010   Example quantity qualifier, coded           M  an..3
+      9009   Example quantity value                      C  n..15
+────────────────────────────────────┐
+      XTT    EXAMPLE TOTAL
+      Function: To count the invented lines.
+010   9008  EXAMPLE LINE COUNT                           M  n..6

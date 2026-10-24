@@ -14,6 +14,8 @@ catalog:
   ajv-formats: 3.0.1
   esbuild: 0.28.2
   fast-check: 4.10.2
+  json-schema-to-typescript: 16.0.0
+  jsonata: 2.2.2
   typescript: 7.0.2
   vitest: 4.1.12
   yaml: 2.9.1

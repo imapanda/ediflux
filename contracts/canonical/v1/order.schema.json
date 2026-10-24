@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/imapanda/libredi/main/contracts/canonical/v1/order.schema.json",
+  "title": "Order",
+  "description": "A purchase order from a buyer to a supplier (canonical document, version 1).",
+  "type": "object",
+  "properties": {
+    "documentType": { "const": "order" },
+    "schemaVersion": { "const": 1 },
+    "documentFunction": { "$ref": "common.schema.json#/$defs/documentFunction" },
+    "documentNumber": { "$ref": "common.schema.json#/$defs/identifier" },
+    "issueDate": { "$ref": "common.schema.json#/$defs/moment" },
+    "requestedDeliveryDate": { "$ref": "common.schema.json#/$defs/date" },
+    "currency": { "$ref": "common.schema.json#/$defs/currency" },
+    "parties": {
+      "type": "object",
+      "properties": {
+        "buyer": { "$ref": "common.schema.json#/$defs/party" },
+        "supplier": { "$ref": "common.schema.json#/$defs/party" },
+        "shipTo": { "$ref": "common.schema.json#/$defs/party" },
+        "invoicee": { "$ref": "common.schema.json#/$defs/party" }
+      },
+      "required": ["buyer", "supplier"],
+      "additionalProperties": false
+    },
+    "references": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/reference" } },
+    "notes": { "$ref": "common.schema.json#/$defs/notes" },
+    "lines": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/line" } }
+  },
+  "required": ["documentType", "schemaVersion", "documentNumber", "issueDate", "parties", "lines"],
+  "additionalProperties": false,
+  "$defs": {
+    "line": {
+      "title": "OrderLine",
+      "description": "`quantity` is the ordered quantity.",
+      "type": "object",
+      "properties": {
+        "lineNumber": { "$ref": "common.schema.json#/$defs/lineNumber" },
+        "product": { "$ref": "common.schema.json#/$defs/product" },
+        "quantity": { "$ref": "common.schema.json#/$defs/quantity" },
+        "unitPrice": { "$ref": "common.schema.json#/$defs/unitPrice" },
+        "requestedDeliveryDate": { "$ref": "common.schema.json#/$defs/date" },
+        "notes": { "$ref": "common.schema.json#/$defs/notes" }
+      },
+      "required": ["lineNumber", "product", "quantity"],
+      "additionalProperties": false
+    }
+  }
+}

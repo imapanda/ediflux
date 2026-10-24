@@ -1,0 +1,48 @@
+FICTITIOUS DATA ELEMENT DIRECTORY
+A test fixture that imitates the layout of a data element directory (D.96A style).
+Every tag, name and text below is invented.
+
+   Change indicators: a plus sign (+) for an addition, X for a deletion mark.
+
+────────────────────────────────────┐
+   9001  Example function code, coded
+   Desc: Code that tells what an invented test document does.
+   Repr: an..3
+   Note: This invented code list is only a test, and
+         this note goes over two lines.
+────────────────────────────────────┐
+   9002  Example document number
+   Desc: Number that identifies an invented test document.
+   Repr: an..35
+────────────────────────────────────┐
+   9003  Example date qualifier, coded
+   Desc: Tells which invented date follows.
+   Repr: an..3
+────────────────────────────────────┐
+   9004  Example date value
+   Desc: A calendar date as eight digits, year first.
+   Repr: n8
+────────────────────────────────────┐
+   9005  Example party role, coded
+   Desc: Two letters that say what an invented party does.
+   Repr: a2
+────────────────────────────────────┐
+   9006  Example party identifier
+   Desc: Identifies an invented party.
+   Repr: an..35
+────────────────────────────────────┐
+   9007  Example name line
+   Desc: One line of the name of an invented party.
+   Repr: an..35
+────────────────────────────────────┐
+   9008  Example line number
+   Desc: Number of an invented line.
+   Repr: n..6
+────────────────────────────────────┐
+   9009  Example quantity value
+   Desc: An invented quantity.
+   Repr: n..15
+────────────────────────────────────┐
+   9010  Example quantity qualifier, coded
+   Desc: Tells what an invented quantity means.
+   Repr: an..3

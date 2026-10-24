@@ -27,3 +27,8 @@ insert_final_newline = unset
 trim_trailing_whitespace = unset
 indent_style = unset
 indent_size = unset
+
+# Fictitious directory files for the tests of the registry generator. They imitate the layout of the
+# UN/EDIFACT directory files, which is made of columns, so their indentation is not a multiple of two.
+[packages/registry/src/test-support/fixtures/**]
+indent_size = unset

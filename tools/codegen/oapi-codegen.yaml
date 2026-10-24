@@ -1,0 +1,14 @@
+# Go types and client for contracts/openapi/api.yaml, written to the connectors service.
+# Run through scripts/generate-go.sh; paths are relative to tools/codegen.
+package: api
+output: ../../services/connectors/internal/generated/api/api.gen.go
+generate:
+  models: true
+  client: true
+# Every schema of components.schemas gets a Go type, whether or not a route uses it yet
+# (contract first: schemas are added before the routes), and enumeration constants are prefixed
+# with their type, so that adding an enumeration elsewhere never renames an existing constant.
+output-options:
+  skip-prune: true
+compatibility:
+  always-prefix-enum-values: true
