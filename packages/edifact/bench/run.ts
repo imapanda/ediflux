@@ -12,7 +12,7 @@
  */
 import { cpus } from "node:os";
 import { performance } from "node:perf_hooks";
-import { Tokenizer, TokenKind } from "../src/index.ts";
+import { splitMessages, Tokenizer, TokenKind } from "../src/index.ts";
 import { generateOrders } from "./generate.ts";
 import { parseToObjectTree } from "./object-tree.ts";
 
@@ -108,7 +108,16 @@ function decodeValues(bytes: Uint8Array): number {
   return total;
 }
 
-/** One tokenizer per message, as the translator will see them once issue #38 splits the file. */
+/** Every message of the file located, with the character set of each value checked. */
+function splitAll(bytes: Uint8Array, checkCharacters = true): number {
+  let segments = 0;
+  for (const slice of splitMessages(bytes, { checkCharacters })) {
+    segments += slice.segmentCount;
+  }
+  return segments;
+}
+
+/** One tokenizer per message, as a worker will see them when the file has been split (see `splitMessages`). */
 function perMessage(
   bytes: Uint8Array,
   messages: readonly { start: number; end: number }[],
@@ -183,6 +192,22 @@ function tokenizerMemory(bytes: Uint8Array): { workingSet: number; retained: num
   return { workingSet, retained };
 }
 
+/** Heap and buffers while the file is split (sampled): the slices are small and dropped. */
+function splitMemory(bytes: Uint8Array): number {
+  gc?.();
+  gc?.();
+  const base = heapNow();
+  let peak = 0;
+  let count = 0;
+  for (const slice of splitMessages(bytes)) {
+    sink ^= slice.segmentCount;
+    if (++count % 64 === 0) {
+      peak = Math.max(peak, heapNow() - base);
+    }
+  }
+  return peak;
+}
+
 /** Memory still held by the tree once it is built, after a full collection. */
 function objectTreeRetained(bytes: Uint8Array): number {
   gc?.();
@@ -251,6 +276,23 @@ const decodeRate = addThroughput(
   "the work the object tree does too, without keeping the strings",
 );
 
+const splitTiming = time(() => splitAll(big.bytes));
+const splitOrdersPerSecond = big.messages.length / (splitTiming.medianMs / 1000);
+const splitRate = addThroughput(
+  "splitMessages, locating every message and checking every character",
+  bigBytes,
+  splitTiming,
+  `${fixed(splitOrdersPerSecond)} orders/s, ${fixed(1e6 / splitOrdersPerSecond, 1)} µs per order`,
+);
+
+const unCheckedTiming = time(() => splitAll(big.bytes, false));
+addThroughput(
+  "splitMessages without the character check",
+  bigBytes,
+  unCheckedTiming,
+  `the check adds ${fixed((splitTiming.medianMs / unCheckedTiming.medianMs - 1) * 100)} % to the time`,
+);
+
 const bigMessageTiming = time(() => perMessage(big.bytes, big.messages));
 const bigMessageRate = big.messages.length / (bigMessageTiming.medianMs / 1000);
 addThroughput(
@@ -285,6 +327,7 @@ if (options.baseline) {
 }
 
 const memory = tokenizerMemory(big.bytes);
+const splitting = splitMemory(big.bytes);
 const retained = options.baseline ? objectTreeRetained(big.bytes) : null;
 
 const lines: string[] = [];
@@ -300,6 +343,7 @@ lines.push(
   "| --- | --- | --- |",
   `| tokenizer, while scanning (its batch, sampled) | ${fixed(memory.workingSet / 1024, 1)} KiB | ${fixed(memory.workingSet / bigBytes, 4)}× |`,
   `| tokenizer, after the scan and a collection | ${fixed(memory.retained / 1024, 1)} KiB | ${fixed(memory.retained / bigBytes, 4)}× |`,
+  `| splitMessages, heap and buffers while it runs (sampled) | ${fixed(splitting / 1024, 1)} KiB | ${fixed(splitting / bigBytes, 4)}× |`,
   ...(retained === null || treeRate === null
     ? []
     : [
@@ -330,6 +374,7 @@ if (options.json) {
       mbPerSecond: {
         raw: mbPerSecond(bigBytes, rawTiming.medianMs),
         tokenizer: readRate,
+        split: splitRate,
         objectTree: treeRate,
       },
       ordersPerSecond: { large: bigMessageRate, small: smallMessageRate },
