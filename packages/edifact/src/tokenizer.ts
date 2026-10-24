@@ -116,9 +116,10 @@ class Batch implements TokenBatch {
  *   ends inside a segment. Everything before the error has been delivered by then; the error
  *   itself is thrown by the loop's next step, so a loop that stops early never sees it.
  *
- * What it leaves to others: character sets (issue #37), grouping into messages (#38), the
- * meaning of segments and the validation of the envelope and the data (#43 to #45), and the
- * syntax 4 repetition separator when there is no UNA (#41).
+ * What it leaves to others: reading values as text and checking them against the character set
+ * (`charset.ts`), finding messages (`splitMessages`), the meaning of segments and the validation
+ * of the envelope and the data (issues #43 to #45), and the syntax 4 repetition separator when
+ * there is no UNA (#41).
  *
  * A tokenizer reads its input once and has one live loop at a time: all loops share one batch.
  * Iterating it again carries on where the last loop stopped (after the end, it yields nothing).
@@ -199,8 +200,8 @@ export class Tokenizer implements Iterable<TokenBatch> {
 
   /**
    * Line and column (both from 1; the column counts bytes) of a byte offset, from 0 to the length
-   * of the input. The first call reads the input once to find its line breaks and keeps four
-   * bytes per line; errors do not use it, they carry their own position.
+   * of the input. The first call reads the input once to build an index of two numbers per 64 KiB;
+   * errors do not use it, they carry their own position.
    */
   locate(offset: number): LineColumn {
     if (!Number.isInteger(offset) || offset < 0 || offset > this.#bytes.length) {

@@ -161,9 +161,10 @@ export const separatorsArbitrary: fc.Arbitrary<Separators> = fc
     };
   });
 
-const tagArbitrary = fc
+/** Tags with no meaning for the tokenizer or the parser: not UNA, and none of the UN service tags. */
+export const tagArbitrary = fc
   .stringMatching(/^[A-Z0-9]{3}$/)
-  .filter((tag) => tag !== "UNA" && tag !== "UNZ");
+  .filter((tag) => !["UNA", "UNB", "UNZ", "UNG", "UNE", "UNH", "UNT"].includes(tag));
 
 /** Values of every byte, so that separators, release characters and line breaks all occur. */
 const valueArbitrary = fc.uint8Array({ maxLength: 8 });

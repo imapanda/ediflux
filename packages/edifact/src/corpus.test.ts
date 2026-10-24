@@ -1,40 +1,17 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { TokenizeError, Tokenizer } from "./index.ts";
+import {
+  type ExpectedInvalid,
+  type ExpectedValid,
+  expectedOf,
+  readSample,
+  samples,
+} from "./testing/corpus.ts";
 import { readSegments } from "./testing/segments.ts";
 
-const corpus = fileURLToPath(new URL("../../../samples/edifact/", import.meta.url));
-
-interface ExpectedValid {
-  sample: string;
-  interchange: { una: string | null; encoding: "ascii" | "iso-8859-1" | "utf-8" };
-  segments: unknown[];
-}
-
-interface ExpectedInvalid {
-  sample: string;
-  layer: "tokenizer" | "envelope" | "structure" | "element" | "code";
-  expectedErrors: {
-    code: string;
-    position: { segment: number; tag: string; element: number | null; component: number | null };
-  }[];
-}
-
-function samples(directory: "valid" | "invalid"): string[] {
-  return readdirSync(`${corpus}${directory}`)
-    .filter((name) => name.endsWith(".edi"))
-    .map((name) => name.slice(0, -".edi".length))
-    .sort();
-}
-
-function read(directory: string, name: string): Uint8Array {
-  return new Uint8Array(readFileSync(`${corpus}${directory}/${name}.edi`));
-}
-
-function expected<T>(directory: string, name: string): T {
-  return JSON.parse(readFileSync(`${corpus}${directory}/${name}.expected.json`, "utf8")) as T;
-}
+const read = (directory: "valid" | "invalid", name: string) => readSample(directory, name);
+const expected = <T>(directory: "valid" | "invalid", name: string) =>
+  expectedOf<T>(directory, name);
 
 function drain(bytes: Uint8Array): void {
   for (const _batch of new Tokenizer(bytes)) {
