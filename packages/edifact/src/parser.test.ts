@@ -809,7 +809,7 @@ describe("repetitions", () => {
     } catch (caught) {
       error = caught as ParseError;
     }
-    expect(error?.code).toBe("TOO_MANY_REPETITIONS");
+    expect(error?.code).toBe("TOO_MANY_ELEMENT_REPETITIONS");
     expect(error?.message).toContain("65535 repetitions");
     expect(error?.message).not.toContain("memoryBudget");
     // Placed where the message that holds the element starts.

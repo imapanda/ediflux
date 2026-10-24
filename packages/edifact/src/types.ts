@@ -67,6 +67,15 @@ export type ParseIssueCode = (typeof ParseIssueCode)[keyof typeof ParseIssueCode
 export interface ParseIssue {
   readonly code: ParseIssueCode;
   readonly message: string;
+  /** What the rules ask for, as a short phrase. */
+  readonly expected: string;
+  /** What the file has. */
+  readonly found: string;
+  /**
+   * The 1-based number of the repetition of the element, counted from the second: null for the
+   * first, which is the element itself. `position.component` counts within the repetition.
+   */
+  readonly repetition: number | null;
   /** Offset of the byte at fault. */
   readonly offset: number;
   readonly line: number;

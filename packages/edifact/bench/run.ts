@@ -22,6 +22,7 @@ import {
   splitMessages,
   Tokenizer,
   TokenKind,
+  validate,
 } from "../src/index.ts";
 import { generateOrders } from "./generate.ts";
 import { parseToObjectTree } from "./object-tree.ts";
@@ -162,6 +163,11 @@ function parseAndRead(bytes: Uint8Array): number {
     }
   }
   return characters;
+}
+
+/** The validator: the file and its envelopes, and nothing built beyond what the parser builds. */
+function validateAll(bytes: Uint8Array): number {
+  return validate(bytes).issueCount + 1;
 }
 
 /** The whole file as one tree, kept in memory. */
@@ -468,6 +474,15 @@ const parseRate = addThroughput(
   `${fixed(parseOrdersPerSecond)} orders/s, ${fixed(1e6 / parseOrdersPerSecond, 1)} µs per order`,
 );
 
+const validateTiming = time(() => validateAll(big.bytes));
+const validateOrdersPerSecond = big.messages.length / (validateTiming.medianMs / 1000);
+const validateRate = addThroughput(
+  "validate, the file and its envelopes",
+  bigBytes,
+  validateTiming,
+  `${fixed(validateOrdersPerSecond)} orders/s, ${fixed(1e6 / validateOrdersPerSecond, 1)} µs per order`,
+);
+
 const walkTiming = time(() => parseAndWalk(big.bytes));
 const walkRate = addThroughput(
   "parseMessages, then visiting every segment, element and component",
@@ -633,6 +648,7 @@ if (options.json) {
         parse: parseRate,
         parseAndWalk: walkRate,
         parseAndRead: textRate,
+        validate: validateRate,
         serializeData: buildRate,
         objectTree: treeRate,
       },
@@ -642,6 +658,7 @@ if (options.json) {
         split: splitOrdersPerSecond,
         parse: parseOrdersPerSecond,
         parseAndRead: textOrdersPerSecond,
+        validate: validateOrdersPerSecond,
         serializeData: buildOrdersPerSecond,
         parseEditWrite: editOrdersPerSecond,
       },

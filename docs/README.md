@@ -11,4 +11,5 @@
 | [Research: languages](research/languages.md) | Language per service, benchmarks, rewrite triggers |
 | [Research: GitHub](research/github-setup.md) | GitHub features used by the project |
 | [Development](development.md) | Build, test and run the repository: tooling, monorepo layout, images, Compose |
+| [Validation errors](validation-errors.md) | The error model of the EDIFACT validator: what an issue tells you, and the catalogue of codes with what each means and what to do |
 | [Registry generator](registry-generator.md) | How the EDIFACT definition registry is built from the official UN/ECE directories: download, checksums, offline mode, what is read |

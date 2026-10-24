@@ -29,6 +29,8 @@ export interface TokenizeErrorPosition {
 /** Why the tokenizer stopped. Everything it had found before this point has been delivered. */
 export class TokenizeError extends Error implements TokenizeErrorPosition {
   readonly code: TokenizeErrorCode;
+  /** What is wrong, without the line, column and offset that `message` adds. */
+  readonly detail: string;
   readonly offset: number;
   readonly line: number;
   readonly column: number;
@@ -39,6 +41,7 @@ export class TokenizeError extends Error implements TokenizeErrorPosition {
     super(`${detail} (line ${position.line}, column ${position.column}, byte ${position.offset})`);
     this.name = "TokenizeError";
     this.code = code;
+    this.detail = detail;
     this.offset = position.offset;
     this.line = position.line;
     this.column = position.column;
@@ -65,7 +68,7 @@ export const ParseErrorCode = {
   /** The whole tree of a file needs more memory than `maxTreeBytes` allows. */
   TreeTooLarge: "TREE_TOO_LARGE",
   /** An element has more repetitions than the parser counts (65,535). */
-  TooManyRepetitions: "TOO_MANY_REPETITIONS",
+  TooManyElementRepetitions: "TOO_MANY_ELEMENT_REPETITIONS",
 } as const;
 
 export type ParseErrorCode = (typeof ParseErrorCode)[keyof typeof ParseErrorCode];
@@ -76,6 +79,8 @@ export type ParseErrorCode = (typeof ParseErrorCode)[keyof typeof ParseErrorCode
  */
 export class ParseError extends Error implements TokenizeErrorPosition {
   readonly code: ParseErrorCode;
+  /** What is wrong, without the line, column and offset that `message` adds. */
+  readonly detail: string;
   readonly offset: number;
   readonly line: number;
   readonly column: number;
@@ -86,6 +91,7 @@ export class ParseError extends Error implements TokenizeErrorPosition {
     super(`${detail} (line ${position.line}, column ${position.column}, byte ${position.offset})`);
     this.name = "ParseError";
     this.code = code;
+    this.detail = detail;
     this.offset = position.offset;
     this.line = position.line;
     this.column = position.column;
