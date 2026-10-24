@@ -1,0 +1,33 @@
+run_id,calls,total_ms,mean_ms,rows,wal_records,wal_bytes,query
+closed-w1-r1,53009,7500,0.141,53009,71707,5150376,"SELECT coalesce(max(msg_id), $2) AS job, coalesce(max((message ->> $3)::bigint), $4) AS mid FROM pgm"
+closed-w1-r1,17669,2072,0.117,17669,71748,9454435,"SELECT pgmq.archive($2, $1::bigint)"
+closed-w1-r1,17670,946,0.054,17670,53647,8376201,"SELECT * FROM pgmq.send(queue_name, msg, $3::pg_catalog.jsonb, clock_timestamp())"
+closed-w1-r1,11780,830,0.070,11780,35767,5906802,"SELECT pgmq.send($3, jsonb_build_object($4, $5, $6, $7, $8, $1::bigint, $9, $10, $11, $2::text, $12,"
+closed-w1-r1,5890,421,0.071,5890,17880,2469399,"SELECT pgmq.send($2, jsonb_build_object($3, $4, $5, $6, $7, $1::bigint, $8, $9, $10, $11 || replace("
+closed-w1-r1,5890,300,0.051,5890,30003,4157836,"INSERT INTO fixture.messages (environment, partner_id, interchange_sender, interchange_recipient, in"
+closed-w1-r1,23559,272,0.012,5889,23888,1716236,WITH cte AS ( SELECT msg_id FROM pgmq.q_acknowledge WHERE vt <= clock_timestamp() AND CASE WHEN $2 !
+closed-w1-r1,5890,237,0.040,17670,60281,4752727,"INSERT INTO fixture.transitions (message_id, from_state, to_state, component, config_version) VALUES"
+closed-w1-r1,11779,230,0.020,11779,48818,3657762,"INSERT INTO fixture.transitions (message_id, from_state, to_state, component, config_version) VALUES"
+closed-w1-r1,17670,219,0.012,5890,23909,1717066,WITH cte AS ( SELECT msg_id FROM pgmq.q_deliver WHERE vt <= clock_timestamp() AND CASE WHEN $2 != $3
+closed-w1-r1,41229,195,0.005,41229,26176,1467978,"SELECT $2 FROM ONLY ""fixture"".""messages"" x WHERE ""id"" OPERATOR(pg_catalog.=) $1 FOR KEY SHARE OF x"
+closed-w1-r1,11780,194,0.016,5890,23910,1717074,WITH cte AS ( SELECT msg_id FROM pgmq.q_translate WHERE vt <= clock_timestamp() AND CASE WHEN $2 != 
+closed-w1-r1,11780,180,0.015,11780,12723,1305009,"UPDATE fixture.messages SET state = $2, updated_at = clock_timestamp() WHERE id = $1::bigint"
+closed-w1-r1,5890,131,0.022,5890,11781,1368831,"INSERT INTO fixture.archive_refs (message_id, kind, sha256, size_bytes) VALUES ($1::bigint, $2, enco"
+closed-w1-r1,5890,119,0.020,5890,18647,1735762,"INSERT INTO fixture.archive_refs (message_id, kind, sha256, size_bytes) VALUES ($1::bigint, $4, $2::"
+closed-w1-r1,5890,98,0.017,5890,23951,3303183,"WITH archived AS ( DELETE FROM pgmq.q_translate WHERE msg_id = $1 RETURNING msg_id, vt, read_ct, enq"
+soak-w8-r1,2529703,460040,0.182,2529703,3470398,249251120,"SELECT coalesce(max(msg_id), $2) AS job, coalesce(max((message ->> $3)::bigint), $4) AS mid FROM pgm"
+soak-w8-r1,843231,103682,0.123,843231,3384275,449056249,"SELECT pgmq.archive($2, $1::bigint)"
+soak-w8-r1,843235,47615,0.056,843235,2565945,404740770,"SELECT * FROM pgmq.send(queue_name, msg, $3::pg_catalog.jsonb, clock_timestamp())"
+soak-w8-r1,562158,42138,0.075,562158,1710609,285185104,"SELECT pgmq.send($3, jsonb_build_object($4, $5, $6, $7, $8, $1::bigint, $9, $10, $11, $2::text, $12,"
+soak-w8-r1,843235,38470,0.046,281077,1145804,82071360,WITH cte AS ( SELECT msg_id FROM pgmq.q_deliver WHERE vt <= clock_timestamp() AND CASE WHEN $2 != $3
+soak-w8-r1,1124310,34618,0.031,281075,1146978,82223488,WITH cte AS ( SELECT msg_id FROM pgmq.q_acknowledge WHERE vt <= clock_timestamp() AND CASE WHEN $2 !
+soak-w8-r1,281077,20636,0.073,281077,855336,119555666,"SELECT pgmq.send($2, jsonb_build_object($3, $4, $5, $6, $7, $1::bigint, $8, $9, $10, $11 || replace("
+soak-w8-r1,281079,16458,0.059,281079,1434408,273768629,"INSERT INTO fixture.messages (environment, partner_id, interchange_sender, interchange_recipient, in"
+soak-w8-r1,281079,12818,0.046,843237,2872337,225619708,"INSERT INTO fixture.transitions (message_id, from_state, to_state, component, config_version) VALUES"
+soak-w8-r1,562152,12757,0.023,562152,2325649,175327267,"INSERT INTO fixture.transitions (message_id, from_state, to_state, component, config_version) VALUES"
+soak-w8-r1,562158,12531,0.022,281079,1148358,82309297,WITH cte AS ( SELECT msg_id FROM pgmq.q_translate WHERE vt <= clock_timestamp() AND CASE WHEN $2 != 
+soak-w8-r1,562156,10067,0.018,562156,650888,67551437,"UPDATE fixture.messages SET state = $2, updated_at = clock_timestamp() WHERE id = $1::bigint"
+soak-w8-r1,1967547,10058,0.005,1967547,1234775,69169008,"SELECT $2 FROM ONLY ""fixture"".""messages"" x WHERE ""id"" OPERATOR(pg_catalog.=) $1 FOR KEY SHARE OF x"
+soak-w8-r1,281079,6990,0.025,281079,563793,66400477,"INSERT INTO fixture.archive_refs (message_id, kind, sha256, size_bytes) VALUES ($1::bigint, $2, enco"
+soak-w8-r1,281079,5724,0.020,281079,883322,81494427,"INSERT INTO fixture.archive_refs (message_id, kind, sha256, size_bytes) VALUES ($1::bigint, $4, $2::"
+soak-w8-r1,281075,4980,0.018,281075,332658,36145431,"UPDATE fixture.messages SET state = $2, updated_at = clock_timestamp(), completed_at = clock_timesta"

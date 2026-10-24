@@ -32,3 +32,12 @@ indent_size = unset
 # UN/EDIFACT directory files, which is made of columns, so their indentation is not a multiple of two.
 [packages/registry/src/test-support/fixtures/**]
 indent_size = unset
+
+# Load test (perf/pgmq): its SQL is aligned by hand, and the raw output of psql and pgbench is
+# kept exactly as printed.
+[perf/pgmq/sql/*.sql]
+indent_size = unset
+
+[perf/pgmq/results/*]
+indent_size = unset
+trim_trailing_whitespace = unset

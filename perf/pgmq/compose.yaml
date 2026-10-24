@@ -1,0 +1,59 @@
+# Exploratory load test of PostgreSQL + pgmq (docs/research/pgmq-load-test.md).
+#
+# Its own Compose project ("libredi-perf") and its own volume: it never touches the stack of
+# compose.yaml at the repository root, and it publishes no port. Driven by perf/pgmq/run.sh,
+# which creates a throwaway password and removes everything (containers, volume, network) at
+# the end.
+#
+# The database is built from the repository's own infra/postgres (PostgreSQL 18 with pgmq
+# installed from its SQL file), with stock settings except for the instrumentation below.
+name: libredi-perf
+
+services:
+  postgres:
+    build: ../../infra/postgres
+    image: libredi-perf/postgres:local
+    # Instrumentation only; no tuning. Everything else is the default of the image, as in
+    # the root compose.yaml.
+    command:
+      - postgres
+      - -c
+      - log_autovacuum_min_duration=0
+      - -c
+      - track_io_timing=on
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - pg_stat_statements.track=all
+    environment:
+      POSTGRES_USER: libredi
+      POSTGRES_DB: libredi
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run.sh sets a throwaway password}
+    volumes:
+      - perf-pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username=libredi --dbname=libredi"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  # The load generator: pgbench from the same image, on the same Compose network, so the
+  # workers talk to PostgreSQL over TCP like the services do. Run on demand by run.sh.
+  bench:
+    image: libredi-perf/postgres:local
+    pull_policy: never
+    profiles: [bench]
+    entrypoint: ["/bin/sh", "/perf/pgbench/bench.sh"]
+    environment:
+      PGHOST: postgres
+      PGUSER: libredi
+      PGPASSWORD: ${POSTGRES_PASSWORD:?run.sh sets a throwaway password}
+    volumes:
+      - ./pgbench:/perf/pgbench:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  perf-pgdata:

@@ -55,6 +55,7 @@ access; only `connectors` can reach partners. `scripts/smoke-compose.sh` checks 
 | `infra/postgres`, `infra/caddy` | Image of PostgreSQL with pgmq; configuration of the reverse proxy. |
 | `compose.yaml`, `.env.example` | The stack on one machine. |
 | `scripts/` | `init-env.sh`, `check-pins.sh`, `smoke-image.sh`, `smoke-compose.sh`. |
+| `perf/pgmq` | Exploratory load test of PostgreSQL and pgmq, in its own Compose project: `run.sh`, a throwaway fixture schema (not a migration), pgbench scripts, small CSV results. See the [research page](research/pgmq-load-test.md). |
 
 Services are stubs for now: each answers `GET /healthz` and nothing else. Business logic comes
 with the milestones of the [roadmap](roadmap.md).
