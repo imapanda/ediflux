@@ -8,15 +8,6 @@ import { type ExpectedInvalid, expectedOf, samples } from "./testing/corpus.ts";
 
 const DOC = fileURLToPath(new URL("../../../docs/validation-errors.md", import.meta.url));
 
-/** Codes of the sample corpus whose layer is not implemented yet. */
-const PENDING = new Set<string>([
-  "MISSING_MANDATORY_SEGMENT",
-  "TOO_MANY_REPETITIONS",
-  "SEGMENT_OUT_OF_ORDER",
-  "VALUE_TOO_LONG",
-  "UNKNOWN_CODE",
-]);
-
 describe("the catalogue", () => {
   it("has a code in capitals and underscores, a layer, a severity, and text for every entry", () => {
     expect(ISSUE_CODES.length).toBeGreaterThan(10);
@@ -35,29 +26,28 @@ describe("the catalogue", () => {
       expect(info.hint).toMatch(/^[A-Z]/);
       expect(info.hint).toMatch(/\.$/);
       expect(info.message.match(/\{[a-z]+\}/g) ?? []).toSatisfy((names: string[]) =>
-        names.every((name) => ["{expected}", "{found}", "{tag}", "{unit}"].includes(name)),
+        names.every((name) =>
+          ["{expected}", "{found}", "{tag}", "{unit}", "{name}"].includes(name),
+        ),
       );
     }
   });
 
-  it("covers every code of the sample corpus, apart from the layers not built yet", () => {
+  it("covers every code of the sample corpus", () => {
     const wanted = new Set<string>();
     for (const name of samples("invalid")) {
       for (const error of expectedOf<ExpectedInvalid>("invalid", name).expectedErrors) {
         wanted.add(error.code);
       }
     }
+    expect(wanted.size).toBeGreaterThanOrEqual(16);
     for (const code of wanted) {
-      expect(isIssueCode(code) || PENDING.has(code), code).toBe(true);
-    }
-    for (const code of PENDING) {
-      expect(isIssueCode(code), `${code} is in the catalogue: take it out of PENDING`).toBe(false);
-      expect(wanted.has(code)).toBe(true);
+      expect(isIssueCode(code), code).toBe(true);
     }
   });
 
   it("is the page docs/validation-errors.md, which is written from it", () => {
-    const written = catalogueMarkdown(PENDING);
+    const written = catalogueMarkdown();
     if (process.env["LIBREDI_UPDATE_DOCS"] === "1") {
       writeFileSync(DOC, written);
     }

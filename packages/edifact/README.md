@@ -6,8 +6,8 @@ messages of a file in constant memory, the **tree**, which reads one message at 
 segments, elements and components with their positions, within a memory budget, and the
 **serializer**, which writes a tree back: byte for byte when it was parsed, or from data that was
 built or edited. **Syntax version 4** (the repetition separator) is read and written throughout.
-The **validator** checks a file and tells what is wrong in plain language: today the file itself and
-its envelopes, with the data checks to come (issue #42).
+The **validator** checks a file, its envelopes and, against a definition registry, the structure and
+the data of its messages, and tells what is wrong in plain language.
 
 The package is private to the monorepo and exports its TypeScript source, like the other
 packages (see [development](../../docs/development.md#typescript-conventions)). Its interface is
@@ -330,7 +330,7 @@ An **issue** answers four questions: what is wrong (`code`, `message`), where (`
 and may be improved. **[Validation errors](../../docs/validation-errors.md)** is the catalogue: every
 code, what it means and what to do. A test keeps that page in step with `ISSUE_CATALOGUE`.
 
-What is checked today, without a registry:
+What is checked without a registry:
 
 - **The file**: the UNA string, segment tags, a file that is cut off, the character set of UNB and
   every value against it, a message too large for the memory budget.
@@ -344,6 +344,64 @@ What is checked today, without a registry:
   reported as well, and a composite that is missing is one issue, not one per component. Text taken
   from the file (a reference, a count) is cut after 32 characters and its control characters are
   shown as `?`, so that a message can go into a log as it is.
+
+### With a registry
+
+```ts
+import { validate, type RegistryView } from "@libredi/edifact";
+
+const registry = JSON.parse(readFileSync("d01b.json", "utf8")) as RegistryView; // see docs/registry-generator.md
+const report = validate(bytes, { registries: [registry], codeLists: "closed" });
+```
+
+A registry is a document that follows [`contracts/registry`](../../contracts/registry/README.md),
+generated on the operator's machine from the UN/ECE directories and never committed
+([ADR 7](../../docs/adr/0007-standards-licensing.md)). `RegistryView` is the part of it that
+validation reads, so this package does not depend on the registry package. The registry that matches
+the message identifier of UNH (agency, version, release) is used for each message; a message that
+no registry describes is not checked and gets a `MESSAGE_NOT_CHECKED` warning (without
+`registries`, nothing is said).
+
+- **Structure** (`MISSING_MANDATORY_SEGMENT`, `TOO_MANY_REPETITIONS`, `SEGMENT_OUT_OF_ORDER`,
+  `UNKNOWN_SEGMENT`): the segments of a message against its structure, group by group. The checker
+  reads one segment at a time, with a stack of the open groups and no look-ahead, as the structures
+  of the directories allow: the next segment alone tells where it belongs. A mandatory segment that
+  is missing is reported at the segment found in its place (or at UNT); a group is counted by the
+  segment that opens it; a stray segment is one issue and is left out, so that it does not make
+  the segments after it look missing.
+- **Data elements** (`MISSING_MANDATORY_ELEMENT`, `INVALID_DATA_TYPE`, `VALUE_TOO_LONG`,
+  `VALUE_TOO_SHORT`, `UNEXPECTED_ELEMENT`, `UNEXPECTED_COMPONENT`): for each position of a segment,
+  a mandatory element or component that is empty, the type of each value (`n`: digits, with a minus
+  sign and one decimal mark, the one of the UNA string; `a`: letters; `an`: anything), and its
+  length in characters (digits only for a number; an escaped character counts once; in UNOW a
+  character counts once, whatever its bytes). A composite that is empty is one issue, and a
+  mandatory component is only needed where its composite is. An error on a simple data element has
+  `component: null`.
+- **Repetition** (`REPETITION_NOT_ALLOWED`, `ELEMENT_REPEATED_TOO_OFTEN`): an element that uses the
+  repetition separator under a UNB that is not syntax version 4 (the rule of the registry), or more
+  often than `maxOccurs`. `position.repetition` says which repetition, from the second.
+- **Code lists** (`UNKNOWN_CODE`): `codeLists: "closed"` (default) enforces the lists that hold every
+  valid value, as errors; `"all"` also looks at the open lists, which are only what the directory
+  knows, and reports a value they lack as a warning; `"off"` skips them. A code is matched exactly
+  (case counts).
+- It does not check the envelope data against a registry (UNB, UNG, UNH, UNT, UNE, UNZ have their own
+  rules above), CONTRL, or partner-specific rules and overrides.
+
+**Cost.** Checking the structure and every value of the generated orders of the benchmark (80 lines,
+8.5 KB) costs about 130 µs per order on top of parsing, see the [benchmark](#benchmark). A definition
+that refers to something the registry does not have (which `checkRegistry()` of the registry
+package would report) is read as a free element instead of stopping the check.
+
+**Testing against the real directories.** The tests use two registries written by hand for the corpus
+(`src/testing/corpus-registry.ts`: invented names, only the segments the samples use, nothing from
+the directories). To run the valid samples against registries you generated, give their paths:
+
+```bash
+LIBREDI_REGISTRIES=/path/to/d96a.json,/path/to/d01b.json pnpm --filter @libredi/edifact test
+```
+
+The test is skipped without it. The samples have never been checked against the real directories, so
+a sample that fails there is a finding about the sample or about the registry; fix the sample.
 
 ## Character sets
 
@@ -427,6 +485,12 @@ position in the terms of the registry (segment, tag, element, component counted 
   the file (without its line breaks), and the tree written as data with `serializeData` gives the
   same bytes, with text values and with byte values; the five syntax 4 samples also parse to the
   same tree without their UNA string;
+- the validator with a registry: all 24 valid samples have no error and all 17 invalid samples give
+  exactly their expected code and position, against the corpus registries; examples for each
+  structure rule (missing, too often, out of order, unknown, groups, a message with no UNT), each
+  data rule (type, length, escapes and non-ASCII, composites, extra elements and components, code
+  lists in each mode, repetition in syntax 3 and 4), and the fictitious registry of
+  `contracts/registry/examples`; an opt-in test of the valid samples against real registries;
 - the validator: every valid sample has no issue, every invalid sample that needs no registry gives
   exactly its expected code and position, envelope examples for each rule and error (counts,
   references, groups, missing segments, a file cut at every point of a segment), the report
@@ -475,6 +539,7 @@ quiet moment; runs agree within 5 %, but expect other machines to differ):
 | `splitMessages`, without the character check | 209 MB/s (the check adds about 28 % to the time) |
 | `parseMessages`, building every message | 126 MB/s, 14,500 orders/s, **68 µs per 8.5 KB order** (3.4 % of the 2 ms budget of ADR 10) |
 | `validate`, the file and its envelopes | 125 to 126 MB/s, 14,700 orders/s, **68 µs per order**: 4 µs more than parsing, 3.4 % of the 2 ms budget (measured on a quieter moment than the rows around it, where `parseMessages` ran at 133 MB/s) |
+| `validate` with a registry, the structure and every value | 43 to 44 MB/s, 5,050 to 5,150 orders/s, **195 to 198 µs per order**: about 131 µs more than parsing, 10 % of the 2 ms budget (a registry of the corpus: 20 segments, 80 lines of orders) |
 | ... and visiting every segment, element and component | 86 MB/s, 10,000 orders/s |
 | ... and reading every value as text | 31 MB/s, 3,600 orders/s, 277 µs per order |
 | `parseInterchanges`, the whole file as one tree | 126 MB/s |

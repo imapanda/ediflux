@@ -66,6 +66,11 @@ export interface Message extends MessageSlice {
   readonly ung: Segment | null;
   /** Every segment, from UNH to UNT. */
   readonly segments: readonly Segment[];
+  /**
+   * Segment `index` of the message, counted from 0 (UNH), made when asked and not kept: a message
+   * can be read segment by segment without the list of `segments` being built.
+   */
+  segment(index: number): Segment | undefined;
   readonly unh: Segment;
   /** Null when the message runs into the next UNH, UNG, UNE, UNZ, UNA or UNB, or the end of the file. */
   readonly unt: Segment | null;
@@ -282,10 +287,12 @@ class ElementView implements Element {
 
   get repetitions(): Component[][] {
     const store = this.#store;
-    const repetitions: Component[][] = Array.from(
-      { length: store.elementRepetitions[this.#element] as number },
-      () => [],
-    );
+    const count = store.elementRepetitions[this.#element] as number;
+    if (count <= 1) {
+      // The common case, an element that is not repeated, needs no list of lists to be sorted out.
+      return count === 0 ? [] : [this.components];
+    }
+    const repetitions: Component[][] = Array.from({ length: count }, () => []);
     const first = store.elementFirstComponent[this.#element] as number;
     const last = store.elementFirstComponent[this.#element + 1] as number;
     for (let c = first; c < last; c++) {
@@ -405,6 +412,12 @@ export class MessageNode implements Message {
   get unh(): Segment {
     this.#unh ??= new SegmentView(this.#ctx, this.#store, 0);
     return this.#unh;
+  }
+
+  segment(index: number): Segment | undefined {
+    return Number.isInteger(index) && index >= 0 && index < this.segmentCount
+      ? new SegmentView(this.#ctx, this.#store, index)
+      : undefined;
   }
 
   get segments(): readonly Segment[] {

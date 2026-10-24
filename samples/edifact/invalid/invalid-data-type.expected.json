@@ -8,7 +8,7 @@
     {
       "code": "INVALID_DATA_TYPE",
       "severity": "error",
-      "position": { "segment": 7, "tag": "LIN", "element": 1, "component": 1 },
+      "position": { "segment": 7, "tag": "LIN", "element": 1, "component": null },
       "expected": "numeric (n..6)",
       "found": "ONE"
     }

@@ -71,6 +71,7 @@ interface Example {
   readonly expected?: string;
   readonly found?: string;
   readonly unit?: string;
+  readonly name?: string;
 }
 
 interface CodeInfo {
@@ -81,7 +82,8 @@ interface CodeInfo {
   /** For the catalogue: when the code is raised. */
   readonly meaning: string;
   /**
-   * The message, with `{expected}`, `{found}`, `{tag}` and `{unit}` filled in. A finder that knows
+   * The message, with `{expected}`, `{found}`, `{tag}`, `{unit}` and `{name}` (the name of the
+   * element) filled in. A finder that knows
    * better (the tokenizer, which names the place in its own words) gives its own.
    */
   readonly message: string;
@@ -265,9 +267,139 @@ export const ISSUE_CATALOGUE = {
     title: "A value is not of the right type",
     meaning:
       "A value does not match the data type of its element: letters where digits are expected, or digits where letters are expected. The counts of UNT, UNE and UNZ are checked without a registry: for them the issue has the layer `envelope`.",
-    message: "The {tag} segment has {found} where {expected} is expected.",
-    hint: "Check the value against the type of the element: numeric elements hold digits (and a sign and a decimal mark), alphabetic elements hold letters.",
-    example: { tag: "UNT", found: "THREE", expected: "a whole number" },
+    message: "The {tag} segment has {found} for {name}, but the value must be {expected}.",
+    hint: "Check the value against the type of the element: numeric elements hold digits (and a minus sign and the decimal mark of the UNA string), alphabetic elements hold letters.",
+    example: { tag: "LIN", name: "line number (1082)", found: "ONE", expected: "a number" },
+  },
+  MESSAGE_NOT_CHECKED: {
+    layer: "structure",
+    severity: "warning",
+    title: "A message has no definition, so it was not checked",
+    meaning:
+      "Registries were given, but none describes the message type, version, release and agency that UNH names. The structure and the data of that message are not checked; its envelope is.",
+    message:
+      "No definition of the message {found} is loaded, so its structure and its data were not checked.",
+    hint: "Load the registry of that directory (the one made from the UN/ECE files for the version in UNH), or ignore this warning if the message is not meant to be checked.",
+    example: { found: "ORDERS D 96A UN" },
+  },
+  MISSING_MANDATORY_SEGMENT: {
+    layer: "structure",
+    severity: "error",
+    title: "A mandatory segment is missing",
+    meaning:
+      "The message structure requires a segment (or a group, by its first segment) that the message does not have. The position is the segment found where the missing one belongs: the next segment, or UNT when the message ends.",
+    message: "The mandatory {expected} segment is missing before the {found} segment.",
+    hint: "Add the segment where the message structure puts it. The order of the segments matters: a segment in the wrong place can look like a missing one.",
+    example: { expected: "BGM", found: "DTM" },
+  },
+  TOO_MANY_REPETITIONS: {
+    layer: "structure",
+    severity: "error",
+    title: "A segment or group occurs too often",
+    meaning:
+      "A segment, or a group (counted by its first segment), occurs more times in its place than the message structure allows. The position is the first occurrence that is too many.",
+    message:
+      "The {tag} segment occurs more often than the message allows: {found}, and at most {expected}.",
+    hint: "Remove the extra occurrences, or check that a segment that starts a new group is not missing in between.",
+    example: { tag: "BGM", expected: "1 occurrence", found: "2 occurrences" },
+  },
+  SEGMENT_OUT_OF_ORDER: {
+    layer: "structure",
+    severity: "error",
+    title: "A segment is in the wrong place",
+    meaning:
+      "A segment that the message structure has stands where the structure cannot continue with it: it belongs before the segments that precede it, or in a group that has not started.",
+    message:
+      "The {tag} segment is out of order: at this point the message can continue with {expected}.",
+    hint: "Move the segment to its place in the message structure. Segments of a group follow the segment that opens the group.",
+    example: { tag: "FTX", expected: "NAD, LIN or UNS" },
+  },
+  UNKNOWN_SEGMENT: {
+    layer: "structure",
+    severity: "error",
+    title: "A segment is not part of the message",
+    meaning: "The segment is not in the structure of this message at all.",
+    message: "The {tag} segment is not part of the structure of this message.",
+    hint: "Remove the segment, or check the message type and version in UNH: this segment may belong to another message.",
+    example: { tag: "XYZ" },
+  },
+  UNEXPECTED_ELEMENT: {
+    layer: "element",
+    severity: "error",
+    title: "A segment has more elements than its definition",
+    meaning: "A segment has an element after the last one that its definition has.",
+    message: "The {tag} segment has {found}, but its definition has {expected}.",
+    hint: "Remove the extra elements, or check for a separator in a value that should have been written with the release character in front.",
+    example: { tag: "BGM", expected: "at most 4 elements", found: "5 elements" },
+  },
+  UNEXPECTED_COMPONENT: {
+    layer: "element",
+    severity: "error",
+    title: "An element has more components than its definition",
+    meaning:
+      "An element has a component after the last one that its definition has; a simple data element has none. The position is that of the first component too many.",
+    message: "The {tag} segment has {found} in an element that is defined with {expected}.",
+    hint: "Remove the extra components, or write a component separator that is part of a value with the release character in front.",
+    example: { tag: "DTM", expected: "at most 3 components", found: "4 components" },
+  },
+  REPETITION_NOT_ALLOWED: {
+    layer: "element",
+    severity: "error",
+    title: "An element is repeated in syntax version 3",
+    meaning:
+      "An element uses the repetition separator, which only syntax version 4 has, and the interchange is of an earlier version.",
+    message: "The {tag} segment repeats an element, which syntax version {found} does not allow.",
+    hint: "Use syntax version 4 in UNB, or declare no repetition separator in the UNA string (a space in its seventh position) and send the values in separate segments.",
+    example: { tag: "FTX", found: "3" },
+  },
+  ELEMENT_REPEATED_TOO_OFTEN: {
+    layer: "element",
+    severity: "error",
+    title: "An element is repeated more often than allowed",
+    meaning: "An element has more repetitions than its definition allows.",
+    message: "The {tag} segment repeats an element {found}, and the definition allows {expected}.",
+    hint: "Remove the extra repetitions.",
+    example: { tag: "FTX", expected: "at most 3 times", found: "4 times" },
+  },
+  VALUE_TOO_LONG: {
+    layer: "element",
+    severity: "error",
+    title: "A value is longer than its element allows",
+    meaning: "A value has more characters than the maximum length of its data element.",
+    message:
+      "The {tag} segment has {found} in {name}, where the element allows {expected} at most.",
+    hint: "Shorten the value to the length of the data element, or send it in a longer element if the message has one.",
+    example: {
+      tag: "BGM",
+      name: "document identifier (1004)",
+      expected: "35 characters",
+      found: "36 characters",
+    },
+  },
+  VALUE_TOO_SHORT: {
+    layer: "element",
+    severity: "error",
+    title: "A value is shorter than its element requires",
+    meaning: "A value has fewer characters than the minimum length of its data element.",
+    message:
+      "The {tag} segment has {found} in {name}, where the element needs {expected} at least.",
+    hint: "Write the value in full: fixed-length elements are not padded for you.",
+    example: {
+      tag: "DTM",
+      name: "date value (2380)",
+      expected: "8 characters",
+      found: "6 characters",
+    },
+  },
+  UNKNOWN_CODE: {
+    layer: "code",
+    severity: "error",
+    title: "A coded value is not in its code list",
+    meaning:
+      "A value of an element that has a code list is not one of its codes. For a list that is only what the directory knows (an open list) it is a warning, and only when the setting asks for it.",
+    message: "The {tag} segment has the code {found} in {name}, which is not in its code list.",
+    hint: "Use one of the codes of the list. The documentation of the message guideline of your partner says which of them it uses.",
+    example: { tag: "NAD", name: "party qualifier (3035)", found: "QQQ" },
   },
 } as const satisfies Record<string, CodeInfo>;
 
@@ -299,10 +431,12 @@ export interface IssueDraft {
   readonly hint?: string;
   /** Fills `{unit}` of a message. */
   readonly unit?: string;
+  /** Fills `{name}` of a message: how the registry names the element, "quantity (6060)". */
+  readonly name?: string;
   readonly offset: number;
 }
 
-const PLACEHOLDER = /\{(expected|found|tag|unit)\}/g;
+const PLACEHOLDER = /\{(expected|found|tag|unit|name)\}/g;
 
 /** A message from a lower layer may lack the full stop that the others end with. */
 const sentence = (text: string): string => (/[.!?]$/.test(text) ? text : `${text}.`);
@@ -336,6 +470,7 @@ export function makeIssue(
     found: draft.found ?? "something else",
     tag: draft.tag ?? "last",
     unit: draft.unit ?? "messages",
+    name: draft.name ?? "the value",
   };
   return {
     code: draft.code,
@@ -370,6 +505,7 @@ export function exampleMessage(code: IssueCode): string {
     found: example.found ?? "something else",
     tag: example.tag ?? "last",
     unit: example.unit ?? "messages",
+    name: example.name ?? "the value",
   };
   return info.message.replace(PLACEHOLDER, (_all, name: keyof typeof values) => values[name]);
 }

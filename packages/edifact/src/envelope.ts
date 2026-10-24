@@ -435,6 +435,7 @@ export class EnvelopeChecker {
           segment: closing.number,
           tag: closing.tag,
           element: 1,
+          name: MANDATORY[closing.tag]?.[0]?.name ?? "the count",
           expected: "a whole number",
           found: shown(text),
           layer: "envelope",

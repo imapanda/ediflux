@@ -93,7 +93,7 @@ envelope, which is checked without a registry). \`expected\` and \`found\` are s
 - \`formatIssue(issue)\` writes an issue as a block for a terminal or a log.
 `;
 
-export function catalogueMarkdown(pending: ReadonlySet<string> = new Set()): string {
+export function catalogueMarkdown(): string {
   const out: string[] = [
     INTRO.trimEnd(),
     "",
@@ -127,9 +127,6 @@ export function catalogueMarkdown(pending: ReadonlySet<string> = new Set()): str
         "",
       );
     }
-  }
-  if (pending.size > 0) {
-    out.push("## Not yet reported", "", wrap([...pending].map((c) => `\`${c}\``).join(", ")), "");
   }
   return `${out.join("\n").trimEnd()}\n`;
 }
