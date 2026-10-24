@@ -162,7 +162,7 @@ function parseAndRead(bytes: Uint8Array): number {
 
 /** The whole file as one tree, kept in memory. */
 function parseWhole(bytes: Uint8Array): number {
-  const { interchanges } = parseInterchanges(bytes);
+  const { interchanges } = parseInterchanges(bytes, { maxTreeBytes: 2 ** 31 });
   return interchanges.length + (interchanges[0]?.items.length ?? 0);
 }
 
@@ -298,7 +298,7 @@ function parserMemory(bytes: Uint8Array): {
   let wholeTree: number | null = null;
   if (options.wholeTree) {
     const baseTree = heapNow();
-    const result = parseInterchanges(bytes);
+    const result = parseInterchanges(bytes, { maxTreeBytes: 2 ** 31 });
     gc?.();
     gc?.();
     wholeTree = heapNow() - baseTree;

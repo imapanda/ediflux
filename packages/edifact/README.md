@@ -158,7 +158,7 @@ const { interchanges, issues } = parseInterchanges(bytes); // the whole file, ke
   and the copy exist together, so the peak of the process is up to about twice the budget.
 - `maxTreeBytes` (default 256 MiB) caps the whole tree that `parseInterchanges` keeps. It counts the
   arrays of every message and about 2 KiB of nodes for each message and each run of segments between
-  messages: that fixed cost is why the tree is **3.8 times the input for messages of a few KB**, and
+  messages: that fixed cost is why the tree is **3.7 times the input for messages of a few KB**, and
   100 times and more for a file of tiny messages (`UNH+1+X'UNT+1+1'` is 16 bytes and costs 1.6 KB).
   A larger tree stops the parse with `TREE_TOO_LARGE`; read such a file with `parseMessages`.
 - An element with more than 65,535 repetitions stops the parse with `TOO_MANY_REPETITIONS`.
@@ -270,36 +270,38 @@ throughput and memory. MB means 10^6 bytes. There is no threshold yet: issue #54
 and a regression check in CI.
 
 Measured on 2026-10-24, Node.js 26.12.1, AMD EPYC 9R45 (one core of a shared cloud machine, on a
-quiet moment; runs agree within 3 %, but expect other machines to differ):
+quiet moment; runs agree within 5 %, but expect other machines to differ):
 
 | What | Result |
 | --- | --- |
 | Tokenizer, counting tokens | 419 MB/s, 173 million tokens/s |
 | Tokenizer, reading every token | 294 MB/s, 14 million segments/s |
 | Tokenizer, also making a string of every tag and value | 261 MB/s |
-| `splitMessages`, with the character check | 174 MB/s, 20,500 orders/s, 49 µs per 8.5 KB order |
-| `splitMessages`, without the character check | 214 MB/s (the check adds about 23 % to the time) |
-| `parseMessages`, building every message | 118 MB/s, 13,900 orders/s, **72 µs per 8.5 KB order** (3.6 % of the 2 ms budget of ADR 10) |
-| ... and visiting every segment, element and component | 85 MB/s, 10,000 orders/s |
-| ... and reading every value as text | 30 MB/s, 3,500 orders/s, 283 µs per order |
-| `parseInterchanges`, the whole file as one tree | 119 MB/s |
+| `splitMessages`, with the character check | 162 MB/s, 19,000 orders/s, 53 µs per 8.5 KB order |
+| `splitMessages`, without the character check | 209 MB/s (the check adds about 28 % to the time) |
+| `parseMessages`, building every message | 126 MB/s, 14,500 orders/s, **68 µs per 8.5 KB order** (3.4 % of the 2 ms budget of ADR 10) |
+| ... and visiting every segment, element and component | 86 MB/s, 10,000 orders/s |
+| ... and reading every value as text | 31 MB/s, 3,600 orders/s, 277 µs per order |
+| `parseInterchanges`, the whole file as one tree | 126 MB/s |
 | One tokenizer per 8.5 KB order | 33,000 orders/s, 30 µs per order |
 | One tokenizer per 0.5 KB order | 360,000 orders/s, 2.8 µs per order |
 | Memory of the tokenizer | 36 KiB while scanning, 9 MB or 90 MB of input alike |
 | Memory of `splitMessages` | nothing held but the envelope; 0.5 MiB sampled for 9 MB of input and 3 MiB for 92 MB, all of it garbage of slices not yet collected |
-| Memory of `parseMessages` | the arrays of one message: **40 KiB** for an 8.5 KB order, which is the bound; 2 MiB live (collected every 64 messages) for 9 MB and for 92 MB of input alike; left to V8, the heap reaches 33 MiB and 72 MiB, which is the garbage of messages that were delivered and dropped |
-| Memory of `parseInterchanges` | the whole tree: **3.8 times the input** (35 MB for 9.25 MB, 352 MB for 92.5 MB) |
-| Object tree (baseline, not used) | 42 to 46 MB/s, 320 MB retained for 9.25 MB (34.6 times the input) |
+| Memory of `parseMessages` | the arrays of one message: **40 KiB** for an 8.5 KB order, which is the bound; 1.4 to 2 MiB live (collected every 64 messages) for 9 MB and for 92 MB of input alike; left to V8, the heap reaches 33 MiB and 72 MiB, which is the garbage of messages that were delivered and dropped |
+| Memory of `parseInterchanges` | the whole tree: **3.7 times the input** for orders of 8.5 KB (34 MB for 9.25 MB, 342 MB for 92.5 MB); **102 times** for a file of 16-byte messages, whose fixed cost is 1.6 KB each |
+| Object tree (baseline, not used) | 42 to 49 MB/s, 320 MB retained for 9.25 MB (34.6 times the input) |
 
-At 92.5 MB (`-- --size-mb=100`) `parseMessages` runs at 120 MB/s, 14,000 orders/s and 71 µs per
+At 92.5 MB (`-- --size-mb=100`) `parseMessages` runs at 121 MB/s, 14,300 orders/s and 70 µs per
 order, with the same 40 KiB bound. `parseInterchanges` falls to 39 MB/s there, because it builds
-352 MB of arrays: for a file of that size, loop over `parseMessages`.
+342 MB of arrays (and needs `maxTreeBytes` raised above its default of 256 MiB): for a file of that
+size, loop over `parseMessages`.
 
 The floor on the same machine, a loop that only looks every byte up in a table, is 2.5 GB/s. The
 flat scanner of the language study reached 737 MB/s on Node 24 but only counted segments; this
 tokenizer also writes the 3.8 million tokens of the file. Against the object tree it is 6 to 7
 times faster, and still 6 times faster when it also builds a string for every value, as the tree
-does. Building the tree costs about 40 µs per order on top of the 30 µs of tokenizing; walking it
+does. Building the tree costs about 40 µs per order on top of the 30 µs of tokenizing; the null
+checks that let the splitter share its loop with the tree cost it about 7 %; walking it
 through nodes costs more than building it, because every node is made on demand: a consumer that
 reads a few values pays for a few. What was tried to get here, with the same benchmark: one table
 lookup per byte instead of three for the byte that ends a value (+16 %), signed instead of unsigned
