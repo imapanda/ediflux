@@ -11,22 +11,13 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/imapanda/libredi/services/connectors/internal/generated/api"
 )
-
-type health struct {
-	Status  string `json:"status"`
-	Service string `json:"service"`
-}
-
-type problem struct {
-	Type   string `json:"type"`
-	Title  string `json:"title"`
-	Status int    `json:"status"`
-}
 
 // New returns a handler that only answers GET and HEAD /healthz: liveness of the process.
 func New(service string) http.Handler {
-	body, err := json.Marshal(health{Status: "ok", Service: service})
+	body, err := json.Marshal(api.Health{Status: api.HealthStatusOk, Service: service})
 	if err != nil {
 		panic(err) // a struct of two strings always marshals
 	}
@@ -51,7 +42,7 @@ func New(service string) http.Handler {
 }
 
 func writeProblem(w http.ResponseWriter, status int) {
-	body, err := json.Marshal(problem{Type: "about:blank", Title: http.StatusText(status), Status: status})
+	body, err := json.Marshal(api.Problem{Type: "about:blank", Title: http.StatusText(status), Status: status})
 	if err != nil {
 		panic(err)
 	}

@@ -64,8 +64,9 @@ flowchart LR
   service or a shared package changed. Typecheck, tests, build, then
   `scripts/smoke-image.sh`: build the image, run it read-only without capabilities, wait for
   its health check, check that it is not root and that `SIGTERM` stops it with exit code 0.
-- **Service (connectors)**: the same for the Go service: `gofmt`, `go vet`, `go test -race`,
-  then the image smoke test.
+- **Service (connectors)**: the same for the Go service: the generated Go code must be what
+  `scripts/generate-go.sh` produces from `contracts/` (the job also runs when `contracts/openapi` or
+  `contracts/jobs` changes), then `gofmt`, `go vet`, `go test -race`, then the image smoke test.
 - **Compose (3 workers)**: `scripts/smoke-compose.sh` starts PostgreSQL with pgmq, the five
   services and the proxy with `--scale worker=3`, and checks that everything is healthy, that
   no service publishes a host port, that the proxy routes work, that the translator cannot

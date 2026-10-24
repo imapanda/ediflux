@@ -37,7 +37,10 @@ updates:
       include: scope
 
   - package-ecosystem: gomod
-    directory: /services/connectors
+    directories:
+      - /services/connectors
+      # The pinned code generators: a new version regenerates services/connectors/internal/generated.
+      - /tools/codegen
     schedule:
       interval: weekly
       day: monday

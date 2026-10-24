@@ -2,7 +2,7 @@
   "name": "@libredi/contracts",
   "version": "0.0.0",
   "private": true,
-  "description": "Types generated from the canonical document schemas, and checks that the files in contracts/ are valid and that services honour them",
+  "description": "Types generated from the schemas in contracts/ (canonical documents, REST API, job envelope), and checks that those files are valid and that services honour them",
   "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
@@ -23,6 +23,8 @@
     "yaml": "catalog:"
   },
   "exports": {
-    "./canonical/v1": "./src/generated/canonical-v1.ts"
+    "./canonical/v1": "./src/generated/canonical-v1.ts",
+    "./api": "./src/generated/api.ts",
+    "./jobs": "./src/generated/jobs.ts"
   }
 }

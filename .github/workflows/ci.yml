@@ -186,8 +186,12 @@ jobs:
               - 'services/mcp/**'
             connectors:
               - '.github/workflows/ci.yml'
+              - 'contracts/jobs/**'
+              - 'contracts/openapi/**'
+              - 'scripts/generate-go.sh'
               - 'scripts/smoke-image.sh'
               - 'services/connectors/**'
+              - 'tools/codegen/**'
             workspace:
               - *ts-shared
               - '.devcontainer/**'
@@ -200,6 +204,7 @@ jobs:
               - 'samples/**'
               - 'scripts/check-pins.sh'
               - 'services/**'
+              - 'tools/codegen/go.mod'
             compose:
               - *ts-shared
               - '.env.example'
@@ -297,6 +302,22 @@ jobs:
         with:
           go-version-file: services/connectors/go.mod
           cache: false # the module has no dependency yet, hence no go.sum to key the cache on
+      - name: Generated Go code is what contracts/ generate
+        working-directory: .
+        run: |
+          scripts/generate-go.sh
+          # A reviewer skims generated code: it must not contain code that runs at start-up.
+          if grep -rn '^func init(' services/connectors/internal/generated; then
+            echo "::error::Generated code must not define init functions."
+            exit 1
+          fi
+          drift=$(git status --porcelain --untracked-files=all -- services/connectors/internal/generated)
+          if [ -n "$drift" ]; then
+            echo "$drift"
+            git --no-pager diff -- services/connectors/internal/generated
+            echo "::error::The generated Go code is out of date. Run scripts/generate-go.sh and commit the result."
+            exit 1
+          fi
       - name: gofmt
         run: |
           unformatted=$(gofmt -l .)
