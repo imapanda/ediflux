@@ -1,0 +1,12 @@
+date_utc: 2026-10-24T01:09Z
+cpu: AMD EPYC 9R45
+vcpus: 16
+memory_mib: 63083
+kernel: Linux 7.0.0-1014-aws
+docker: Docker version 29.1.3, build 29.1.3-0ubuntu3~24.04.2
+compose: 2.40.3+ds1-0ubuntu1~24.04.1
+loadavg_at_start: 17.06 12.17 8.71
+containers_running_on_host: 16
+postgres: postgres (PostgreSQL) 18.6
+postgres_settings: shared_buffers=128MB max_wal_size=1GB synchronous_commit=on fsync=on wal_compression=off autovacuum_naptime=1min autovacuum_vacuum_scale_factor=0.2 autovacuum_vacuum_cost_delay=2ms checkpoint_timeout=5min
+pgmq: v1.13.1 from infra/postgres/Dockerfile, sha256 e861fcbd8c602df70a00eb9d230b1a2f591860a2230b9a6084172e3eff463642

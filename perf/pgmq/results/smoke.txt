@@ -1,0 +1,100 @@
+# pgmq SQL-only install check (2026-10-24T00:08Z)
+postgres (PostgreSQL) 18.6
+# pgmq.sql sha256 (must match infra/postgres/Dockerfile):
+e861fcbd8c602df70a00eb9d230b1a2f591860a2230b9a6084172e3eff463642  /docker-entrypoint-initdb.d/10-pgmq.sql
+
+## 1. The database created by the image at first start (superuser)
+  role   | superuser | pgmq_extensions | pgmq_available_as_extension 
+---------+-----------+-----------------+-----------------------------
+ libredi | t         |               0 |                           0
+(1 row)
+
+ create 
+--------
+ 
+(1 row)
+
+ msg_id 
+--------
+      1
+(1 row)
+
+ queue_name | queue_length | total_messages 
+------------+--------------+----------------
+ smoke      |            3 |              5
+(1 row)
+
+ drop_queue 
+------------
+ t
+(1 row)
+
+           result           
+----------------------------
+ OK: pgmq SQL install works
+(1 row)
+
+
+## 2. A fresh database, pgmq.sql run by hand as a superuser
+  role   | superuser | pgmq_extensions | pgmq_available_as_extension 
+---------+-----------+-----------------+-----------------------------
+ libredi | t         |               0 |                           0
+(1 row)
+
+ create 
+--------
+ 
+(1 row)
+
+ msg_id 
+--------
+      1
+(1 row)
+
+ queue_name | queue_length | total_messages 
+------------+--------------+----------------
+ smoke      |            3 |              5
+(1 row)
+
+ drop_queue 
+------------
+ t
+(1 row)
+
+           result           
+----------------------------
+ OK: pgmq SQL install works
+(1 row)
+
+
+## 3. A fresh database owned by a plain role (no superuser, no createrole, no createdb)
+    role    | superuser | pgmq_extensions | pgmq_available_as_extension 
+------------+-----------+-----------------+-----------------------------
+ perf_plain | f         |               0 |                           0
+(1 row)
+
+ create 
+--------
+ 
+(1 row)
+
+ msg_id 
+--------
+      1
+(1 row)
+
+ queue_name | queue_length | total_messages 
+------------+--------------+----------------
+ smoke      |            3 |              5
+(1 row)
+
+ drop_queue 
+------------
+ t
+(1 row)
+
+           result           
+----------------------------
+ OK: pgmq SQL install works
+(1 row)
+

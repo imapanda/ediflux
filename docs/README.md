@@ -10,5 +10,6 @@
 | [Research: open source](research/open-source.md) | Bots EDI and alternatives, reusable building blocks, market |
 | [Research: languages](research/languages.md) | Language per service, benchmarks, rewrite triggers |
 | [Research: GitHub](research/github-setup.md) | GitHub features used by the project |
+| [Research: PostgreSQL and pgmq load test](research/pgmq-load-test.md) | Exploratory load test of the queue and state writes per message: method, results, limits, questions for M3 |
 | [Development](development.md) | Build, test and run the repository: tooling, monorepo layout, images, Compose |
 | [Registry generator](registry-generator.md) | How the EDIFACT definition registry is built from the official UN/ECE directories: download, checksums, offline mode, what is read |
