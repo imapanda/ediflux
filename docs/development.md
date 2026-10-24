@@ -50,12 +50,12 @@ access; only `connectors` can reach partners. `scripts/smoke-compose.sh` checks 
 | `services/connectors` | Go service, with its own `go.mod` and `Dockerfile`. |
 | `packages/service-kit` | Shared runtime of the TypeScript services: `/healthz`, port handling, graceful shutdown. |
 | `packages/contracts` | Tests that check that the files in `contracts/` are valid, and the TypeScript types generated from them (`@libredi/contracts/canonical/v1`, `/api`, `/jobs`). Each service tests its own responses against the contracts. |
-| `packages/registry` | Tests of the EDIFACT definition registry schema in `contracts/registry/` against its fictitious example, and `checkRegistry()`, which checks the rules a schema cannot express. |
+| `packages/registry` | The registry generator ([docs](registry-generator.md)): downloads the UN/ECE directories, parses them into the EDIFACT definition registry of `contracts/registry/`, and checks the result. Tests use fictitious files only. |
 | `contracts/` | OpenAPI (`openapi/`), job JSON Schemas (`jobs/`), canonical documents (`canonical/`), the mapping format (`mapping/`) and the EDIFACT registry schema (`registry/`), written before the code. See its [README](../contracts/README.md). |
 | `infra/postgres`, `infra/caddy` | Image of PostgreSQL with pgmq; configuration of the reverse proxy. |
 | `compose.yaml`, `.env.example` | The stack on one machine. |
 | `tools/codegen` | Go module that pins the generators of the Go code (`oapi-codegen`, `go-jsonschema`). |
-| `scripts/` | `init-env.sh`, `check-pins.sh`, `generate-go.sh`, `smoke-image.sh`, `smoke-compose.sh`. |
+| `scripts/` | `init-env.sh`, `check-pins.sh`, `check-derived-data.sh`, `generate-go.sh`, `smoke-image.sh`, `smoke-compose.sh`. |
 
 Services are stubs for now: each answers `GET /healthz` and nothing else. Business logic comes
 with the milestones of the [roadmap](roadmap.md).
@@ -73,6 +73,8 @@ with the milestones of the [roadmap](roadmap.md).
 | `scripts/generate-go.sh` | Regenerate the Go code of `services/connectors/internal/generated` from the contracts. The Go job of the CI fails when it is out of date. |
 | `pnpm --filter @libredi/api dev` | Run a service from source with `node --watch`. |
 | `scripts/check-pins.sh` | Check that the Node.js, pnpm, Go and Biome versions agree across files. |
+| `scripts/check-derived-data.sh` | Check that Git tracks no UN/EDIFACT directory file and no registry built from one ([ADR 7](adr/0007-standards-licensing.md)). |
+| `pnpm --filter @libredi/registry libredi registry build` | Build the EDIFACT definition registry from the UN/ECE directories ([docs](registry-generator.md)). |
 | `scripts/smoke-image.sh api` | Build one image, run it locked down, check health, user and shutdown. |
 | `scripts/smoke-compose.sh` | The acceptance test: whole stack, three workers, routes, network isolation, pgmq. |
 

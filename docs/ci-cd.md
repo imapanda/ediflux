@@ -42,6 +42,10 @@ flowchart LR
   enforces `.editorconfig` (UTF-8, LF, final newline, no trailing spaces).
 - **Local links**: [lychee](https://github.com/lycheeverse/lychee) checks relative links and
   anchors, configured in `lychee.toml`.
+- **Derived data**: `scripts/check-derived-data.sh` fails when Git tracks a UN/EDIFACT directory
+  file or a registry built from one ([ADR 7](adr/0007-standards-licensing.md)). Unlike the jobs that
+  wait for **Changes**, it runs on every pull request, because such a file can be committed
+  anywhere in the tree.
 - **actionlint**: [actionlint](https://github.com/rhysd/actionlint) checks workflow syntax,
   expressions and shell scripts.
 - **zizmor**: [zizmor](https://github.com/zizmorcore/zizmor) audits workflow security.
