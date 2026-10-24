@@ -593,22 +593,32 @@ describe("memory budget", () => {
     expect(() => parseMessages(new Uint8Array(0), { maxIssues: -1 })).toThrow(RangeError);
   });
 
-  it("parses a large interchange one message at a time with a few KiB of working memory", () => {
-    const { bytes, messages } = generateOrders({ messages: 2500, linesPerMessage: 80 });
-    expect(bytes.length).toBeGreaterThan(20_000_000);
-    const stream = parseMessages(bytes, { memoryBudget: 1024 * 1024 });
-    let count = 0;
-    let segments = 0;
-    for (const message of stream) {
-      count++;
-      segments += message.segmentCount;
-    }
-    expect(count).toBe(messages.length);
-    expect(segments).toBe(messages.length * 408);
-    expect(stream.issueCount).toBe(0);
-    // About 4 times the size of one 8.5 KB message, not of the 20 MB file.
-    expect(stream.peakWorkingBytes).toBeLessThanOrEqual(1024 * 1024);
-    expect(stream.peakWorkingBytes).toBeLessThan(bytes.length / 20);
+  it("parses an interchange one message at a time with working memory that does not grow with its size", {
+    timeout: 30_000,
+  }, () => {
+    const budget = 256 * 1024;
+    const parse = (orders: number) => {
+      const { bytes, messages } = generateOrders({ messages: orders, linesPerMessage: 80 });
+      const stream = parseMessages(bytes, { memoryBudget: budget });
+      let count = 0;
+      let segments = 0;
+      for (const message of stream) {
+        count++;
+        segments += message.segmentCount;
+      }
+      expect(count).toBe(messages.length);
+      expect(segments).toBe(messages.length * 408);
+      expect(stream.issueCount).toBe(0);
+      return { size: bytes.length, peak: stream.peakWorkingBytes };
+    };
+    // Ten times the file, the same memory: the arrays of one 8.5 KB message (40 KiB), not of the file.
+    const small = parse(40);
+    const large = parse(400);
+    expect(large.size).toBeGreaterThan(3_000_000);
+    expect(large.size).toBeGreaterThan(9 * small.size);
+    expect(large.peak).toBe(small.peak);
+    expect(large.peak).toBeLessThanOrEqual(budget);
+    expect(large.peak).toBeLessThan(large.size / 50);
   });
 });
 

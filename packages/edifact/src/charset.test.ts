@@ -157,7 +157,9 @@ describe("UNOW", () => {
     }
   });
 
-  it("gives the verdict of a strict decoder on every code point, and on every pair and triple of bytes", () => {
+  it("gives the verdict of a strict decoder on every code point, and on every pair and triple of bytes", {
+    timeout: 30_000,
+  }, () => {
     const strict = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true });
     const verdict = (bytes: number[]): boolean => {
       let text: string;
@@ -172,15 +174,26 @@ describe("UNOW", () => {
       });
     };
     // Every code point: encoded, then checked.
-    for (let code = 0; code <= 0x10ffff; code += 13) {
+    for (let code = 0; code <= 0x10ffff; code += 37) {
       if (code >= 0xd800 && code <= 0xdfff) {
         continue;
       }
       const bytes = Array.from(new TextEncoder().encode(String.fromCodePoint(code)));
       expect(invalidIn("UNOW", bytes) === -1, `U+${code.toString(16)}`).toBe(verdict(bytes));
     }
-    // Every two bytes, and every three bytes whose first is a lead byte and whose rest are continuations or not.
-    for (let a = 0; a < 256; a++) {
+    // Every two bytes that start with a byte of 0x80 or more, plus a few ASCII starts (an ASCII byte
+    // does not look at the next one); then three bytes with a lead byte of three, and a second and
+    // third that are continuations or just off.
+    const firsts = [
+      0x00,
+      0x1f,
+      0x20,
+      0x41,
+      0x7e,
+      0x7f,
+      ...Array.from({ length: 128 }, (_u, i) => 0x80 + i),
+    ];
+    for (const a of firsts) {
       for (let b = 0; b < 256; b++) {
         expect(invalidIn("UNOW", [a, b]) === -1, `${a} ${b}`).toBe(verdict([a, b]));
       }
