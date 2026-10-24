@@ -57,3 +57,39 @@ export function describeByte(byte: number): string {
   }
   return `byte 0x${byte.toString(16).toUpperCase().padStart(2, "0")}`;
 }
+
+/** Codes of the errors that stop the parser. */
+export const ParseErrorCode = {
+  /** A message needs more memory than the budget allows. */
+  MessageTooLarge: "MESSAGE_TOO_LARGE",
+  /** The whole tree of a file needs more memory than `maxTreeBytes` allows. */
+  TreeTooLarge: "TREE_TOO_LARGE",
+  /** An element has more repetitions than the parser counts (65,535). */
+  TooManyRepetitions: "TOO_MANY_REPETITIONS",
+} as const;
+
+export type ParseErrorCode = (typeof ParseErrorCode)[keyof typeof ParseErrorCode];
+
+/**
+ * Why the parser stopped, other than a {@link TokenizeError}. The messages and interchanges that
+ * were complete before it have been delivered.
+ */
+export class ParseError extends Error implements TokenizeErrorPosition {
+  readonly code: ParseErrorCode;
+  readonly offset: number;
+  readonly line: number;
+  readonly column: number;
+  readonly segment: number;
+  readonly tag: string | null;
+
+  constructor(code: ParseErrorCode, detail: string, position: TokenizeErrorPosition) {
+    super(`${detail} (line ${position.line}, column ${position.column}, byte ${position.offset})`);
+    this.name = "ParseError";
+    this.code = code;
+    this.offset = position.offset;
+    this.line = position.line;
+    this.column = position.column;
+    this.segment = position.segment;
+    this.tag = position.tag;
+  }
+}

@@ -5,9 +5,11 @@ import {
   decodeText,
   explainInvalidCharacter,
 } from "./charset.ts";
+import { ParseError, ParseErrorCode } from "./errors.ts";
 import { type LineColumn, LineCursor } from "./line-index.ts";
 import type { Separators } from "./separators.ts";
 import { Source } from "./source.ts";
+import { BudgetExceeded, MAX_REPETITIONS, type Store, type StoreBuilder } from "./store.ts";
 import { Tokenizer } from "./tokenizer.ts";
 import { TokenKind } from "./tokens.ts";
 import {
@@ -39,6 +41,39 @@ export interface MessageSlice extends Span {
   readonly closed: boolean;
 }
 
+/**
+ * What the tree adds to the splitter: the arrays that hold the segments of a unit, and the nodes
+ * that are made from them. `tree.ts` provides it; the splitter alone has none and keeps nothing.
+ */
+export interface TreeFactory {
+  readonly builder: StoreBuilder;
+  /** The most memory the builder may use, in bytes, for the message of the error. */
+  readonly budget: number;
+  interchange(index: number, source: Source, separators: Separators): InterchangeFacts;
+  message(
+    interchange: InterchangeFacts,
+    store: Store,
+    ung: Span | null,
+    closed: boolean,
+  ): MessageSlice;
+  /** The segment `index` of a store, for the nodes that point at one (UNB, UNG). */
+  segment(interchange: InterchangeFacts, store: Store, index: number): Span;
+}
+
+/**
+ * What the engine hands out in tree mode: an interchange as soon as it starts (so that one with
+ * nothing but a UNA is not lost), a message, or the segments between messages (UNB, UNG, UNE,
+ * UNZ). Without a tree there are only messages.
+ */
+export type Unit =
+  | { readonly kind: "interchange"; readonly interchange: InterchangeFacts }
+  | { readonly kind: "run"; readonly interchange: InterchangeFacts; readonly store: Store }
+  | {
+      readonly kind: "message";
+      readonly interchange: InterchangeFacts;
+      readonly message: MessageSlice;
+    };
+
 const UNB = 0x554e42;
 const UNG = 0x554e47;
 const UNE = 0x554e45;
@@ -47,7 +82,7 @@ const UNT = 0x554e54;
 const UNZ = 0x554e5a;
 
 /** An interchange while it is read: what UNA and UNB say, as they are met. */
-class InterchangeFacts implements InterchangeInfo {
+export class InterchangeFacts implements InterchangeInfo {
   readonly index: number;
   readonly source: Uint8Array;
   una: ServiceStringAdvice | null = null;
@@ -95,9 +130,11 @@ function tagName(code: number): string {
 
 /**
  * Reads the tokens of the tokenizer once, cuts them into messages, and keeps what the envelope
- * says. It holds no segment: the memory it uses is a few numbers, whatever the size of the file.
+ * says. On its own it holds no segment: the memory it uses is a few numbers, whatever the size
+ * of the file. With a {@link TreeFactory} it also builds the segments of one message at a time
+ * (or of one run of segments between messages), so that the memory used is that of the largest.
  */
-class Splitter {
+export class Splitter {
   readonly source: Source;
   readonly issues: ParseIssue[] = [];
   issueCount = 0;
@@ -107,6 +144,8 @@ class Splitter {
   readonly #tokenizer: Tokenizer;
   /** Issues come in file order, so their lines and columns are found in one pass in all. */
   readonly #lines: LineCursor;
+  readonly #tree: TreeFactory | null;
+  readonly #builder: StoreBuilder | null;
 
   node: InterchangeFacts | null = null;
   nodeUsed = false;
@@ -123,8 +162,15 @@ class Splitter {
   componentNo = 0;
   /** Repetition separators met in the element being read. */
   repetitionNo = 0;
+  /** With a tree: the builder holds the segments of a unit that is not finished. */
+  unitOpen = false;
+  unitStart = 0;
+  unitSegment = 0;
+  unitTag = 0;
+  /** With a tree: an interchange that has started and has not been handed out yet. */
+  created: InterchangeFacts | null = null;
 
-  constructor(bytes: Uint8Array, options: SplitOptions) {
+  constructor(bytes: Uint8Array, options: SplitOptions, tree: TreeFactory | null = null) {
     const maxIssues = options.maxIssues ?? 100;
     if (!Number.isInteger(maxIssues) || maxIssues < 0) {
       throw new RangeError(`maxIssues must be a whole number, not ${maxIssues}`);
@@ -133,6 +179,8 @@ class Splitter {
     this.#check = options.checkCharacters ?? true;
     this.#maxIssues = maxIssues;
     this.#lines = new LineCursor(bytes);
+    this.#tree = tree;
+    this.#builder = tree === null ? null : tree.builder;
     // Made now, so that an input or a batch size that is not valid is refused by the call.
     this.#tokenizer = new Tokenizer(
       bytes,
@@ -141,52 +189,88 @@ class Splitter {
   }
 
   *messages(): Generator<MessageSlice> {
-    for (const batch of this.#tokenizer) {
-      const { kinds, starts, ends, length, separators } = batch;
-      for (let i = 0; i < length; i++) {
-        const start = starts[i] as number;
-        let done: MessageSlice | null = null;
-        switch (kinds[i]) {
-          case TokenKind.Text:
-          case TokenKind.EscapedText:
-            this.text(start, ends[i] as number);
-            break;
-          case TokenKind.ElementSeparator:
-            this.elementNo++;
-            this.componentNo = 1;
-            this.repetitionNo = 0;
-            break;
-          case TokenKind.ComponentSeparator:
-            this.componentNo++;
-            break;
-          case TokenKind.RepetitionSeparator:
-            this.componentNo = 1;
-            this.repetitionNo++;
-            break;
-          case TokenKind.SegmentTag:
-            done = this.tag(start, separators);
-            break;
-          case TokenKind.SegmentTerminator:
-            done = this.terminator(ends[i] as number);
-            break;
-          case TokenKind.ServiceStringAdvice:
-            done = this.una(start, ends[i] as number, separators);
-            break;
-        }
-        if (done !== null) {
-          yield done;
-        }
+    for (const unit of this.units()) {
+      if (unit.kind === "message") {
+        yield unit.message;
       }
     }
-    const last = this.finishMessage(false);
+  }
+
+  *units(): Generator<Unit> {
+    const builder = this.#builder;
+    try {
+      for (const batch of this.#tokenizer) {
+        const { kinds, starts, ends, length, separators } = batch;
+        for (let i = 0; i < length; i++) {
+          const start = starts[i] as number;
+          let done: Unit | null = null;
+          switch (kinds[i]) {
+            case TokenKind.Text:
+              this.text(start, ends[i] as number, false);
+              break;
+            case TokenKind.EscapedText:
+              this.text(start, ends[i] as number, true);
+              break;
+            case TokenKind.ElementSeparator:
+              builder?.beginElement(start, ends[i] as number);
+              this.elementNo++;
+              this.componentNo = 1;
+              this.repetitionNo = 0;
+              break;
+            case TokenKind.ComponentSeparator:
+              builder?.componentSeparator(start);
+              this.componentNo++;
+              break;
+            case TokenKind.RepetitionSeparator:
+              builder?.repetitionSeparator(start);
+              this.componentNo = 1;
+              this.repetitionNo++;
+              break;
+            case TokenKind.SegmentTag:
+              done = this.tag(start, separators);
+              if (this.created !== null) {
+                if (done !== null) {
+                  yield done;
+                  done = null;
+                }
+                yield this.takeCreated();
+              }
+              break;
+            case TokenKind.SegmentTerminator:
+              builder?.endSegment(start, ends[i] as number);
+              done = this.terminator(ends[i] as number);
+              break;
+            case TokenKind.ServiceStringAdvice:
+              done = this.una(start, ends[i] as number, separators);
+              if (this.created !== null) {
+                if (done !== null) {
+                  yield done;
+                  done = null;
+                }
+                yield this.takeCreated();
+              }
+              break;
+          }
+          if (done !== null) {
+            yield done;
+          }
+        }
+      }
+    } catch (error) {
+      if (error instanceof BudgetExceeded) {
+        throw this.tooLarge(error.reason);
+      }
+      throw error;
+    }
+    const last = this.finishUnit(false);
     if (last !== null) {
       yield last;
     }
   }
 
-  una(start: number, end: number, separators: Separators): MessageSlice | null {
-    const done = this.finishMessage(false);
-    this.node = new InterchangeFacts(this.interchangeCount++, this.source, separators);
+  una(start: number, end: number, separators: Separators): Unit | null {
+    const done = this.finishUnit(false);
+    this.node = this.newNode(separators);
     this.nodeUsed = false;
     this.node.una = {
       kind: "una",
@@ -199,29 +283,35 @@ class Splitter {
     return done;
   }
 
-  tag(start: number, separators: Separators): MessageSlice | null {
+  tag(start: number, separators: Separators): Unit | null {
     const bytes = this.source.bytes;
     const code =
       ((bytes[start] as number) << 16) |
       ((bytes[start + 1] as number) << 8) |
       (bytes[start + 2] as number);
-    let done: MessageSlice | null = null;
+    let done: Unit | null = null;
     if (this.node === null) {
-      this.node = new InterchangeFacts(this.interchangeCount++, this.source, separators);
+      this.node = this.newNode(separators);
     } else if (code === UNB && this.nodeUsed) {
       // A new interchange that has no UNA, after one that has no UNZ.
-      done = this.finishMessage(false);
-      this.node = new InterchangeFacts(this.interchangeCount++, this.source, separators);
+      done = this.finishUnit(false);
+      this.node = this.newNode(separators);
       this.segmentNumber = 0;
       this.ung = null;
     }
     if (code === UNH) {
-      done = this.finishMessage(false);
+      done = this.finishUnit(false);
       this.inMessage = true;
       this.messageStart = start;
       this.messageSegments = 0;
     } else if (this.inMessage && (code === UNG || code === UNE || code === UNZ)) {
-      done = this.finishMessage(false);
+      done = this.finishUnit(false);
+    }
+    if (!this.unitOpen) {
+      this.unitOpen = true;
+      this.unitStart = start;
+      this.unitSegment = this.segmentNumber + 1;
+      this.unitTag = code;
     }
     this.nodeUsed = true;
     this.segmentStart = start;
@@ -230,16 +320,17 @@ class Splitter {
     this.elementNo = 0;
     this.componentNo = 0;
     this.repetitionNo = 0;
+    this.#builder?.beginSegment(start, this.segmentNumber);
     return done;
   }
 
-  terminator(end: number): MessageSlice | null {
-    let done: MessageSlice | null = null;
+  terminator(end: number): Unit | null {
+    let done: Unit | null = null;
     if (this.inMessage) {
       this.messageSegments++;
       this.messageEnd = end;
       if (this.tagCode === UNT) {
-        done = this.finishMessage(true);
+        done = this.finishUnit(true);
       }
     }
     const node = this.node as InterchangeFacts;
@@ -250,6 +341,8 @@ class Splitter {
     } else if (this.tagCode === UNE) {
       this.ung = null;
     } else if (this.tagCode === UNZ) {
+      // The interchange is over, and so is the run of segments that holds its UNZ.
+      done = this.finishUnit(false) ?? done;
       this.node = null;
       this.ung = null;
       this.segmentNumber = 0;
@@ -257,7 +350,8 @@ class Splitter {
     return done;
   }
 
-  text(start: number, end: number): void {
+  text(start: number, end: number, escaped: boolean): void {
+    this.#builder?.addValue(start, end, escaped);
     const node = this.node as InterchangeFacts;
     if (
       this.tagCode === UNB &&
@@ -300,22 +394,103 @@ class Splitter {
     }
   }
 
-  /** Ends the message being read, if there is one, and hands it out. */
-  finishMessage(closed: boolean): MessageSlice | null {
-    if (!this.inMessage) {
+  newNode(separators: Separators): InterchangeFacts {
+    const index = this.interchangeCount++;
+    if (this.#tree === null) {
+      return new InterchangeFacts(index, this.source, separators);
+    }
+    const node = this.#tree.interchange(index, this.source, separators);
+    this.created = node;
+    return node;
+  }
+
+  takeCreated(): Unit {
+    const interchange = this.created as InterchangeFacts;
+    this.created = null;
+    return { kind: "interchange", interchange };
+  }
+
+  /** Ends the unit being read, if there is one, and hands it out. */
+  finishUnit(closed: boolean): Unit | null {
+    const tree = this.#tree;
+    if (tree === null) {
+      if (!this.inMessage) {
+        return null;
+      }
+      this.inMessage = false;
+      this.messageCount++;
+      const node = this.node as InterchangeFacts;
+      return {
+        kind: "message",
+        interchange: node,
+        message: {
+          kind: "message",
+          interchange: node,
+          ung: this.ung,
+          start: this.messageStart,
+          end: this.messageEnd,
+          segmentCount: this.messageSegments,
+          closed,
+        },
+      };
+    }
+    if (!this.unitOpen) {
       return null;
     }
-    this.inMessage = false;
-    this.messageCount++;
-    return {
-      kind: "message",
-      interchange: this.node as InterchangeFacts,
-      ung: this.ung,
-      start: this.messageStart,
-      end: this.messageEnd,
-      segmentCount: this.messageSegments,
-      closed,
+    const node = this.node as InterchangeFacts;
+    const store = tree.builder.finish();
+    tree.builder.reset();
+    this.unitOpen = false;
+    if (this.inMessage) {
+      this.inMessage = false;
+      this.messageCount++;
+      return {
+        kind: "message",
+        interchange: node,
+        message: tree.message(node, store, this.ung, closed),
+      };
+    }
+    const bytes = this.source.bytes;
+    for (let s = 0; s < store.segmentCount; s++) {
+      const at = store.segmentStart[s] as number;
+      const code =
+        ((bytes[at] as number) << 16) |
+        ((bytes[at + 1] as number) << 8) |
+        (bytes[at + 2] as number);
+      if (code === UNB) {
+        node.unb = tree.segment(node, store, s);
+      } else if (code === UNG) {
+        this.ung = tree.segment(node, store, s);
+      } else if (code === UNE) {
+        this.ung = null;
+      }
+    }
+    return { kind: "run", interchange: node, store };
+  }
+
+  /** The error for a unit that the arrays cannot hold, placed where that unit starts. */
+  tooLarge(reason: BudgetExceeded["reason"]): ParseError {
+    const { line, column } = this.source.locate(this.unitStart);
+    const what = this.inMessage ? "The message" : "The run of segments outside any message";
+    const position = {
+      offset: this.unitStart,
+      line,
+      column,
+      segment: this.unitSegment,
+      tag: tagName(this.unitTag),
     };
+    if (reason === "repetitions") {
+      return new ParseError(
+        ParseErrorCode.TooManyRepetitions,
+        `${what} that starts here has an element with more than ${MAX_REPETITIONS} repetitions, which is more than the parser counts`,
+        position,
+      );
+    }
+    return new ParseError(
+      ParseErrorCode.MessageTooLarge,
+      `${what} that starts here needs more than the memory budget of ${this.#tree?.budget} bytes; raise memoryBudget, or check that the file has the UNH and UNT segments it should`,
+      position,
+    );
   }
 
   report(code: ParseIssue["code"], message: string, offset: number): void {

@@ -1,4 +1,4 @@
-import { Tokenizer, TokenKind, unescapeValue } from "../index.ts";
+import { type Interchange, Tokenizer, TokenKind, unescapeValue } from "../index.ts";
 import { textOf } from "./helpers.ts";
 
 /** A data element as the expected-result files of samples/edifact write it. */
@@ -88,4 +88,19 @@ export function readSegments(bytes: Uint8Array, encoding: "latin1" | "utf8"): In
     }
   }
   return model;
+}
+
+/** The same shape as {@link readSegments}, read from the tree instead of from the tokens. */
+export function treeToModel(interchange: Interchange): InterchangeModel {
+  return {
+    una: interchange.una === null ? null : interchange.una.text,
+    segments: [...interchange.segments()].map((segment) => ({
+      tag: segment.tag,
+      elements: segment.elements.map((element) =>
+        element.repetitions.length > 1
+          ? { repetitions: element.repetitions.map((r) => r.map((c) => c.text())) }
+          : element.components.map((c) => c.text()),
+      ),
+    })),
+  };
 }

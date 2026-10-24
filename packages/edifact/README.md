@@ -1,14 +1,15 @@
 # @libredi/edifact
 
 The UN/EDIFACT engine of Libredi. Today it holds the **tokenizer** (bytes in, a flat stream of
-tokens out), **character sets** (UNOA, UNOB, UNOC, UNOW) and the **splitter**, which finds the
-messages of a file in constant memory. The tree (issue #39), the serializer (#40) and the
-validator (#42) build on them.
+tokens out), **character sets** (UNOA, UNOB, UNOC, UNOW), the **splitter**, which finds the
+messages of a file in constant memory, and the **tree**, which reads one message at a time into
+segments, elements and components with their positions, within a memory budget. The serializer
+(issue #40) and the validator (#42) build on them.
 
 The package is private to the monorepo and exports its TypeScript source, like the other
 packages (see [development](../../docs/development.md#typescript-conventions)). Its interface is
-deliberately narrow, bytes in and tokens out, so that a faster implementation in another
-language could replace it behind the same shape (ADR 4).
+deliberately narrow, bytes in and tokens, slices or messages out, so that a faster
+implementation in another language could replace it behind the same shape (ADR 4).
 
 ## Use
 
@@ -91,6 +92,88 @@ stream.messageCount; // messages handed out so far
 - A cut file ends the loop with the tokenizer's `TokenizeError`, after the messages before it.
   A stream reads its input once; a second loop yields nothing.
 
+## Read the tree
+
+```ts
+import { parseInterchanges, parseMessages } from "@libredi/edifact";
+
+for (const message of parseMessages(bytes)) {
+  for (const segment of message.segments) {
+    segment.tag; // "NAD"
+    segment.text(2, 1); // component 1 of element 2, as text, or undefined
+    const component = segment.component(2, 3);
+    component?.position; // { segment: 5, tag: "NAD", element: 2, component: 3 }
+    component?.start; // bytes of the value in the input, release characters included
+  }
+}
+
+const { interchanges, issues } = parseInterchanges(bytes); // the whole file, kept in memory
+```
+
+- **A tree of nodes**: `Interchange` (UNA, separators, character set, `items`, UNB, UNZ), `Group`
+  (UNG to UNE), `Message` (UNH to UNT), `Segment`, `Element`, `Component`. Each has `start` and
+  `end`, the bytes it spans in the input. Elements and components come from `segment.elements`,
+  `element.components` and `element.repetitions` (syntax 4: one list of components per repetition;
+  one list otherwise).
+- **Positions** are those of the sample corpus, the registry and the validator: the number of the
+  segment in the interchange (UNA is 0, UNB is 1), the tag, and the element and component counted
+  from 1. A composite counts as one element and an empty element counts; an empty component stands
+  between two separators and has a `start` equal to its `end`. `interchange.locate(offset)` gives
+  line and column.
+- **Lossless.** The input is kept (`interchange.source`) and every node knows its bytes, so
+  nothing of the file is lost: values keep their release characters until `text()` or `bytes()`
+  asks for them without, and the bytes between two nodes (the line breaks after a terminator, a
+  byte order mark in front of the first segment) are exactly the bytes between their spans. The
+  serializer (issue #40) writes the tree back.
+- **Nodes are views** on compact typed arrays, made when they are asked for. `segment.elements`
+  builds its list on each call: keep it if you read it often. The arrays of a message of a few KB
+  take about four times its size, against thirty and more for an object tree.
+- **The structure is not judged.** A message without UNT (`unt` is null), a segment outside any
+  message (an item of the interchange or of the group, next to messages), a UNE without UNG, a file
+  with no UNB or no UNZ all come out as they are; the validator reports them.
+- **Values are decoded with the character set of UNB** (`text()`), or as ISO 8859-1 when there is
+  none. A value with a character the set does not allow is in the `issues` and still in the tree.
+- **`parseMessages`** gives the messages of a file one at a time, each with its own arrays, so a
+  message can be kept or dropped on its own. `parseMessages(bytes).items()` gives the messages
+  and, between them, the segments that are not in a message (UNB, UNG, UNE, UNZ, loose segments)
+  as `Envelope` items, so that a validator that reads a large file message by message still sees
+  the envelope and its counts. `parseInterchanges` is the whole file at once, for small files: it
+  throws the `TokenizeError` or `ParseError` and returns nothing. An interchange that is only a UNA
+  string is an interchange (and an `Interchange` of its own); the stream does not hand out UNA
+  strings, which `message.interchange.una` has.
+- **`bytes()` is a copy**, even for an input that is a Node.js `Buffer`: writing to it does not
+  change the file or the text of other nodes. `message.segments` cannot be changed.
+- **A long element is paid for when it is asked for.** `element.components` makes one node for each
+  component (about 80 bytes each), and `component.position` finds its repetition by a binary
+  search; a million components are fine to read one at a time, not to list at once.
+
+### Memory
+
+- `memoryBudget` (default 64 MiB, from 4096 bytes to 2 GiB) is the most that the arrays of one
+  message may use. A message of 9 KB takes 40 KiB, so the default allows messages of about 16 MB.
+  The same limit applies to a run of segments that are not in a message (UNB, UNG, UNE, UNZ, loose
+  segments). Arrays grow by doubling, up to what fits in the limit. A message that needs more stops
+  the parse with a `ParseError` (`MESSAGE_TOO_LARGE`) that says where the message starts.
+  `stream.peakWorkingBytes` is the most a message needed. While a message is copied out, the arrays
+  and the copy exist together, so the peak of the process is up to about twice the budget.
+- `maxTreeBytes` (default 256 MiB) caps the whole tree that `parseInterchanges` keeps. It counts the
+  arrays of every message and about 2 KiB of nodes for each message and each run of segments between
+  messages: that fixed cost is why the tree is **3.7 times the input for messages of a few KB**, and
+  100 times and more for a file of tiny messages (`UNH+1+X'UNT+1+1'` is 16 bytes and costs 1.6 KB).
+  A larger tree stops the parse with `TREE_TOO_LARGE`; read such a file with `parseMessages`.
+- An element with more than 65,535 repetitions stops the parse with `TOO_MANY_REPETITIONS`.
+
+| Code of a `ParseError` | When |
+| --- | --- |
+| `MESSAGE_TOO_LARGE` | One message, or one run of segments outside messages, needs more than `memoryBudget`. |
+| `TREE_TOO_LARGE` | The whole tree of `parseInterchanges` needs more than `maxTreeBytes`. |
+| `TOO_MANY_REPETITIONS` | An element has more than 65,535 repetitions. |
+
+The bound is on what the parser holds, not on the input, which the caller has already read into a
+`Uint8Array`, and not on the garbage of messages that were delivered and dropped: V8 collects the
+arrays of dropped messages when it decides to. The benchmark shows both (live set and free-running
+heap).
+
 ## Character sets
 
 UNB names the character set in the first component of S001. The splitter reads that component as
@@ -150,17 +233,28 @@ position in the terms of the registry (segment, tag, element, component counted 
 - every sample once more through the splitter (message counts and sizes, facts of the interchange,
   UNOC and UTF-8 values decoded to the text of the expected-result file, the character issues of
   the invalid samples at the positions of their expected-result files);
-- examples for each rule above;
+- every sample once more through the parser: the tree, read component by component, is the content
+  of its expected-result file and what the tokens say; the segment, element and component
+  positions and spans agree with the bytes;
+- examples for each rule above, including a structure that is not what it should be (no UNT, no
+  UNZ, loose segments, groups, several interchanges) and the memory budget (the error, its place,
+  the segments outside messages, a 20 MB interchange parsed within 1 MiB);
 - [fast-check](https://fast-check.dev) properties: any bytes survive escaping, a released byte
   never acts as a separator, an interchange written from a model is tokenized exactly as laid
   out for any legal separators and line breaks, several interchanges in one file keep their own
   separators, the result does not depend on the batch size, every byte is covered by a token or
   is a skipped line break, and `locate` agrees with a plain scan; messages written from a model
   (with or without UNT, in groups or not) are found where they were written; a value is reported
-  if and only if it has a byte its character set does not allow;
+  if and only if it has a byte its character set does not allow; a tree written from a model has
+  the segments, elements, repetitions, components, positions and spans of the model, and says
+  what the tokens say; the same messages come out of `parseMessages` and `parseInterchanges`,
+  whatever the batch size; arbitrary bytes parse into a consistent tree or stop with the
+  tokenizer's error;
 - a second, deliberately plain tokenizer (`src/testing/reference.ts`, one byte at a time, no
-  tables, no batches) that must give the same tokens, separators and errors on arbitrary bytes
-  and on real samples that are cut, bent, joined or have a byte changed.
+  tables, no batches) and a second, plain splitter on top of it (`src/testing/split-reference.ts`)
+  that must give the same tokens, separators, errors, messages, interchange facts and issues on
+  arbitrary bytes, on random envelopes and on real samples that are cut, bent, joined or have a
+  byte changed.
 
 ## Benchmark
 
@@ -175,27 +269,44 @@ It generates a deterministic ORDERS interchange (1,087 orders of 80 lines, 443,4
 throughput and memory. MB means 10^6 bytes. There is no threshold yet: issue #54 adds fuzzing
 and a regression check in CI.
 
-Measured on 2026-10-23, Node.js 26.12.1, AMD EPYC 9R45 (one core of a shared cloud machine;
-three runs agree within 2 %, but expect other machines to differ):
+Measured on 2026-10-24, Node.js 26.12.1, AMD EPYC 9R45 (one core of a shared cloud machine, on a
+quiet moment; runs agree within 5 %, but expect other machines to differ):
 
 | What | Result |
 | --- | --- |
-| Tokenizer, counting tokens | 420 MB/s, 173 million tokens/s |
-| Tokenizer, reading every token | 293 MB/s, 14 million segments/s |
+| Tokenizer, counting tokens | 419 MB/s, 173 million tokens/s |
+| Tokenizer, reading every token | 294 MB/s, 14 million segments/s |
 | Tokenizer, also making a string of every tag and value | 261 MB/s |
-| `splitMessages`, with the character check | 182 MB/s, 21,000 orders/s, 47 µs per 8.5 KB order |
-| `splitMessages`, without the character check | 225 MB/s (the check adds about 24 % to the time) |
-| One tokenizer per 8.5 KB order | 34,000 orders/s, 29 µs per order (1.5 % of the 2 ms budget of ADR 10) |
-| One tokenizer per 0.5 KB order | 380,000 orders/s, 2.6 µs per order |
+| `splitMessages`, with the character check | 162 MB/s, 19,000 orders/s, 53 µs per 8.5 KB order |
+| `splitMessages`, without the character check | 209 MB/s (the check adds about 28 % to the time) |
+| `parseMessages`, building every message | 126 MB/s, 14,500 orders/s, **68 µs per 8.5 KB order** (3.4 % of the 2 ms budget of ADR 10) |
+| ... and visiting every segment, element and component | 86 MB/s, 10,000 orders/s |
+| ... and reading every value as text | 31 MB/s, 3,600 orders/s, 277 µs per order |
+| `parseInterchanges`, the whole file as one tree | 126 MB/s |
+| One tokenizer per 8.5 KB order | 33,000 orders/s, 30 µs per order |
+| One tokenizer per 0.5 KB order | 360,000 orders/s, 2.8 µs per order |
 | Memory of the tokenizer | 36 KiB while scanning, 9 MB or 90 MB of input alike |
-| Memory of `splitMessages` | nothing held but the envelope; the sampled heap stays under 2 MiB for 90 MB of input (garbage of slices not yet collected) |
-| Object tree (baseline, not used) | 42 to 45 MB/s, 320 MB retained for 9.25 MB (34.6 times the input) |
+| Memory of `splitMessages` | nothing held but the envelope; 0.5 MiB sampled for 9 MB of input and 3 MiB for 92 MB, all of it garbage of slices not yet collected |
+| Memory of `parseMessages` | the arrays of one message: **40 KiB** for an 8.5 KB order, which is the bound; 1.4 to 2 MiB live (collected every 64 messages) for 9 MB and for 92 MB of input alike; left to V8, the heap reaches 33 MiB and 72 MiB, which is the garbage of messages that were delivered and dropped |
+| Memory of `parseInterchanges` | the whole tree: **3.7 times the input** for orders of 8.5 KB (34 MB for 9.25 MB, 342 MB for 92.5 MB); **102 times** for a file of 16-byte messages, whose fixed cost is 1.6 KB each |
+| Object tree (baseline, not used) | 42 to 49 MB/s, 320 MB retained for 9.25 MB (34.6 times the input) |
+
+At 92.5 MB (`-- --size-mb=100`) `parseMessages` runs at 121 MB/s, 14,300 orders/s and 70 µs per
+order, with the same 40 KiB bound. `parseInterchanges` falls to 39 MB/s there, because it builds
+342 MB of arrays (and needs `maxTreeBytes` raised above its default of 256 MiB): for a file of that
+size, loop over `parseMessages`.
 
 The floor on the same machine, a loop that only looks every byte up in a table, is 2.5 GB/s. The
 flat scanner of the language study reached 737 MB/s on Node 24 but only counted segments; this
 tokenizer also writes the 3.8 million tokens of the file. Against the object tree it is 6 to 7
 times faster, and still 6 times faster when it also builds a string for every value, as the tree
-does. What was tried to get here, with the same benchmark: one table lookup per byte instead of
-three for the byte that ends a value (+16 %), signed instead of unsigned offsets (+3 to 5 %),
-one allocation for the three arrays and arrays sized to small inputs (a 0.5 KB order went from
-71 to 177 MB/s); `bytes.length` as the loop bound was slower and was dropped.
+does. Building the tree costs about 40 µs per order on top of the 30 µs of tokenizing; the null
+checks that let the splitter share its loop with the tree cost it about 7 %; walking it
+through nodes costs more than building it, because every node is made on demand: a consumer that
+reads a few values pays for a few. What was tried to get here, with the same benchmark: one table
+lookup per byte instead of three for the byte that ends a value (+16 %), signed instead of unsigned
+offsets (+3 to 5 %), one allocation for the three arrays and arrays sized to small inputs (a 0.5 KB
+order went from 71 to 177 MB/s), a character table made once per interchange instead of looked up
+for every value (the check went from 40 % to 23 % of the time of the splitter), `component(e, c)`
+and `element.components` without the lists and nodes they do not need (visiting every node went from
+34 to 85 MB/s); `bytes.length` as the loop bound was slower and was dropped.
