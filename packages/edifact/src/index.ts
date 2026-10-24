@@ -9,6 +9,17 @@ export {
   TokenizeErrorCode,
   type TokenizeErrorPosition,
 } from "./errors.ts";
+export {
+  formatIssue,
+  ISSUE_CATALOGUE,
+  ISSUE_CODES,
+  type IssueCode,
+  type IssuePosition,
+  isIssueCode,
+  type Severity,
+  type ValidationIssue,
+  type ValidationLayer,
+} from "./issues.ts";
 export type { LineColumn } from "./line-index.ts";
 export {
   MessageStream,
@@ -60,3 +71,4 @@ export {
   type Span,
 } from "./types.ts";
 export { unescapeValue } from "./unescape.ts";
+export { type ValidateOptions, type ValidationReport, validate } from "./validate.ts";

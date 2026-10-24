@@ -6,7 +6,8 @@ messages of a file in constant memory, the **tree**, which reads one message at 
 segments, elements and components with their positions, within a memory budget, and the
 **serializer**, which writes a tree back: byte for byte when it was parsed, or from data that was
 built or edited. **Syntax version 4** (the repetition separator) is read and written throughout.
-The validator (#42) builds on them.
+The **validator** checks a file and tells what is wrong in plain language: today the file itself and
+its envelopes, with the data checks to come (issue #42).
 
 The package is private to the monorepo and exports its TypeScript source, like the other
 packages (see [development](../../docs/development.md#typescript-conventions)). Its interface is
@@ -163,13 +164,13 @@ const { interchanges, issues } = parseInterchanges(bytes); // the whole file, ke
   messages: that fixed cost is why the tree is **3.7 times the input for messages of a few KB**, and
   100 times and more for a file of tiny messages (`UNH+1+X'UNT+1+1'` is 16 bytes and costs 1.6 KB).
   A larger tree stops the parse with `TREE_TOO_LARGE`; read such a file with `parseMessages`.
-- An element with more than 65,535 repetitions stops the parse with `TOO_MANY_REPETITIONS`.
+- An element with more than 65,535 repetitions stops the parse with `TOO_MANY_ELEMENT_REPETITIONS`.
 
 | Code of a `ParseError` | When |
 | --- | --- |
 | `MESSAGE_TOO_LARGE` | One message, or one run of segments outside messages, needs more than `memoryBudget`. |
 | `TREE_TOO_LARGE` | The whole tree of `parseInterchanges` needs more than `maxTreeBytes`. |
-| `TOO_MANY_REPETITIONS` | An element has more than 65,535 repetitions. |
+| `TOO_MANY_ELEMENT_REPETITIONS` | An element has more than 65,535 repetitions. |
 
 The bound is on what the parser holds, not on the input, which the caller has already read into a
 `Uint8Array`, and not on the garbage of messages that were delivered and dropped: V8 collects the
@@ -295,6 +296,55 @@ which character it is (syntax 3 keeps a space there).
   version 4 has (UGH and UGT, UNO and UNP) are ordinary segments to the engine: they are in the
   tree where they stand, loose segments between messages, and are not interpreted.
 
+## Validate
+
+```ts
+import { formatIssue, validate } from "@libredi/edifact";
+
+const report = validate(bytes);
+report.valid; // no error was found
+for (const issue of report.issues) {
+  issue.code; // "UNT_COUNT_MISMATCH": stable, switch on it
+  issue.position; // { segment: 23, tag: "UNT", element: 1, component: null, repetition: null }
+  issue.expected; // "12"
+  issue.found; // "13"
+  console.log(formatIssue(issue));
+  // error UNT_COUNT_MISMATCH at line 23, column 5 (segment 23 UNT, element 1)
+  //   UNT gives the number of segments as 13, but the message has 12 (UNH and UNT included).
+  //   Hint: Count the segments from UNH to UNT inclusive and write that number in the first element of UNT. ...
+}
+```
+
+`validate(bytes, { maxIssues, memoryBudget })` reads the file once, a message at a time (the memory
+is that of the largest message), and never throws for a problem in the file: a file that stops the
+tokenizer ends the check with an issue, and everything delivered before it has been checked. The
+report holds the first issues of the file, in file order (at most `maxIssues`, default 1,000;
+`issueCount` counts them all), the number of errors and warnings, `valid` (no error), `complete`
+(false when the check stopped on an unreadable file, or on a message too large for the budget, so
+that what follows was not checked) and how many messages and interchanges were read.
+
+An **issue** answers four questions: what is wrong (`code`, `message`), where (`position`, `line`,
+`column`, `offset`), what was expected and found (`expected`, `found`), and what to do about it
+(`hint`). It also has a `severity` and the `layer` that found it. The codes are stable, taken from the
+[sample corpus](../../samples/edifact/README.md); the messages and hints are English text for people
+and may be improved. **[Validation errors](../../docs/validation-errors.md)** is the catalogue: every
+code, what it means and what to do. A test keeps that page in step with `ISSUE_CATALOGUE`.
+
+What is checked today, without a registry:
+
+- **The file**: the UNA string, segment tags, a file that is cut off, the character set of UNB and
+  every value against it, a message too large for the memory budget.
+- **The envelopes** (ISO 9735): the mandatory data of UNB, UNZ, UNG, UNE, UNH and UNT; the syntax
+  version (3 or 4); the number of segments in UNT (UNH and UNT included), of messages in UNE and
+  of messages (or of groups, when there are some) in UNZ; the control references that UNT, UNE and
+  UNZ repeat from UNH, UNG and UNB; a missing UNT, UNE, UNZ or UNB; a segment outside any message.
+  A count is compared as a number (`03` is 3) and one that is not a whole number is
+  `INVALID_DATA_TYPE`.
+- **One cause, one issue**: when the file stops being readable, what is missing after the cut is not
+  reported as well, and a composite that is missing is one issue, not one per component. Text taken
+  from the file (a reference, a count) is cut after 32 characters and its control characters are
+  shown as `?`, so that a message can go into a log as it is.
+
 ## Character sets
 
 UNB names the character set in the first component of S001. The splitter reads that component as
@@ -377,6 +427,11 @@ position in the terms of the registry (segment, tag, element, component counted 
   the file (without its line breaks), and the tree written as data with `serializeData` gives the
   same bytes, with text values and with byte values; the five syntax 4 samples also parse to the
   same tree without their UNA string;
+- the validator: every valid sample has no issue, every invalid sample that needs no registry gives
+  exactly its expected code and position, envelope examples for each rule and error (counts,
+  references, groups, missing segments, a file cut at every point of a segment), the report
+  (order, limit, formatting), and the catalogue (its text, the corpus codes it covers, and the page
+  `docs/validation-errors.md`, which is written from it: `LIBREDI_UPDATE_DOCS=1` rewrites it);
 - the serializer's own examples (escapes with other service characters, empty elements and
   components, each character set, each error and its position, the output limit, an edited
   interchange) and fast-check properties: a parsed file comes back byte for byte whatever the
@@ -419,6 +474,7 @@ quiet moment; runs agree within 5 %, but expect other machines to differ):
 | `splitMessages`, with the character check | 162 MB/s, 19,000 orders/s, 53 µs per 8.5 KB order |
 | `splitMessages`, without the character check | 209 MB/s (the check adds about 28 % to the time) |
 | `parseMessages`, building every message | 126 MB/s, 14,500 orders/s, **68 µs per 8.5 KB order** (3.4 % of the 2 ms budget of ADR 10) |
+| `validate`, the file and its envelopes | 125 to 126 MB/s, 14,700 orders/s, **68 µs per order**: 4 µs more than parsing, 3.4 % of the 2 ms budget (measured on a quieter moment than the rows around it, where `parseMessages` ran at 133 MB/s) |
 | ... and visiting every segment, element and component | 86 MB/s, 10,000 orders/s |
 | ... and reading every value as text | 31 MB/s, 3,600 orders/s, 277 µs per order |
 | `parseInterchanges`, the whole file as one tree | 126 MB/s |

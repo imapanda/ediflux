@@ -373,6 +373,8 @@ export class Splitter {
             ParseIssueCode.UnsupportedCharset,
             `The character set "${node.syntaxIdentifier}" is not supported (UNOA, UNOB, UNOC and UNOW are); values are read as ISO 8859-1 and not checked`,
             start,
+            "UNOA, UNOB, UNOC or UNOW",
+            node.syntaxIdentifier,
           );
         }
       } else {
@@ -385,11 +387,19 @@ export class Splitter {
       const bytes = this.source.bytes;
       const bad = checker.find(bytes, start, end);
       if (bad >= 0) {
-        this.report(
-          ParseIssueCode.InvalidCharacter,
-          `Invalid character in ${checker.set}: ${explainInvalidCharacter(bytes, bad, checker.set)}`,
-          bad,
-        );
+        // The explanation is only worth building for an issue that is kept.
+        if (this.issues.length < this.#maxIssues) {
+          const why = explainInvalidCharacter(bytes, bad, checker.set);
+          this.report(
+            ParseIssueCode.InvalidCharacter,
+            `Invalid character in ${checker.set}: ${why}`,
+            bad,
+            `a character of ${checker.set}`,
+            why,
+          );
+        } else {
+          this.issueCount++;
+        }
       }
     }
   }
@@ -481,7 +491,7 @@ export class Splitter {
     };
     if (reason === "repetitions") {
       return new ParseError(
-        ParseErrorCode.TooManyRepetitions,
+        ParseErrorCode.TooManyElementRepetitions,
         `${what} that starts here has an element with more than ${MAX_REPETITIONS} repetitions, which is more than the parser counts`,
         position,
       );
@@ -493,13 +503,22 @@ export class Splitter {
     );
   }
 
-  report(code: ParseIssue["code"], message: string, offset: number): void {
+  report(
+    code: ParseIssue["code"],
+    message: string,
+    offset: number,
+    expected: string,
+    found: string,
+  ): void {
     this.issueCount++;
     if (this.issues.length < this.#maxIssues) {
       const { line, column } = this.#lines.advanceTo(offset);
       this.issues.push({
         code,
         message,
+        expected,
+        found,
+        repetition: this.repetitionNo > 0 ? this.repetitionNo + 1 : null,
         offset,
         line,
         column,
