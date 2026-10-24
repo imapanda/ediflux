@@ -59,7 +59,8 @@ flowchart LR
 - **Workspace**: [Biome](https://biomejs.dev/) over the whole repository, `scripts/check-pins.sh`
   (the Node.js, pnpm, Go and Biome versions agree across the files that pin them), then
   typecheck and tests of the shared packages, including the checks of the files in
-  `contracts/` and of the examples against the sample corpus.
+  `contracts/`, of the examples against the sample corpus, and the tokenizer tests against
+  `samples/`.
 - **Service (api, worker, translator, mcp)**: one job per TypeScript service, run when the
   service or a shared package changed. Typecheck, tests, build, then
   `scripts/smoke-image.sh`: build the image, run it read-only without capabilities, wait for

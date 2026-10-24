@@ -1,0 +1,22 @@
+{
+  "name": "@libredi/edifact",
+  "version": "0.0.0",
+  "private": true,
+  "description": "UN/EDIFACT engine: a flat tokenizer that turns bytes into tokens; the parser and validator build on it",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "bench": "node --expose-gc bench/run.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "fast-check": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
