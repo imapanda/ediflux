@@ -50,6 +50,8 @@ access; only `connectors` can reach partners. `scripts/smoke-compose.sh` checks 
 | `services/connectors` | Go service, with its own `go.mod` and `Dockerfile`. |
 | `packages/service-kit` | Shared runtime of the TypeScript services: `/healthz`, port handling, graceful shutdown. |
 | `packages/contracts` | Tests that check that the files in `contracts/` are valid. Each service tests its own responses against them. |
+| `packages/edifact` | The UN/EDIFACT engine. Today: the tokenizer (bytes in, flat tokens out), tested against `samples/edifact`, and its benchmark. See its [README](../packages/edifact/README.md). |
+| `samples/edifact` | Fictitious EDIFACT interchanges with expected results, for the tokenizer, parser and validator. See its [README](../samples/edifact/README.md). |
 | `contracts/` | OpenAPI (`openapi/`) and job JSON Schemas (`jobs/`), written before the code. See its [README](../contracts/README.md). |
 | `infra/postgres`, `infra/caddy` | Image of PostgreSQL with pgmq; configuration of the reverse proxy. |
 | `compose.yaml`, `.env.example` | The stack on one machine. |
@@ -66,6 +68,7 @@ with the milestones of the [roadmap](roadmap.md).
 | `pnpm typecheck` | `tsc --noEmit` in every package. |
 | `pnpm test` | Vitest (with fast-check for property tests) in every package. |
 | `pnpm build` | Bundle every service into `dist/main.js` with esbuild. |
+| `pnpm --filter @libredi/edifact bench` | Benchmark the EDIFACT tokenizer on a generated 10 MB interchange: throughput and memory. Never part of `verify`. |
 | `pnpm verify` | `check`, `typecheck` and `test`. Run it before every push. |
 | `pnpm --filter @libredi/api dev` | Run a service from source with `node --watch`. |
 | `scripts/check-pins.sh` | Check that the Node.js, pnpm, Go and Biome versions agree across files. |
