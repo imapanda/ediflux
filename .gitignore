@@ -11,6 +11,12 @@
 /data/
 /samples/private/
 
+# UN/EDIFACT directories and the registries built from them are never committed (ADR 7)
+/registry/
+/.libredi/
+*.registry.json
+d[0-9][0-9][a-c].zip
+
 # Editors and OS
 .idea/
 .vscode/

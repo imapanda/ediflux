@@ -78,6 +78,21 @@ jobs:
           failIfEmpty: false
           jobSummary: false
 
+  # Runs whatever the change is, unlike the jobs below that wait for `changes`: a directory file or a
+  # registry can be committed anywhere in the tree.
+  derived-data:
+    name: Derived data
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # No UN/EDIFACT directory file, and no registry built from one, may be tracked (ADR 7).
+      - run: scripts/check-derived-data.sh
+
   actionlint:
     name: actionlint
     runs-on: ubuntu-latest
@@ -319,6 +334,7 @@ jobs:
       - spelling
       - editorconfig
       - links
+      - derived-data
       - actionlint
       - zizmor
       - dependency-review

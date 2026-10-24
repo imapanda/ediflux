@@ -54,7 +54,7 @@ access; only `connectors` can reach partners. `scripts/smoke-compose.sh` checks 
 | `contracts/` | OpenAPI (`openapi/`), job JSON Schemas (`jobs/`), canonical documents (`canonical/`), the mapping format (`mapping/`) and the EDIFACT registry schema (`registry/`), written before the code. See its [README](../contracts/README.md). |
 | `infra/postgres`, `infra/caddy` | Image of PostgreSQL with pgmq; configuration of the reverse proxy. |
 | `compose.yaml`, `.env.example` | The stack on one machine. |
-| `scripts/` | `init-env.sh`, `check-pins.sh`, `smoke-image.sh`, `smoke-compose.sh`. |
+| `scripts/` | `init-env.sh`, `check-pins.sh`, `check-derived-data.sh`, `smoke-image.sh`, `smoke-compose.sh`. |
 
 Services are stubs for now: each answers `GET /healthz` and nothing else. Business logic comes
 with the milestones of the [roadmap](roadmap.md).
@@ -71,6 +71,8 @@ with the milestones of the [roadmap](roadmap.md).
 | `pnpm --filter @libredi/contracts generate` | Regenerate the TypeScript types of the canonical documents after changing a schema in `contracts/canonical/`. The tests fail when they are out of date. |
 | `pnpm --filter @libredi/api dev` | Run a service from source with `node --watch`. |
 | `scripts/check-pins.sh` | Check that the Node.js, pnpm, Go and Biome versions agree across files. |
+| `scripts/check-derived-data.sh` | Check that Git tracks no UN/EDIFACT directory file and no registry built from one ([ADR 7](adr/0007-standards-licensing.md)). |
+| `pnpm --filter @libredi/registry libredi registry build` | Build the EDIFACT definition registry from the UN/ECE directories ([docs](registry-generator.md)). |
 | `scripts/smoke-image.sh api` | Build one image, run it locked down, check health, user and shutdown. |
 | `scripts/smoke-compose.sh` | The acceptance test: whole stack, three workers, routes, network isolation, pgmq. |
 

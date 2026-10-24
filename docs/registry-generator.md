@@ -2,10 +2,10 @@
 
 How Libredi builds its [EDIFACT definition registry](../contracts/registry/README.md) from the
 official UN/ECE directories. The generator lives in [`packages/registry`](../packages/registry).
-Issues [#31](https://github.com/imapanda/libredi/issues/31) (download) and
-[#32](https://github.com/imapanda/libredi/issues/32) (parser) are done; the command that runs it
+It covers the download ([#31](https://github.com/imapanda/libredi/issues/31)), the parser
+([#32](https://github.com/imapanda/libredi/issues/32)), the command that runs them
 (`libredi registry build`, [#33](https://github.com/imapanda/libredi/issues/33)) and the guard that
-keeps derived data out of Git ([#34](https://github.com/imapanda/libredi/issues/34)) come next.
+keeps derived data out of Git ([#34](https://github.com/imapanda/libredi/issues/34)).
 
 ## Why it exists
 
@@ -15,6 +15,42 @@ official archive, checks it, and builds the registry on the operator's own volum
 operator the licensee ([ADR 7](adr/0007-standards-licensing.md)). The repository holds the code, the
 [registry schema](../contracts/registry/registry.schema.json) and hand-written fictitious test files,
 nothing else.
+
+## Running it
+
+```bash
+pnpm --filter @libredi/registry libredi registry build --out /var/lib/libredi/registry
+```
+
+`libredi registry build` is the command; until the `libredi` program exists, the `libredi` script of
+the package runs it (it is `node src/main.ts`, and takes the arguments that follow the name of the
+program). It writes one file per directory, `d96a.json` and `d01b.json`, in the output folder.
+
+| Option | Meaning |
+| --- | --- |
+| `--out <dir>` | Output folder. Default: `$LIBREDI_REGISTRY_DIR`, else `$XDG_DATA_HOME/libredi/registry`, which is `~/.local/share/libredi/registry`: outside the repository. |
+| `--directory <id>` | Build only this directory (repeatable). Default: all. |
+| `--offline <dir>` | [Offline mode](#offline-mode). Default: `$LIBREDI_REGISTRY_OFFLINE_DIR`. |
+| `--cache <dir>` | Where downloaded archives are kept. Default: `<out>/.downloads`. |
+| `--sha256 <id>=<hex>` | Expect another checksum than the pinned one. |
+| `--force` | Build again even when the registry is up to date. |
+
+- **It can run at every start.** A registry that is already in the output folder is left alone
+  when it was built from the archive with the expected checksum, by this version of the generator,
+  and still follows the schema and resolves its references. So the first start builds the
+  registry, the next ones only check it, and a registry damaged or edited by hand is built again.
+  A new version of the generator that changes the output changes `GENERATOR.version`
+  (`generator.ts`), which rebuilds every registry.
+- **A directory that fails does not stop the others.** The status is 0 when every directory is
+  built or up to date, 1 when one failed (with the reason on the error output, one line per
+  problem), and 2 for a wrong option.
+- **Files are written atomically**, through a temporary file renamed over the target, so a service
+  that reads the folder never sees half a registry.
+- **In a container**, run the command as the first step of the service that reads the registry (or
+  as an init container sharing its volume), with `LIBREDI_REGISTRY_DIR` on the volume and, without
+  Internet access, `LIBREDI_REGISTRY_OFFLINE_DIR` on a read-only mount of the archives. The images
+  do not contain the command yet: it goes into the image of the first service that loads the
+  registry.
 
 ## Supported directories
 
@@ -117,6 +153,21 @@ Before returning a registry, the generator validates it against the schema and a
 rules of `checkRegistry()`. A registry that fails either is never returned: the error lists the first
 problems with their JSON Pointers. Lines of the files that it does not understand are returned as
 warnings; there are none for D.96A and D.01B.
+
+## Keeping derived data out of Git
+
+[`scripts/check-derived-data.sh`](../scripts/check-derived-data.sh) fails when Git tracks:
+
+- the archive of a directory, one of its parts or message files, or its licence, by name;
+- a file that carries the licence text or the title pages of the directory files, whatever its name;
+- a registry built from UN/ECE files (`"kind": "unece-directory"`), or any registry-shaped JSON
+  file outside `contracts/registry/`.
+
+It runs in the `Derived data` job of the CI, on every pull request: unlike most jobs, it does not wait
+for the path filter, since such a file can be committed anywhere. The `.gitignore` also lists the
+usual places (`/registry/`, `/.libredi/`, `*.registry.json`, `d96a.zip` and the like). Run the script
+by hand before pushing if you work with real archives. The guard looks for files, not for facts:
+it does not notice a fragment pasted into another file, so review what you paste.
 
 ## Tests
 
