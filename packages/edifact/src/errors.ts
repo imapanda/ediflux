@@ -1,0 +1,59 @@
+/**
+ * Codes of the errors that stop the tokenizer. They are the working names of the sample corpus
+ * (`samples/edifact/README.md`); the plain-language error model of issue #46 may rename them.
+ */
+export const TokenizeErrorCode = {
+  /** The UNA string is malformed, cut off, or reuses a service character. */
+  InvalidUna: "INVALID_UNA",
+  /** The file ends inside a segment, or right after a release character. */
+  UnexpectedEndOfFile: "UNEXPECTED_END_OF_FILE",
+  /** A segment does not start with a three-character tag. */
+  InvalidSegmentTag: "INVALID_SEGMENT_TAG",
+} as const;
+
+export type TokenizeErrorCode = (typeof TokenizeErrorCode)[keyof typeof TokenizeErrorCode];
+
+export interface TokenizeErrorPosition {
+  /** Byte offset in the input, 0-based. For a file that ends too early, the length of the input. */
+  readonly offset: number;
+  /** Line, 1-based. CR LF, LF and a lone CR each end a line. */
+  readonly line: number;
+  /** Column, 1-based, counted in bytes: a multi-byte UNOW character takes several columns. */
+  readonly column: number;
+  /** Number of the segment in the interchange, 1-based (UNB is 1); 0 for the UNA string. */
+  readonly segment: number;
+  /** Tag of that segment, or null when the problem is that there is no valid tag. */
+  readonly tag: string | null;
+}
+
+/** Why the tokenizer stopped. Everything it had found before this point has been delivered. */
+export class TokenizeError extends Error implements TokenizeErrorPosition {
+  readonly code: TokenizeErrorCode;
+  readonly offset: number;
+  readonly line: number;
+  readonly column: number;
+  readonly segment: number;
+  readonly tag: string | null;
+
+  constructor(code: TokenizeErrorCode, detail: string, position: TokenizeErrorPosition) {
+    super(`${detail} (line ${position.line}, column ${position.column}, byte ${position.offset})`);
+    this.name = "TokenizeError";
+    this.code = code;
+    this.offset = position.offset;
+    this.line = position.line;
+    this.column = position.column;
+    this.segment = position.segment;
+    this.tag = position.tag;
+  }
+}
+
+/**
+ * A byte as it can be shown in an error message: printable ASCII quoted, anything else by its
+ * value, so that a message never carries a raw control character or a lone half of a character.
+ */
+export function describeByte(byte: number): string {
+  if (byte >= 0x20 && byte <= 0x7e) {
+    return `"${String.fromCharCode(byte)}"`;
+  }
+  return `byte 0x${byte.toString(16).toUpperCase().padStart(2, "0")}`;
+}
